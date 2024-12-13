@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "35eeb82b-7c80-408a-8cb6-2536065c9da1",
+		"name": "RESERVA CARRITOS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38446658"
+	},
+	"item": [
+		{
+			"name": "OBTENER RECURSO",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localHost:8085/incidenciasTic/obtener_recurso",
+					"protocol": "http",
+					"host": [
+						"localHost"
+					],
+					"port": "8085",
+					"path": [
+						"incidenciasTic",
+						"obtener_recurso"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OBTENER TRAMOS HORARIOS",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localHost:8085/incidenciasTic/obtener_tramos_horarios",
+					"protocol": "http",
+					"host": [
+						"localHost"
+					],
+					"port": "8085",
+					"path": [
+						"incidenciasTic",
+						"obtener_tramos_horarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CANCELAR RECURSO",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "email",
+						"value": "juan@gmail.com",
+						"type": "text"
+					},
+					{
+						"key": "recurso",
+						"value": "aula 2.1",
+						"type": "text"
+					},
+					{
+						"key": "diaDeLaSemana",
+						"value": "Lunes",
+						"type": "text"
+					},
+					{
+						"key": "tramoHorario",
+						"value": "10:00/11:00",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localHost:8085/incidenciasTic/cancelar_recurso",
+					"protocol": "http",
+					"host": [
+						"localHost"
+					],
+					"port": "8085",
+					"path": [
+						"incidenciasTic",
+						"cancelar_recurso"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RESERVAR RECURSO",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "email",
+						"value": "juan@gmail.com",
+						"type": "text"
+					},
+					{
+						"key": "profesor",
+						"value": "Juan",
+						"type": "text"
+					},
+					{
+						"key": "recurso",
+						"value": "aula 2.1",
+						"type": "text"
+					},
+					{
+						"key": "diaDeLaSemana",
+						"value": "Lunes",
+						"type": "text"
+					},
+					{
+						"key": "tramosHorarios",
+						"value": "10:00/11:00",
+						"type": "text"
+					},
+					{
+						"key": "nAlumnos",
+						"value": "10",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localHost:8085/incidenciasTic/reservarRecurso",
+					"protocol": "http",
+					"host": [
+						"localHost"
+					],
+					"port": "8085",
+					"path": [
+						"incidenciasTic",
+						"reservarRecurso"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
