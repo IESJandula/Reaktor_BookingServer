@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -211,7 +212,7 @@ public class ReservaCarritosRestWeb
 	 * @throws ReservaException
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/obtenerReservaPorRecurso")
-	public ResponseEntity<?> obtenerReservaPorRecurso(@RequestHeader(value = "recursos", required = true) Recursos recursos)
+	public ResponseEntity<?> obtenerReservaPorRecurso(@RequestBody(required = true) Recursos recursos)
 	{
 		try 
 		{
@@ -248,8 +249,8 @@ public class ReservaCarritosRestWeb
 	/**
 	 * Endpoint de tipo post para añadir un recurso con un recurso
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/añadir_recurso")
-	public ResponseEntity<?> añadirRecurso(@RequestHeader(value = "recursos", required = true) String recursos)
+	@RequestMapping(method = RequestMethod.POST, value = "/implementar_recurso")
+	public ResponseEntity<?> implementarRecurso(@RequestHeader(value = "recursos", required = true) String recursos)
 	{
 		
 		try 

@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 public class ReservaDto
 {	
     private String diaSemana;
+    
     private String tramoHorario;
+    
+	private int nAlumnos;
+	
+	private String nombreProfesor;
 
 }

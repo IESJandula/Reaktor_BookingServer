@@ -29,7 +29,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, ReservaId>
 
 //	Consulta que recupera la información sobre las reservas que están asociadas a un recurso específico..
 	@Query("SELECT new ies.jandula.reservaCarritos.dto.ReservaDto(" +
-		   "r.reservaId.diasDeLaSemana.diasDeLaSemana, r.reservaId.tramosHorarios.tramosHorarios) " +
+		   "r.reservaId.diasDeLaSemana.diasDeLaSemana, r.reservaId.tramosHorarios.tramosHorarios, r.nAlumnos, r.nombreProfesor) " +
 		   "FROM Reserva r " +
 		   "WHERE r.reservaId.aulaYCarritos = :recurso")
 	List<ReservaDto> encontrarReservaPorRecurso(@Param("recurso") Recursos recurso);

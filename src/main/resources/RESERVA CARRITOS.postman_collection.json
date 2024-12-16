@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "35eeb82b-7c80-408a-8cb6-2536065c9da1",
+		"_postman_id": "c2abcd31-ee91-4083-8453-772be61ae5e6",
 		"name": "RESERVA CARRITOS",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "38446658"
+		"_exporter_id": "30190989"
 	},
 	"item": [
 		{
@@ -93,16 +93,10 @@
 			},
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "recursos",
-						"value": "aula 2.1",
-						"type": "text"
-					}
-				],
+				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "",
+					"raw": "{\r\n    \"aulaYCarritos\" : \"aula 2.1\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -136,7 +130,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localHost:8085/incidenciasTic/añadir_recurso",
+					"raw": "http://localHost:8085/incidenciasTic/implementar_recurso",
 					"protocol": "http",
 					"host": [
 						"localHost"
@@ -144,7 +138,7 @@
 					"port": "8085",
 					"path": [
 						"incidenciasTic",
-						"añadir_recurso"
+						"implementar_recurso"
 					]
 				}
 			},
