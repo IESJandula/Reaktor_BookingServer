@@ -8,13 +8,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservaDto
-{	
-    private String diaSemana;
-    
-    private String tramoHorario;
-    
+{
+	private String diaSemana;
+
+	private String tramoHorario;
+
 	private int nAlumnos;
-	
-	private String nombreProfesor;
+
+	private String email;
+
+	private String nombre;
+
+	private String apellidos;
 
 }

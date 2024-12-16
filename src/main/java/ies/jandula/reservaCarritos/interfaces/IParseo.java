@@ -4,8 +4,9 @@ import java.util.Scanner;
 
 import ies.jandula.reservaCarritos.exception.ReservaException;
 
-public interface IParseo {
-	
+public interface IParseo
+{
+
 	void parseaFichero(Scanner scanner) throws ReservaException;
 
 }

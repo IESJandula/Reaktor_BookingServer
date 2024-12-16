@@ -1,5 +1,6 @@
 package ies.jandula.reservaCarritos.interfaces;
 
-public interface IParseoRecurso extends IParseo{
+public interface IParseoRecurso extends IParseo
+{
 
 }

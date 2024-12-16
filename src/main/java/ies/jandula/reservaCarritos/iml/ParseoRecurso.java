@@ -13,7 +13,7 @@ import ies.jandula.reservaCarritos.repository.RecursosRepository;
 @Service
 public class ParseoRecurso implements IParseoRecurso
 {
-	
+
 	@Autowired
 	private RecursosRepository recursosRepository;
 
@@ -21,23 +21,23 @@ public class ParseoRecurso implements IParseoRecurso
 	public void parseaFichero(Scanner scanner) throws ReservaException
 	{
 		// TODO Auto-generated method stub
-		
+
 		scanner.nextLine();
-		
-		while(scanner.hasNextLine())
+
+		while (scanner.hasNextLine())
 		{
-			
+
 			String lineaDelFichero = scanner.nextLine();
-			
-			String [] lineaDelFicheroTroceada = lineaDelFichero.split(",");
-			
+
+			String[] lineaDelFicheroTroceada = lineaDelFichero.split(",");
+
 			Recursos recursos = new Recursos();
-			
+
 			recursos.setAulaYCarritos(lineaDelFicheroTroceada[0]);
-			
+
 			this.recursosRepository.saveAndFlush(recursos);
 		}
-		
+
 	}
 
 }

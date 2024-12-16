@@ -1,5 +1,6 @@
 package ies.jandula.reservaCarritos.interfaces;
 
-public interface IParseoDiasSemana extends IParseo{
+public interface IParseoDiasSemana extends IParseo
+{
 
 }

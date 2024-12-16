@@ -13,30 +13,30 @@ import ies.jandula.reservaCarritos.repository.TramoHorarioRepository;
 @Service
 public class ParseoTramoHorario implements IParseoTramoHorario
 {
-	
+
 	@Autowired
 	private TramoHorarioRepository tramoHorarioRepository;
 
 	@Override
-	public void parseaFichero(Scanner scanner) throws ReservaException 
+	public void parseaFichero(Scanner scanner) throws ReservaException
 	{
-		
+
 		scanner.nextLine();
-		
-		while(scanner.hasNextLine())
+
+		while (scanner.hasNextLine())
 		{
-			
+
 			String lineaDelFichero = scanner.nextLine();
-			
-			String [] valores = lineaDelFichero.split(",");
-			
+
+			String[] valores = lineaDelFichero.split(",");
+
 			TramosHorarios tramos = new TramosHorarios();
-			
+
 			tramos.setTramosHorarios(valores[0]);
-			
+
 			this.tramoHorarioRepository.saveAndFlush(tramos);
 		}
-		
+
 	}
 
 }

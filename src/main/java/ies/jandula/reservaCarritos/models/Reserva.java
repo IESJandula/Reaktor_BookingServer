@@ -9,16 +9,16 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-public class Reserva 
+public class Reserva
 {
 
 	@EmbeddedId
 	private ReservaId reservaId;
-	
+
 	@Column(nullable = false)
 	private int nAlumnos;
-	
+
 	@Column(length = 100, nullable = false)
 	private String nombreProfesor;
-	
+
 }

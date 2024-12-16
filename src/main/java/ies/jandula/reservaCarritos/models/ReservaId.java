@@ -13,16 +13,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class ReservaId implements Serializable 
+public class ReservaId implements Serializable
 {
 	private static final long serialVersionUID = 4705657948307458266L;
-	
-	private String email;
-	
+
+	@ManyToOne
+	private Profesor profesor;
+
 	@ManyToOne
 	@JoinColumn(name = "recursos_aula_y_carritos", referencedColumnName = "aulaYCarritos")
 	private Recursos aulaYCarritos;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "dia_de_la_semana", referencedColumnName = "diasDeLaSemana")
 	private DiasSemana diasDeLaSemana;
