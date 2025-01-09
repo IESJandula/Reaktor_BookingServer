@@ -1,7 +1,6 @@
 spring:
   spring.application.name: reservaCarritos
   jpa.hibernate.ddl-auto: update
-  spring.jpa.hibernate.ddl-auto: validate
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/reservaCarritos?createDatabaseIfNotExist=true
