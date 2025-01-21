@@ -1,17 +1,20 @@
 spring:
-  spring.application.name: reservaCarritos
   jpa.hibernate.ddl-auto: update
   datasource:
-    driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/reservaCarritos?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/reaktor_bookingserver?createDatabaseIfNotExist=true
     username: root
     password: toor
-
-  hikari:
-    connection-timeout: 60000
-    maximum-pool-size: 5
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 5
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 server:
-  port: 8085
+  port: 8083
+  
 logging:
   level:
     root: INFO
@@ -21,4 +24,6 @@ logging:
     max-history: 10
     total-size-cap: 10MB
 
-urlCors: http://localhost:5173
+reaktor:
+  publicKeyFile: C:\claves\public_key.pem
+  urlCors: http://localhost:5173, http://192.168.1.209:5173, http://192.168.1.181:5173, http://192.168.1.137:5173, http://172.20.10.2:5173

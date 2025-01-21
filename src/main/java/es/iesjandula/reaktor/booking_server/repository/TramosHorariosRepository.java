@@ -1,0 +1,10 @@
+package es.iesjandula.reaktor.booking_server.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramosHorarios;
+
+public interface TramosHorariosRepository extends JpaRepository<TramosHorarios, String>
+{
+
+}
