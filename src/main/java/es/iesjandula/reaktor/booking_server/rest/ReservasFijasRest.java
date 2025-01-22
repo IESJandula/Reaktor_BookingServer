@@ -1,8 +1,6 @@
 package es.iesjandula.reaktor.booking_server.rest;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,17 +17,20 @@ import es.iesjandula.reaktor.base.security.models.DtoUsuario;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.booking_server.dto.ReservasFijasDto;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
+import es.iesjandula.reaktor.booking_server.models.Constante;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiasSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesores;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.RecursosPrevios;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFijas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservasFijasId;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramosHorarios;
+import es.iesjandula.reaktor.booking_server.repository.ConstanteRepository;
 import es.iesjandula.reaktor.booking_server.repository.IDiasSemanaRepository;
 import es.iesjandula.reaktor.booking_server.repository.IProfesoresRepository;
 import es.iesjandula.reaktor.booking_server.repository.IRecursosRepository;
 import es.iesjandula.reaktor.booking_server.repository.IReservasRepository;
 import es.iesjandula.reaktor.booking_server.repository.ITramosHorariosRepository;
+import es.iesjandula.reaktor.booking_server.utils.Costantes;
 import lombok.extern.log4j.Log4j2;
 
 @RequestMapping(value = "/statics_bookings/previous_resources", produces =
@@ -52,6 +53,9 @@ public class ReservasFijasRest
 
 	@Autowired
 	private ITramosHorariosRepository tramosHorariosRepository;
+	
+	@Autowired
+	private ConstanteRepository constanteRepository;
 
 	/*
 	 * Endpoint de tipo get para mostar una lista con los recursos
@@ -237,6 +241,13 @@ public class ReservasFijasRest
 	{
 		try
 		{
+			String errorReserva = this.validacionesGlobalesPreviasReservaFija();
+			
+			if(errorReserva != null) 
+			{
+				log.error(errorReserva);
+				throw new ReservaException(22, errorReserva);
+			}
 			// Si el role del usuario es Administrador, creará la reserva con el email recibido en la cabecera
 			// Si el role del usuario no es Administrador, se verificará primero que el email coincide con el que viene en DtoUsuario. Enviando excepción si no es correcto
 			
@@ -388,7 +399,7 @@ public class ReservasFijasRest
 	}
 	
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
-	@RequestMapping(method = RequestMethod.POST, value = "/bookings")
+	@RequestMapping(method = RequestMethod.POST, value = "/one_time_bookings")
 	public ResponseEntity<?> realizarReservaPuntual(@AuthenticationPrincipal DtoUsuario usuario,
 											 @RequestHeader(value = "email", required = true) String email,
 											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
@@ -398,6 +409,13 @@ public class ReservasFijasRest
 	{
 		try
 		{
+			String errorReserva = this.validacionesGlobalesPreviasReservaPuntual();
+			
+			if(errorReserva != null) 
+			{
+				log.error(errorReserva);
+				throw new ReservaException(22, errorReserva);
+			}
 			// Si el role del usuario es Administrador, creará la reserva con el email recibido en la cabecera
 			// Si el role del usuario no es Administrador, se verificará primero que el email coincide con el que viene en DtoUsuario. Enviando excepción si no es correcto
 			
@@ -468,5 +486,57 @@ public class ReservasFijasRest
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 
+	}
+	
+	/**
+	 * @return error global si existiera
+	 * @throws ReservaException con un error
+	 */
+	private String validacionesGlobalesPreviasReservaFija() throws ReservaException 
+	{
+		
+		String outcome = null;
+		
+		// Vemos si la reserva está deshabilitada
+		Optional<Constante> optionalAppDeshabilitada = this.constanteRepository.findByClave(Costantes.TABLA_CONST_RESERVAS_FIJAS);
+		if(!optionalAppDeshabilitada.isPresent()) 
+		{
+			String errorString = "Error obteniendo parametros";
+			
+			log.error(errorString + ". " + Costantes.TABLA_CONST_RESERVAS_FIJAS);
+			throw new ReservaException(21, errorString);
+		}
+		
+		if(!optionalAppDeshabilitada.get().getValor().isEmpty()) 
+		{
+			outcome = optionalAppDeshabilitada.get().getValor();
+		}
+		
+		return outcome;
+
+	}
+	
+	private String validacionesGlobalesPreviasReservaPuntual() throws ReservaException 
+	{
+		
+		String outcome = null;
+		
+		// Vemos si la reserva está deshabilitada
+		Optional<Constante> optionalAppDeshabilitada = this.constanteRepository.findByClave(Costantes.TABLA_CONST_RESERVAS_PUNTUALES);
+		if(!optionalAppDeshabilitada.isPresent()) 
+		{
+			String errorString = "Error obteniendo parametros";
+			
+			log.error(errorString + ". " + Costantes.TABLA_CONST_RESERVAS_PUNTUALES);
+			throw new ReservaException(22, errorString);
+		}
+		
+		if(!optionalAppDeshabilitada.get().getValor().isEmpty()) 
+		{
+			outcome = optionalAppDeshabilitada.get().getValor();
+		}
+		
+		return outcome;
+		
 	}
 }

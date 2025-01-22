@@ -1,6 +1,7 @@
 package es.iesjandula.reaktor.booking_server.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,13 @@ import es.iesjandula.reaktor.booking_server.models.Constante;
 @Repository
 public interface ConstanteRepository extends JpaRepository<Constante, String>
 {
+	
+	/**
+     * Búsqueda de constante por clave
+     * @param clave clave de la constante
+     * @return constante encontrada
+     */
+	Optional<Constante> findByClave(String clave);
 	
 	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.DtoConstante(c.clave, c.valor) "
 			+ "FROM Constante c")
