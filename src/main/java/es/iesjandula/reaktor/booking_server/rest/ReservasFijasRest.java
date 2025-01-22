@@ -1,6 +1,8 @@
 package es.iesjandula.reaktor.booking_server.rest;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,33 +25,33 @@ import es.iesjandula.reaktor.booking_server.models.reservas_fijas.RecursosPrevio
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFijas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservasFijasId;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramosHorarios;
-import es.iesjandula.reaktor.booking_server.repository.DiasSemanaRepository;
-import es.iesjandula.reaktor.booking_server.repository.ProfesoresRepository;
-import es.iesjandula.reaktor.booking_server.repository.RecursosRepository;
-import es.iesjandula.reaktor.booking_server.repository.ReservasRepository;
-import es.iesjandula.reaktor.booking_server.repository.TramosHorariosRepository;
+import es.iesjandula.reaktor.booking_server.repository.IDiasSemanaRepository;
+import es.iesjandula.reaktor.booking_server.repository.IProfesoresRepository;
+import es.iesjandula.reaktor.booking_server.repository.IRecursosRepository;
+import es.iesjandula.reaktor.booking_server.repository.IReservasRepository;
+import es.iesjandula.reaktor.booking_server.repository.ITramosHorariosRepository;
 import lombok.extern.log4j.Log4j2;
 
-@RequestMapping(value = "/bookings/previous_resources", produces =
+@RequestMapping(value = "/statics_bookings/previous_resources", produces =
 { "application/json" })
 @RestController
 @Log4j2
 public class ReservasFijasRest
 {
 	@Autowired
-	private RecursosRepository recursosRepository;
+	private IRecursosRepository recursosRepository;
 
 	@Autowired
-	private ProfesoresRepository profesoresRepository;
+	private IProfesoresRepository profesoresRepository;
 
 	@Autowired
-	private ReservasRepository reservasRepository;
+	private IReservasRepository reservasRepository;
 
 	@Autowired
-	private DiasSemanaRepository diasSemanaRepository;
+	private IDiasSemanaRepository diasSemanaRepository;
 
 	@Autowired
-	private TramosHorariosRepository tramosHorariosRepository;
+	private ITramosHorariosRepository tramosHorariosRepository;
 
 	/*
 	 * Endpoint de tipo get para mostar una lista con los recursos
@@ -226,7 +228,7 @@ public class ReservasFijasRest
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/bookings")
-	public ResponseEntity<?> realizarReserva(@AuthenticationPrincipal DtoUsuario usuario,
+	public ResponseEntity<?> realizarReservaFija(@AuthenticationPrincipal DtoUsuario usuario,
 											 @RequestHeader(value = "email", required = true) String email,
 											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
 											 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
@@ -317,7 +319,9 @@ public class ReservasFijasRest
 											 @RequestHeader(value = "email", required = true) String email,
 											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
 											 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
-											 @RequestHeader(value = "tramoHorario", required = true) Long tramoHorario)
+											 @RequestHeader(value = "tramoHorario", required = true) Long tramoHorario,
+											 @RequestHeader(value = "numeroSemna", required = true) Integer numeroSemana
+												)
 	{
 		try
 		{
@@ -381,5 +385,88 @@ public class ReservasFijasRest
 			log.error("Error inesperado al cancelar la reserva: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
+	}
+	
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
+	@RequestMapping(method = RequestMethod.POST, value = "/bookings")
+	public ResponseEntity<?> realizarReservaPuntual(@AuthenticationPrincipal DtoUsuario usuario,
+											 @RequestHeader(value = "email", required = true) String email,
+											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
+											 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
+											 @RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
+											 @RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
+	{
+		try
+		{
+			// Si el role del usuario es Administrador, creará la reserva con el email recibido en la cabecera
+			// Si el role del usuario no es Administrador, se verificará primero que el email coincide con el que viene en DtoUsuario. Enviando excepción si no es correcto
+			
+			
+			// Verifica si ya existe una reserva con los mismos datos
+			Optional<ReservaFijas> optinalReserva = this.reservasRepository
+					.encontrarReserva( aulaYCarritos, diaDeLaSemana, tramosHorarios);
+
+			if (optinalReserva.isPresent())
+			{
+				String mensajeError = "Ya existe una la reserva con esos datos";
+				log.error(mensajeError);
+				throw new ReservaException(6, mensajeError);
+			}
+
+			RecursosPrevios recurso = new RecursosPrevios();
+			recurso.setAulaYCarritos(aulaYCarritos);
+
+			DiasSemana diasSemana = new DiasSemana();
+			diasSemana.setId(diaDeLaSemana);
+
+			TramosHorarios tramos = new TramosHorarios();
+			tramos.setId(tramosHorarios);
+
+			Optional<Profesores> profesor = this.profesoresRepository.findById(email);
+
+			ReservasFijasId reservaId = new ReservasFijasId();
+
+			if (!profesor.isPresent())
+			{
+				String mensajeError = "No existe ese email";
+				log.error(mensajeError);
+				throw new ReservaException(20, mensajeError);
+			}
+			reservaId.setProfesor(profesor.get());
+
+			reservaId.setAulaYCarritos(recurso);
+			reservaId.setDiasDeLaSemana(diasSemana);
+			reservaId.setTramosHorarios(tramos);
+
+			ReservaFijas reserva = new ReservaFijas();
+			reserva.setReservaId(reservaId);
+			reserva.setNAlumnos(nAlumnos);
+
+			log.info("Se ha reservado correctamente");
+
+			reserva.setReservaId(reservaId);
+
+//			Si no existe una reserva previa, se guarda la nueva reserva en la base de datos
+			this.reservasRepository.saveAndFlush(reserva);
+
+			return ResponseEntity.ok().body("Reserva realizada correctamente");
+
+		} catch (ReservaException reservaException)
+		{
+
+//			Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
+//			que existe una reserva con los mismos datos
+			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
+		} catch (Exception exception)
+		{
+//			Para cualquier error inesperado, devolverá un 500
+			ReservaException reservaException = new ReservaException(
+					100, "Error inesperado al realizar la reserva", exception
+			);
+
+			log.error("Error inesperado al realizar la reserva: ", exception);
+			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
+		}
+
 	}
 }

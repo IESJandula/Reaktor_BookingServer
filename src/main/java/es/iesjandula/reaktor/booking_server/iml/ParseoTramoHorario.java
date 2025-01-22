@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.interfaces.IParseoTramoHorario;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramosHorarios;
-import es.iesjandula.reaktor.booking_server.repository.TramosHorariosRepository;
+import es.iesjandula.reaktor.booking_server.repository.ITramosHorariosRepository;
 
 @Service
 public class ParseoTramoHorario implements IParseoTramoHorario
 {
 
 	@Autowired
-	private TramosHorariosRepository tramoHorarioRepository;
+	private ITramosHorariosRepository tramoHorarioRepository;
 
 	@Override
 	public void parseaFichero(Scanner scanner) throws ReservaException

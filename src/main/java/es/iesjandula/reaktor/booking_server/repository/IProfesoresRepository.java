@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesores;
 
-public interface ProfesoresRepository extends JpaRepository<Profesores, String>
+public interface IProfesoresRepository extends JpaRepository<Profesores, String>
 {
 }

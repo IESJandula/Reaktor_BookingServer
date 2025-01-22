@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFijas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservasFijasId;
 
-public interface ReservasRepository extends JpaRepository<ReservaFijas, ReservasFijasId>
+public interface IReservasRepository extends JpaRepository<ReservaFijas, ReservasFijasId>
 {
 
 //	Consulta que recupera la información sobre las reservas que están asociadas a 
@@ -21,6 +21,7 @@ public interface ReservasRepository extends JpaRepository<ReservaFijas, Reservas
 			+ "r.reservaId.tramosHorarios.id = :tramosHorarios")
 	Optional<ReservaFijas> encontrarReserva( @Param("aulaYCarritos") String aulaYCarritos,
 			@Param("diasDeLaSemana") Long diasDeLaSemana, @Param("tramosHorarios") Long tramosHorarios);
+	
 
 //	Consulta que recupera la información sobre las reservas que están asociadas a un recurso específico..
 	@Query(value = 

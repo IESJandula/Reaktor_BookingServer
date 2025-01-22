@@ -9,10 +9,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.iesjandula.reaktor.booking_server.interfaces.IGestorParseo;
-import es.iesjandula.reaktor.booking_server.repository.DiasSemanaRepository;
-import es.iesjandula.reaktor.booking_server.repository.ProfesoresRepository;
-import es.iesjandula.reaktor.booking_server.repository.RecursosRepository;
-import es.iesjandula.reaktor.booking_server.repository.TramosHorariosRepository;
+import es.iesjandula.reaktor.booking_server.repository.IDiasSemanaRepository;
+import es.iesjandula.reaktor.booking_server.repository.IProfesoresRepository;
+import es.iesjandula.reaktor.booking_server.repository.IRecursosRepository;
+import es.iesjandula.reaktor.booking_server.repository.ITramosHorariosRepository;
 import es.iesjandula.reaktor.booking_server.utils.Costantes;
 
 @SpringBootApplication
@@ -22,19 +22,19 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 {
 
 	@Autowired
-	private IGestorParseo iGestroParseo;
+	private IGestorParseo iGestorParseo;
 
 	@Autowired
-	private RecursosRepository recursosRepository;
+	private IRecursosRepository recursosRepository;
 
 	@Autowired
-	private TramosHorariosRepository tramosHorariosRepository;
+	private ITramosHorariosRepository tramosHorariosRepository;
 
 	@Autowired
-	private ProfesoresRepository profesoreRepository;
+	private IProfesoresRepository profesoreRepository;
 
 	@Autowired
-	private DiasSemanaRepository diasSemanaRepository;
+	private IDiasSemanaRepository diasSemanaRepository;
 
 	public static void main(String[] args)
 	{
@@ -46,23 +46,23 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 	{
 		if (this.recursosRepository.findAll().isEmpty())
 		{
-			this.iGestroParseo.parseaFichero(Costantes.FICHERO_RECURSO);
+			this.iGestorParseo.parseaFichero(Costantes.FICHERO_RECURSO);
 		}
 
 		if (this.tramosHorariosRepository.findAll().isEmpty())
 		{
 
-			this.iGestroParseo.parseaFichero(Costantes.FICHERO_TRAMOS_HORARIOS);
+			this.iGestorParseo.parseaFichero(Costantes.FICHERO_TRAMOS_HORARIOS);
 		}
 
 		if (this.diasSemanaRepository.findAll().isEmpty())
 		{
-			this.iGestroParseo.parseaFichero(Costantes.FICHERO_DIAS_SEMANAS);
+			this.iGestorParseo.parseaFichero(Costantes.FICHERO_DIAS_SEMANAS);
 		}
 		
 		if (this.profesoreRepository.findAll().isEmpty())
 		{
-			this.iGestroParseo.parseaFichero(Costantes.FICHERO_PROFESORES);
+			this.iGestorParseo.parseaFichero(Costantes.FICHERO_PROFESORES);
 		}
 	}
 

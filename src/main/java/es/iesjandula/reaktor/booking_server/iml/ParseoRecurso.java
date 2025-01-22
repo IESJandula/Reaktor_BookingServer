@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.interfaces.IParseoRecurso;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.RecursosPrevios;
-import es.iesjandula.reaktor.booking_server.repository.RecursosRepository;
+import es.iesjandula.reaktor.booking_server.repository.IRecursosRepository;
 
 @Service
 public class ParseoRecurso implements IParseoRecurso
 {
 
 	@Autowired
-	private RecursosRepository recursosRepository;
+	private IRecursosRepository recursosRepository;
 
 	@Override
 	public void parseaFichero(Scanner scanner) throws ReservaException

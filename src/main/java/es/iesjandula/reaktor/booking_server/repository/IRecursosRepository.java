@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.RecursosPrevios;
 
-public interface RecursosRepository extends JpaRepository<RecursosPrevios, String>
+public interface IRecursosRepository extends JpaRepository<RecursosPrevios, String>
 {
 
 }

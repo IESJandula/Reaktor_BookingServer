@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.interfaces.IParseoDiasSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiasSemana;
-import es.iesjandula.reaktor.booking_server.repository.DiasSemanaRepository;
+import es.iesjandula.reaktor.booking_server.repository.IDiasSemanaRepository;
 
 @Service
 public class ParseoDiasSemanas implements IParseoDiasSemana
 {
 	@Autowired
-	private DiasSemanaRepository diasSemanaRepository;
+	private IDiasSemanaRepository diasSemanaRepository;
 
 	@Override
 	public void parseaFichero(Scanner scanner) throws ReservaException

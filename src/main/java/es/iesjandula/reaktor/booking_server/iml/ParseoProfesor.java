@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.interfaces.IParseoProfesor;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesores;
-import es.iesjandula.reaktor.booking_server.repository.ProfesoresRepository;
+import es.iesjandula.reaktor.booking_server.repository.IProfesoresRepository;
 
 @Service
 public class ParseoProfesor implements IParseoProfesor
 {
 
 	@Autowired
-	ProfesoresRepository profesorRepository;
+	IProfesoresRepository profesorRepository;
 
 	@Override
 	public void parseaFichero(Scanner scanner) throws ReservaException

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.RecursosPrevios;
-import es.iesjandula.reaktor.booking_server.repository.RecursosRepository;
+import es.iesjandula.reaktor.booking_server.repository.IRecursosRepository;
 import lombok.extern.log4j.Log4j2;
 
 @RequestMapping(value = "/bookings/admin")
@@ -20,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 public class ReservasAdminRest
 {
 	@Autowired
-	private RecursosRepository recursosRepository;	
+	private IRecursosRepository recursosRepository;	
 	
 	/**
 	 * Endpoint de tipo post para añadir un recurso con un recurso
