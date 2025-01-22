@@ -36,4 +36,24 @@ public interface IReservasRepository extends JpaRepository<ReservaFijas, Reserva
 		    + "ORDER BY 1, 2", 
 		    nativeQuery = true)
 	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso);
+	
+	   @Query(value = 
+		        "SELECT d.id, t.id, NULL, NULL, NULL, NULL "
+		        + "FROM dias_semana d, tramos_horarios t "
+		        + "WHERE (d.id, t.id) NOT IN ("
+		        + "    SELECT r.dias_de_la_semana_id, r.tramos_horarios_id "
+		        + "    FROM reserva_fijas r "
+		        + "    WHERE r.recursos_aula_y_carritos = :recurso "
+		        + "    AND r.n_semana = :nSemana"
+		        + ") "
+		        + "UNION "
+		        + "SELECT r2.dias_de_la_semana_id, r2.tramos_horarios_id, r2.n_alumnos, r2.profesor_email, "
+		        + "CONCAT(p.nombre, ' ', p.apellidos), r2.recursos_aula_y_carritos "
+		        + "FROM reserva_fijas r2 "
+		        + "JOIN profesores p ON r2.profesor_email = p.email "
+		        + "WHERE r2.recursos_aula_y_carritos = :recurso "
+		        + "AND r2.n_semana = :nSemana "
+		        + "ORDER BY 1, 2", 
+		        nativeQuery = true)
+		    List<Object[]> encontrarReservaPorRecursoYnSemana(@Param("recurso") String recurso, @Param("nSemana") Integer nSemana);
 }

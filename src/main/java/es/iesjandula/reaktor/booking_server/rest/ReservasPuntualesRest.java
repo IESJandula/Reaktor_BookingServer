@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.security.models.DtoUsuario;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
-import es.iesjandula.reaktor.booking_server.dto.ReservaDto;
+import es.iesjandula.reaktor.booking_server.dto.ReservasFijasDto;
+import es.iesjandula.reaktor.booking_server.dto.ReservasPuntualesDto;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiasSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesores;
@@ -57,13 +58,15 @@ public class ReservasPuntualesRest
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/bookings")
-	public ResponseEntity<?> obtenerReservasDto(@RequestHeader(value = "aulaYCarritos")String recursoA)
+	public ResponseEntity<?> obtenerReservasDto(@RequestHeader(value = "aulaYCarritos")String recursoA,
+												@RequestHeader(value = "numeroSemana")Integer nSemana
+			)
 	{
 		try
 		{
 //			Creacion de una lista para almacenar los recursos
-			List<ReservaDto> listaReservas = new ArrayList<ReservaDto>();
-			List<Object[]> resultados = reservasRepository.encontrarReservaPorRecurso(recursoA);
+			List<ReservasPuntualesDto> listaReservas = new ArrayList<ReservasPuntualesDto>();
+			List<Object[]> resultados = reservasRepository.encontrarReservaPorRecursoYnSemana(recursoA,nSemana);
 
 //			Comprueba si la base de datos tiene registros de los recurso
 			if (this.recursosRepository.findAll().isEmpty())
@@ -80,9 +83,9 @@ public class ReservasPuntualesRest
 	            String email = (String) row[3];
 	            String nombreYapellidos = (String) row[4];
 	            String recurso = (String) row[5];
-
+	            Integer numeroSemana = (row[6] != null) ? (Integer) row[6] : 0;
 	            // Mapeo a ReservaDto
-	            listaReservas.add(new ReservaDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recurso));
+	            listaReservas.add(new ReservasPuntualesDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recurso, numeroSemana));
 	        }
 //			Encontramos todos los recursos y los introducimos en una lista para mostrarlos más adelante
 

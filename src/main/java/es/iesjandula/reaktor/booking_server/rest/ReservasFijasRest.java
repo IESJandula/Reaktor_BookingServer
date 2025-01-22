@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.security.models.DtoUsuario;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
-import es.iesjandula.reaktor.booking_server.dto.ReservaDto;
+import es.iesjandula.reaktor.booking_server.dto.ReservasFijasDto;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiasSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesores;
@@ -181,7 +181,7 @@ public class ReservasFijasRest
 		try
 		{
 //			Creacion de una lista para almacenar los recursos
-			List<ReservaDto> listaReservas = new ArrayList<ReservaDto>();
+			List<ReservasFijasDto> listaReservas = new ArrayList<ReservasFijasDto>();
 			List<Object[]> resultados = reservasRepository.encontrarReservaPorRecurso(recursoA);
 
 //			Comprueba si la base de datos tiene registros de los recurso
@@ -201,7 +201,7 @@ public class ReservasFijasRest
 	            String recurso = (String) row[5];
 
 	            // Mapeo a ReservaDto
-	            listaReservas.add(new ReservaDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recurso));
+	            listaReservas.add(new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recurso));
 	        }
 //			Encontramos todos los recursos y los introducimos en una lista para mostrarlos más adelante
 

@@ -18,6 +18,6 @@ public class ReservaPuntual
 	private int nAlumnos;
 	
 	@Column(nullable = false)
-	private int numeroSemana;
+	private int nSemana;
 
 }

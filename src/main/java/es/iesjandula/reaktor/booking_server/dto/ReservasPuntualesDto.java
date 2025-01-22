@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservaDto
+public class ReservasPuntualesDto 
 {
 	private Long diaSemana;
 
@@ -20,11 +20,7 @@ public class ReservaDto
 	private String nombreYapellidos;
 	
 	private String recurso;
+	
+	private int nSemana;
 
-	public ReservaDto(Long diaSemana, Long tramoHorario) {
-		super();
-		this.diaSemana = diaSemana;
-		this.tramoHorario = tramoHorario;
-
-	}	
 }
