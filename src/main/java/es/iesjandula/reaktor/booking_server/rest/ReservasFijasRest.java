@@ -336,6 +336,13 @@ public class ReservasFijasRest
 	{
 		try
 		{
+			String errorReserva = this.validacionesGlobalesPreviasReservaFija();
+			
+			if(errorReserva != null) 
+			{
+				log.error(errorReserva);
+				throw new ReservaException(22, errorReserva);
+			}
 			// Si el role del usuario es Administrador, borrará la reserva con el email recibido en la cabecera
 			// Si el role del usuario no es Administrador, se verificará primero que el email coincide con el que viene en DtoUsuario. Enviando excepción si no es correcto
 			
@@ -398,96 +405,6 @@ public class ReservasFijasRest
 		}
 	}
 	
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
-	@RequestMapping(method = RequestMethod.POST, value = "/one_time_bookings")
-	public ResponseEntity<?> realizarReservaPuntual(@AuthenticationPrincipal DtoUsuario usuario,
-											 @RequestHeader(value = "email", required = true) String email,
-											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
-											 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
-											 @RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
-											 @RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
-	{
-		try
-		{
-			String errorReserva = this.validacionesGlobalesPreviasReservaPuntual();
-			
-			if(errorReserva != null) 
-			{
-				log.error(errorReserva);
-				throw new ReservaException(22, errorReserva);
-			}
-			// Si el role del usuario es Administrador, creará la reserva con el email recibido en la cabecera
-			// Si el role del usuario no es Administrador, se verificará primero que el email coincide con el que viene en DtoUsuario. Enviando excepción si no es correcto
-			
-			
-			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFijas> optinalReserva = this.reservasRepository
-					.encontrarReserva( aulaYCarritos, diaDeLaSemana, tramosHorarios);
-
-			if (optinalReserva.isPresent())
-			{
-				String mensajeError = "Ya existe una la reserva con esos datos";
-				log.error(mensajeError);
-				throw new ReservaException(6, mensajeError);
-			}
-
-			RecursosPrevios recurso = new RecursosPrevios();
-			recurso.setAulaYCarritos(aulaYCarritos);
-
-			DiasSemana diasSemana = new DiasSemana();
-			diasSemana.setId(diaDeLaSemana);
-
-			TramosHorarios tramos = new TramosHorarios();
-			tramos.setId(tramosHorarios);
-
-			Optional<Profesores> profesor = this.profesoresRepository.findById(email);
-
-			ReservasFijasId reservaId = new ReservasFijasId();
-
-			if (!profesor.isPresent())
-			{
-				String mensajeError = "No existe ese email";
-				log.error(mensajeError);
-				throw new ReservaException(20, mensajeError);
-			}
-			reservaId.setProfesor(profesor.get());
-
-			reservaId.setAulaYCarritos(recurso);
-			reservaId.setDiasDeLaSemana(diasSemana);
-			reservaId.setTramosHorarios(tramos);
-
-			ReservaFijas reserva = new ReservaFijas();
-			reserva.setReservaId(reservaId);
-			reserva.setNAlumnos(nAlumnos);
-
-			log.info("Se ha reservado correctamente");
-
-			reserva.setReservaId(reservaId);
-
-//			Si no existe una reserva previa, se guarda la nueva reserva en la base de datos
-			this.reservasRepository.saveAndFlush(reserva);
-
-			return ResponseEntity.ok().body("Reserva realizada correctamente");
-
-		} catch (ReservaException reservaException)
-		{
-
-//			Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
-//			que existe una reserva con los mismos datos
-			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
-		{
-//			Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(
-					100, "Error inesperado al realizar la reserva", exception
-			);
-
-			log.error("Error inesperado al realizar la reserva: ", exception);
-			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
-		}
-
-	}
-	
 	/**
 	 * @return error global si existiera
 	 * @throws ReservaException con un error
@@ -516,27 +433,4 @@ public class ReservasFijasRest
 
 	}
 	
-	private String validacionesGlobalesPreviasReservaPuntual() throws ReservaException 
-	{
-		
-		String outcome = null;
-		
-		// Vemos si la reserva está deshabilitada
-		Optional<Constante> optionalAppDeshabilitada = this.constanteRepository.findByClave(Costantes.TABLA_CONST_RESERVAS_PUNTUALES);
-		if(!optionalAppDeshabilitada.isPresent()) 
-		{
-			String errorString = "Error obteniendo parametros";
-			
-			log.error(errorString + ". " + Costantes.TABLA_CONST_RESERVAS_PUNTUALES);
-			throw new ReservaException(22, errorString);
-		}
-		
-		if(!optionalAppDeshabilitada.get().getValor().isEmpty()) 
-		{
-			outcome = optionalAppDeshabilitada.get().getValor();
-		}
-		
-		return outcome;
-		
-	}
 }
