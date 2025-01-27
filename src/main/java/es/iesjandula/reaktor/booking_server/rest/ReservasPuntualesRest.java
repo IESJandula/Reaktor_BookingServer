@@ -1,6 +1,7 @@
 package es.iesjandula.reaktor.booking_server.rest;
 
 import java.io.IOException;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,12 +35,17 @@ import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservasFijasI
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramosHorarios;
 import es.iesjandula.reaktor.booking_server.models.reservas_puntuales.Booking;
 import es.iesjandula.reaktor.booking_server.models.reservas_puntuales.Classroom;
+import es.iesjandula.reaktor.booking_server.models.reservas_puntuales.Classroom2;
+import es.iesjandula.reaktor.booking_server.models.reservas_puntuales.ClassroomId;
+import es.iesjandula.reaktor.booking_server.models.reservas_puntuales.Dates;
 import es.iesjandula.reaktor.booking_server.models.reservas_puntuales.Holidays;
 import es.iesjandula.reaktor.booking_server.models.reservas_puntuales.Teacher;
 import es.iesjandula.reaktor.booking_server.models.reservas_puntuales.Trolley;
 import es.iesjandula.reaktor.booking_server.repository.ConstanteRepository;
 import es.iesjandula.reaktor.booking_server.repository.IProfesoresRepository;
 import es.iesjandula.reaktor.booking_server.repository.IReservasRepository;
+import es.iesjandula.reaktor.booking_server.repository.reservas_puntuales.IClassroom2Repository;
+import es.iesjandula.reaktor.booking_server.repository.reservas_puntuales.IDatesRepository;
 import es.iesjandula.reaktor.booking_server.utils.Costantes;
 import es.iesjandula.reaktor.booking_server.utils.Utils;
 import jakarta.servlet.http.HttpSession;
@@ -63,31 +69,29 @@ public class ReservasPuntualesRest
 	
 	@Autowired
 	private IProfesoresRepository profesoresRepository;
+	
+	@Autowired
+	private IDatesRepository datesRepository;
+	
+	@Autowired
+	private IClassroom2Repository classroom2Repository;
+	
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/configDates")
-	public ResponseEntity<?> configDates(@RequestParam(value = "fechaInicio", required = true) String inicio,
-			@RequestParam(value = "fechaFinal", required = true) String fin, HttpSession session)
+	public ResponseEntity<?> configDates(	@RequestParam(value = "fechaInicio", required = true) String inicio,
+											@RequestParam(value = "fechaFinal", required = true) String fin
+										)
 	{
 		try
 		{
-			List<String> dateConfig = new ArrayList<String>();
-			if (session.getAttribute("dataConfig") != null)
-			{
-				dateConfig = (List<String>) session.getAttribute("dataConfig");
-				dateConfig.removeAll(dateConfig);
-				dateConfig.add(inicio);
-				dateConfig.add(fin);
-				session.setAttribute("dataConfig", dateConfig);
-			} else
-			{
-				dateConfig.add(inicio);
-				dateConfig.add(fin);
-				session.setAttribute("dataConfig", dateConfig);
-			}
+			Dates dates = new Dates();
+			dates.setFechaInicio(inicio);
+			dates.setFechaFin(fin);
 			String message = "Fechas asignadas correctamente";
 			log.info(message);
 			return ResponseEntity.ok().body(message);
-		} catch (Exception exception)
+		} 
+		catch (Exception exception)
 		{
 			String message = "Error generico";
 			log.error(message, exception);
@@ -100,24 +104,21 @@ public class ReservasPuntualesRest
 
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/configDates")
-	public ResponseEntity<?> configDates(HttpSession session)
+	public ResponseEntity<?> configDates()
 	{
 		try
 		{
-			List<String> dateConfig = new ArrayList<String>();
+			List<Dates> listaFechas = this.datesRepository.findAll();
 
-			if (session.getAttribute("dataConfig") != null)
-			{
-				dateConfig = (List<String>) session.getAttribute("dataConfig");
-			} else
+			if (this.datesRepository.findAll().isEmpty())
 			{
 				String message = "Todavía no existe una configuración de Fecha de Inicio y Fin";
 				log.error(message);
 				BookingError bookingError = new BookingError(0, message);
 				return ResponseEntity.status(404).body(message);
 			}
-			log.info(dateConfig);
-			return ResponseEntity.ok().body(dateConfig);
+			log.info(listaFechas);
+			return ResponseEntity.ok(listaFechas);
 		} catch (Exception exception)
 		{
 			String message = "Server Error";
@@ -136,63 +137,40 @@ public class ReservasPuntualesRest
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/classroom", consumes = "multipart/form-data")
-	public ResponseEntity<?> postClassroom(@RequestPart(value = "csvFile", required = true) MultipartFile csvFile,
-			HttpSession session)
+	public ResponseEntity<?> postClassroom(
+										 @RequestHeader(value = "date", required = true) String date,
+										 @RequestHeader(value = "aula", required = true) String aula,
+										 @RequestHeader(value = "dni", required = true) String dni,
+										 @RequestHeader(value = "name", required = true) String name,
+										 @RequestHeader(value = "lastName", required = true) String lastName
+			)
 	{
-		Scanner scanner = null;
+		
+		
 		try
 		{
-			String csvContent = new String(csvFile.getBytes());
-			// Se crea un scanner para leer el contenido del csv
-			scanner = new Scanner(csvContent);
-			// Nos saltamos la primera linera que es la cabecera
-			scanner.nextLine();
-			// Creamos una lista de Aulas para almacenar el contenido del csv
-			List<Classroom> classroomsList = new ArrayList<Classroom>();
-			// Creamos un bucle para leer hasta terminar el csv
-			while (scanner.hasNextLine())
-			{
-				// Leemos la primera linea del fichero
-				String line = scanner.nextLine();
-				// Almacenamos en una variable token la limitación de cada columna: CSV =
-				// Separación de Comas
-				String[] token = line.split(",");
-
-				// Cogemos la columna 0,1,2 que son las que tienen el objeto Profesor
-				String name = token[0];
-				String lastname = token[1];
-				String dni = token[2];
-				// Creamos el objeto directamente inicializandolo con las variables que
-				// contienen los datos del csv
-				Teacher teacher = new Teacher(name, lastname, dni);
-				// Cogemos la columna 3,4 que son las que contienen las variables del objecto
-				// Aula
-				String aula = token[3];
-				String date = token[4];
-				// Creamos el objeto directamente inicializandolo con las variables que
-				// contienen los datos del csv
-				Classroom classroom = new Classroom(teacher, date, aula);
-				// Añadimos el objeto a la lista
-				classroomsList.add(classroom);
-				// Y guardamos la lista en session
-				session.setAttribute("classroomList", classroomsList);
-			}
+			
+			Classroom2 classroom2 = new Classroom2();
+			classroom2.setAula(aula);
+			classroom2.setDate(date);
+			Teacher teacher = new Teacher();
+			teacher.setDni(dni);
+			teacher.setLastname(lastName);
+			teacher.setName(name);
+			ClassroomId classroomId= new ClassroomId();
+			classroomId.setTeacher(teacher);
+			classroom2.setClassroomId(classroomId);
+			
 			// Creamos una variable para mostrar que todo a ido correctamente
 			String message = "Data loading was successful";
 			log.info(message);
+			this.classroom2Repository.saveAndFlush(classroom2);
 			// Devolvemos en un 200, el mensaje de la variable
-			return ResponseEntity.ok().body(message);
+			return ResponseEntity.ok().build();
 
-		} catch (IOException ioException)
-		{
-			// Si hay algún fallo al leer el csv nos saldrá éste error de lectura
-			// entrada/salida
-			String message = "I/O ERROR";
-			log.error(message, ioException);
-			BookingError exerciseError = new BookingError(1, message, ioException);
-			// Devolvemos en forma de mapa el objeto propio con la información del fallo
-			return ResponseEntity.status(400).body(exerciseError.getMapError());
-		} catch (Exception exception)
+		} 
+		
+		catch (Exception exception)
 		{
 			// Si hay algun fallo que no se controle devolvemos un error generico
 			String message = "Error generico";
@@ -201,13 +179,6 @@ public class ReservasPuntualesRest
 			// Al no controlar que fallo puede llegar a tener el servidor devolvemos un 500,
 			// informando del fallo real que ha ocurrido.
 			return ResponseEntity.status(500).body(exerciseError.getMapError());
-		} finally
-		{
-			if (scanner != null)
-			{
-				// Cerramos el escaner y liberamos la memoria.
-				scanner.close();
-			}
 		}
 	}
 
@@ -220,46 +191,19 @@ public class ReservasPuntualesRest
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/classroom")
-	public ResponseEntity<?> getBookingsByClassroom(HttpSession session,
-			@RequestParam(value = "classroom", required = false) String aula)
+	public ResponseEntity<?> getBookingsByClassroom()
 	{
 		try
 		{
-			List<Classroom> classroomList = null;
-			List<Classroom> classroomListSend = new ArrayList<Classroom>();
-			// comprobamos que la lista guardada en session no este vacia
-			if (session.getAttribute("classroomList") != null)
+			List<Classroom2> listaClases= this.classroom2Repository.findAll();
+			if(this.classroom2Repository.findAll().isEmpty())
 			{
-				// obtenemos la lista guardada en session
-				classroomList = (List<Classroom>) session.getAttribute("classroomList");
-				for (Classroom classroomObject : classroomList)
-				{
-					// comprobamos si nos han mandado alguna aula
-					if (aula != null)
-					{
-						// buscamos los objetos con la aula que nos han mandado y los guardamos en una
-						// lista
-						if (aula.equals(classroomObject.getAula()))
-						{
-							Classroom classroomTosend = classroomObject;
-							classroomListSend.add(classroomTosend);
-						}
-					}
-					// si no pasan ningun aula mandamos todas las aulas
-					else
-					{
-						Classroom classroomTosend = classroomObject;
-						classroomListSend.add(classroomTosend);
-					}
-				}
-			} else
-			{
-				String message = "No se ha realizado ninguna reserva de aula todavía";
+				String message = "No hay clases cargadas";
+				
 				log.error(message);
-				return ResponseEntity.status(400).body(message);
+				throw new BookingError(9,message);
 			}
-
-			return ResponseEntity.ok().body(classroomListSend);
+			return ResponseEntity.ok(listaClases);
 		} catch (Exception exception)
 		{
 			String message = "Server Error";

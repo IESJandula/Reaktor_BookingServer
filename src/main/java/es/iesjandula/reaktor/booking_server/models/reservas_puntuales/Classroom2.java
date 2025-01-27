@@ -1,29 +1,25 @@
 package es.iesjandula.reaktor.booking_server.models.reservas_puntuales;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Id;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @author Manuel y Miguel
- */
-
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-/**
- * teacher class
- */
-public class Teacher
+public class Classroom2 
 {
-	@Id
+	@EmbeddedId
+	private ClassroomId classroomId;
 	@Column(length = 100)
-	private String dni;
+	private String date;
 	@Column(length = 100)
-	private String name;
-	@Column(length = 100)
-	private String lastname;
+	private String aula;
 	
+	
+
 }

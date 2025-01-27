@@ -1,5 +1,6 @@
 package es.iesjandula.reaktor.booking_server.models.reservas_puntuales;
 
+import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
  */
 
 @Data
+@Entity
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
