@@ -1,5 +1,6 @@
-package es.iesjandula.reaktor.booking_server.models.reservas_fijas;
+package es.iesjandula.reaktor.booking_server.models.reservas_puntuales;
 
+import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservasFijasId;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
