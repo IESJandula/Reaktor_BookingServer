@@ -430,7 +430,6 @@ public class ReservasFijasRest
 		}
 		
 		return outcome;
-
 	}
 	
 }
