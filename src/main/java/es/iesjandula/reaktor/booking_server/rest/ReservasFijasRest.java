@@ -33,7 +33,7 @@ import es.iesjandula.reaktor.booking_server.repository.ITramosHorariosRepository
 import es.iesjandula.reaktor.booking_server.utils.Costantes;
 import lombok.extern.log4j.Log4j2;
 
-@RequestMapping(value = "/statics_bookings/previous_resources", produces =
+@RequestMapping(value = "/bookings/fixed", produces =
 { "application/json" })
 @RestController
 @Log4j2

@@ -17,7 +17,7 @@ import es.iesjandula.reaktor.booking_server.models.Constante;
 import es.iesjandula.reaktor.booking_server.repository.ConstanteRepository;
 import lombok.extern.log4j.Log4j2;
 
-@RequestMapping(value = "/booking/constants", produces = {"application/json"})
+@RequestMapping(value = "/bookings/constants", produces = {"application/json"})
 @RestController
 @Log4j2
 public class ConstantesController 

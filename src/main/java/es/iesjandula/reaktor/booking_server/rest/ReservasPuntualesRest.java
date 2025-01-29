@@ -56,7 +56,7 @@ import lombok.extern.log4j.Log4j2;
  */
 
 @RestController
-@RequestMapping(value = "/bookings", produces = "application/json")
+@RequestMapping(value = "/bookings/temporary", produces = "application/json")
 @Log4j2
 public class ReservasPuntualesRest
 {
