@@ -1,6 +1,7 @@
 package es.iesjandula.reaktor.bookings_server.models.reservas_puntuales;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,6 +24,7 @@ public class Classroom extends Booking
 	/**
 	 * classroom location
 	 */
+	@Id
 	private String aula;
 
 	public Classroom(Teacher teacher, String date, String aula)
