@@ -94,7 +94,7 @@
 						<configuration>
 							<classifier>jar-with-dependencies</classifier>
 							<mainClass>
-								es.iesjandula.reaktor.booking_server.ReaktorBookingServerApplication</mainClass>
+								es.iesjandula.reaktor.bookings_server.ReaktorBookingServerApplication</mainClass>
 						</configuration>
 					</execution>
 				</executions>
