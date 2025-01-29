@@ -25,3 +25,6 @@ logging:
 reaktor:
   publicKeyFile: ${PUBLIC_KEY_FILE}
   urlCors: https://somos.iesjandula.es
+  constantes:
+    reservasFijas: ""
+    reservasPuntuales: ""

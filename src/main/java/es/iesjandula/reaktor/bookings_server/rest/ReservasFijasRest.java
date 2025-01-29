@@ -272,7 +272,16 @@ public class ReservasFijasRest
 			TramosHorarios tramos = new TramosHorarios();
 			tramos.setId(tramosHorarios);
 
-			Optional<Profesores> profesor = this.profesoresRepository.findById(email);
+			Optional<Profesores> profesor = null ;
+			
+			if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
+			{
+				profesor = this.profesoresRepository.findById(email);
+			}
+			else
+			{
+				profesor = this.profesoresRepository.findById(usuario.getEmail());
+			}
 
 			ReservasFijasId reservaId = new ReservasFijasId();
 
@@ -301,13 +310,15 @@ public class ReservasFijasRest
 
 			return ResponseEntity.ok().body("Reserva realizada correctamente");
 
-		} catch (ReservaException reservaException)
+		} 
+		catch (ReservaException reservaException)
 		{
 
 //			Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
 //			que existe una reserva con los mismos datos
 			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 //			Para cualquier error inesperado, devolverá un 500
 			ReservaException reservaException = new ReservaException(
@@ -368,10 +379,17 @@ public class ReservasFijasRest
 			TramosHorarios tramosHorarios = new TramosHorarios();
 			tramosHorarios.setId(tramoHorario);
 
-//			if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
+			Optional<Profesores> profesor = null ;
 			
-			Optional<Profesores> profesor = this.profesoresRepository.findById(usuario.getEmail());
-
+			if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
+			{
+				profesor = this.profesoresRepository.findById(email);
+			}
+			else
+			{
+				profesor = this.profesoresRepository.findById(usuario.getEmail());
+			}
+			
 			ReservasFijasId reservaId = new ReservasFijasId();
 
 			if (profesor.isPresent())
