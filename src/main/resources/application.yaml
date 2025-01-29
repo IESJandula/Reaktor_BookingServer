@@ -13,7 +13,7 @@ spring:
       enabled: true
       force: true
 server:
-  port: 8083
+  port: 8084
   
 logging:
   level:
