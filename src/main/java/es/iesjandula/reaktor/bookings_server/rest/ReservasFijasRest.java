@@ -1,5 +1,9 @@
 package es.iesjandula.reaktor.bookings_server.rest;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.iesjandula.reaktor.base.security.models.DtoUsuario;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
@@ -233,28 +239,30 @@ public class ReservasFijasRest
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/bookings")
 	public ResponseEntity<?> realizarReservaFija(@AuthenticationPrincipal DtoUsuario usuario,
-											 @RequestHeader(value = "email", required = true) String email,
-											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
-											 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
-											 @RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
-											 @RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
+			@RequestHeader(value = "email", required = true) String email,
+			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
+			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
+			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
+			@RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
 	{
 		try
 		{
 			String errorReserva = this.validacionesGlobalesPreviasReservaFija();
-			
-			if(errorReserva != null) 
+
+			if (errorReserva != null)
 			{
 				log.error(errorReserva);
 				throw new ReservaException(22, errorReserva);
 			}
-			// Si el role del usuario es Administrador, creará la reserva con el email recibido en la cabecera
-			// Si el role del usuario no es Administrador, se verificará primero que el email coincide con el que viene en DtoUsuario. Enviando excepción si no es correcto
-			
-			
+			// Si el role del usuario es Administrador, creará la reserva con el email
+			// recibido en la cabecera
+			// Si el role del usuario no es Administrador, se verificará primero que el
+			// email coincide con el que viene en DtoUsuario. Enviando excepción si no es
+			// correcto
+
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFijas> optinalReserva = this.reservasRepository
-					.encontrarReserva( aulaYCarritos, diaDeLaSemana, tramosHorarios);
+			Optional<ReservaFijas> optinalReserva = this.reservasRepository.encontrarReserva(aulaYCarritos,
+					diaDeLaSemana, tramosHorarios);
 
 			if (optinalReserva.isPresent())
 			{
@@ -272,27 +280,31 @@ public class ReservasFijasRest
 			TramosHorarios tramos = new TramosHorarios();
 			tramos.setId(tramosHorarios);
 
-			Optional<Profesores> profesor = null ;
-			
-			if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
+			Profesores profesor = null;
+			Optional<Profesores> optionalProfesor = null;
+
+			if (!usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
 			{
-				profesor = this.profesoresRepository.findById(email);
+				optionalProfesor = this.profesoresRepository.findById(usuario.getEmail());
+
+				if (optionalProfesor.isEmpty())
+				{
+					profesor = new Profesores(usuario.getEmail(), usuario.getNombre(), usuario.getApellidos());
+					this.profesoresRepository.saveAndFlush(profesor);
+				}
+				else
+				{
+					profesor = optionalProfesor.get();
+				}
 			}
 			else
 			{
-				profesor = this.profesoresRepository.findById(usuario.getEmail());
+				optionalProfesor = this.profesoresRepository.findById(email);
 			}
 
 			ReservasFijasId reservaId = new ReservasFijasId();
 
-			if (!profesor.isPresent())
-			{
-				String mensajeError = "No existe ese email";
-				log.error(mensajeError);
-				throw new ReservaException(20, mensajeError);
-			}
-			reservaId.setProfesor(profesor.get());
-
+			reservaId.setProfesor(profesor);
 			reservaId.setAulaYCarritos(recurso);
 			reservaId.setDiasDeLaSemana(diasSemana);
 			reservaId.setTramosHorarios(tramos);
@@ -310,20 +322,17 @@ public class ReservasFijasRest
 
 			return ResponseEntity.ok().body("Reserva realizada correctamente");
 
-		} 
-		catch (ReservaException reservaException)
+		} catch (ReservaException reservaException)
 		{
 
 //			Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
 //			que existe una reserva con los mismos datos
 			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		}
-		catch (Exception exception)
+		} catch (Exception exception)
 		{
 //			Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(
-					100, "Error inesperado al realizar la reserva", exception
-			);
+			ReservaException reservaException = new ReservaException(100, "Error inesperado al realizar la reserva",
+					exception);
 
 			log.error("Error inesperado al realizar la reserva: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
