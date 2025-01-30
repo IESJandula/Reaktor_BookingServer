@@ -9,17 +9,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @Entity
-public class TramosHorarios
+@NoArgsConstructor
+public class DiaSemana
 {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private long id ;
 
-	// 11:30/12:30
-	@Column(length = 20)
-	private String tramosHorarios;
-
+	@Column(length = 9)
+	private String diaSemana ;
 }

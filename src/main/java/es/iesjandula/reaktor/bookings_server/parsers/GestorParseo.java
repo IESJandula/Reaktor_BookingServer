@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor.bookings_server.iml;
+package es.iesjandula.reaktor.bookings_server.parsers;
 
 import java.io.File;
 import java.io.FileNotFoundException;

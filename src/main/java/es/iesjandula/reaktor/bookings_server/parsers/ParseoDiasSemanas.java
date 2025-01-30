@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor.bookings_server.iml;
+package es.iesjandula.reaktor.bookings_server.parsers;
 
 import java.util.Scanner;
 
@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoDiasSemana;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiasSemana;
-import es.iesjandula.reaktor.bookings_server.repository.IDiasSemanaRepository;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiaSemana;
+import es.iesjandula.reaktor.bookings_server.repository.IDiaSemanaRepository;
 
 @Service
 public class ParseoDiasSemanas implements IParseoDiasSemana
 {
 	@Autowired
-	private IDiasSemanaRepository diasSemanaRepository;
+	private IDiaSemanaRepository diasSemanaRepository;
 
 	@Override
 	public void parseaFichero(Scanner scanner) throws ReservaException
@@ -28,10 +28,9 @@ public class ParseoDiasSemanas implements IParseoDiasSemana
 			// Dividir la línea por comas
 			String[] lineaDelFicheroTroceada = lineaDelFichero.split(",");
 
-			DiasSemana diasSemana = new DiasSemana();
-			diasSemana.setDiasDeLaSemana(lineaDelFicheroTroceada[0]);
+			DiaSemana diasSemana = new DiaSemana();
+			diasSemana.setDiaSemana(lineaDelFicheroTroceada[0]);
 			this.diasSemanaRepository.saveAndFlush(diasSemana);
 		}
 	}
-
 }

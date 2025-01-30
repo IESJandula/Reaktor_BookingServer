@@ -2,10 +2,6 @@ package es.iesjandula.reaktor.bookings_server.utils;
 
 public class Constants
 {
-	
-	/** Constante - Header - Content-Disposition */
-	public static final String HEADER_PRINT_CONTENT_DISPOSITION = "Content-Disposition" ;
-	
 	/*********************************************************/
 	/*********************** Errores *************************/
 	/*********************************************************/

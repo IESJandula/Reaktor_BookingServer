@@ -25,45 +25,44 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioBase;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
-import es.iesjandula.reaktor.base_client.utils.HttpClientUtils;
+import es.iesjandula.reaktor.base.utils.HttpClientUtils;
 import es.iesjandula.reaktor.bookings_server.dto.ReservasFijasDto;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.Constantes;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiasSemana;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesores;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursosPrevios;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijas;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservasFijasId;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramosHorarios;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiaSemana;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesor;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFija;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijaId;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramoHorario;
 import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IDiasSemanaRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IProfesoresRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IRecursosRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IReservasRepository;
-import es.iesjandula.reaktor.bookings_server.repository.ITramosHorariosRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IDiaSemanaRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IProfesorRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IRecursoPrevioRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IReservaRepository;
+import es.iesjandula.reaktor.bookings_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
-@RequestMapping(value = "/bookings/fixed", produces =
-{ "application/json" })
+@RequestMapping(value = "/bookings/fixed")
 @RestController
 @Log4j2
 public class ReservasFijasRest
 {
 	@Autowired
-	private IRecursosRepository recursosRepository;
+	private IRecursoPrevioRepository recursosRepository;
 
 	@Autowired
-	private IProfesoresRepository profesoresRepository;
+	private IProfesorRepository profesoresRepository;
 
 	@Autowired
-	private IReservasRepository reservasRepository;
+	private IReservaRepository reservasRepository;
 
 	@Autowired
-	private IDiasSemanaRepository diasSemanaRepository;
+	private IDiaSemanaRepository diasSemanaRepository;
 
 	@Autowired
-	private ITramosHorariosRepository tramosHorariosRepository;
+	private ITramoHorarioRepository tramosHorariosRepository;
 
 	@Autowired
 	private ConstantesRepository constanteRepository;
@@ -86,30 +85,30 @@ public class ReservasFijasRest
 	{
 		try
 		{
-//			Creacion de una lista para almacenar los recursos
-			List<RecursosPrevios> listaRecursosPrevios;
+			// Encontramos todos los recursos y los introducimos en una lista para mostrarlos más adelante 			
+			List<RecursoPrevio> listaRecursosPrevios = this.recursosRepository.findAll();
 
-//			Comprueba si la base de datos tiene registros de los recurso
-			if (this.recursosRepository.findAll().isEmpty())
+			// Comprueba si la base de datos tiene registros de los recurso
+			if (listaRecursosPrevios.isEmpty())
 			{
 				String mensajeError = "No se ha encontrado ningun recurso";
+				
 				log.error(mensajeError);
 				throw new ReservaException(1, mensajeError);
 			}
 
-//			Encontramos todos los recursos y los introducimos en una lista para mostrarlos más adelante
-			listaRecursosPrevios = this.recursosRepository.findAll();
-
 			return ResponseEntity.ok(listaRecursosPrevios);
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
-//			Captura la excepcion personalizada, devolvera un 404
+			// Captura la excepcion personalizada, devolvera un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
-//			Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error al acceder a la bade de datos",
-					exception);
+			// Captura los errores relacionados con la base de datos, devolverá un 500
+			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos", exception);
+			
 			log.error("Error al acceder a la bade de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
@@ -124,25 +123,30 @@ public class ReservasFijasRest
 	{
 		try
 		{
-//			Comprueba si la base de datos tiene registros de los tramos horarios
-			if (this.tramosHorariosRepository.findAll().isEmpty())
+			// Encontramos todos los tramos y los introducimos en una lista para mostrarlos más adelante
+			List<TramoHorario> listaTramos = this.tramosHorariosRepository.findAll();
+			
+			// Comprueba si la base de datos tiene registros de los tramos horarios
+			if (listaTramos.isEmpty())
 			{
 				String mensajeError = "No se ha encontrado ningun tramo horario";
+				
 				log.error(mensajeError);
 				throw new ReservaException(2, mensajeError);
 			}
-//			Encontramos todos los tramos y los introducimos en una lista para mostrarlos más adelante
-			List<TramosHorarios> listaTramos = this.tramosHorariosRepository.findAll();
+			
 			return ResponseEntity.ok(listaTramos);
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
-//			Captura la excepcion personalizada, devolvera un 404
+			// Captura la excepcion personalizada, devolvera un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
-//			Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error al acceder a la bade de datos",
-					exception);
+			// Captura los errores relacionados con la base de datos, devolverá un 500
+			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos", exception);
+			
 			log.error("Error al acceder a la bade de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
@@ -157,31 +161,29 @@ public class ReservasFijasRest
 	{
 		try
 		{
-//			Creacion de una lista para almacenar los dias de la semana
-			List<DiasSemana> listaDias;
+			// Encontramos todos los dias y los introducimos en una lista para mostrarlos más adelante
+			List<DiaSemana> listaDias = this.diasSemanaRepository.findAll();
 
-//			Comprueba si la base de datos tiene registros de los días de la semana
-			if (this.diasSemanaRepository.findAll().isEmpty())
+			// Comprueba si la base de datos tiene registros de los días de la semana
+			if (listaDias.isEmpty())
 			{
-
 				String mensajeError = "Error al obtener los días de la semana";
 				log.error(mensajeError);
 				throw new ReservaException(3, mensajeError);
 			}
 
-//			Encontramos todos los dias y los introducimos en una lista para mostrarlos más adelante
-			listaDias = this.diasSemanaRepository.findAll();
-
 			return ResponseEntity.ok(listaDias);
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
-//			Captura la excepcion personalizada, devolvera un 404
+			// Captura la excepcion personalizada, devolvera un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
-//			Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error al acceder a la bade de datos",
-					exception);
+			// Captura los errores relacionados con la base de datos, devolverá un 500
+			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos", exception);
+			
 			log.error("Error al acceder a la bade de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
@@ -197,22 +199,24 @@ public class ReservasFijasRest
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/bookings")
-	public ResponseEntity<?> obtenerReservasDto(@RequestHeader(value = "aulaYCarritos") String recursoA)
+	public ResponseEntity<?> obtenerReservasDto(@RequestHeader(value = "aulaYCarritos") String recursoPrevio)
 	{
 		try
 		{
-//			Creacion de una lista para almacenar los recursos
+			// Creacion de una lista para almacenar los recursos
 			List<ReservasFijasDto> listaReservas = new ArrayList<ReservasFijasDto>();
-			List<Object[]> resultados = reservasRepository.encontrarReservaPorRecurso(recursoA);
-
-//			Comprueba si la base de datos tiene registros de los recurso
-			if (this.recursosRepository.findAll().isEmpty())
+			
+			// Comprueba si la base de datos tiene registros de los recurso
+			if (this.recursosRepository.count() == 0)
 			{
 				String mensajeError = "No se ha encontrado ningun recurso";
 				log.error(mensajeError);
-				throw new ReservaException(1, mensajeError);
+				throw new ReservaException(4, mensajeError);
 			}
 
+			// Buscamos las reservas por el recurso
+			List<Object[]> resultados = this.reservasRepository.encontrarReservaPorRecurso(recursoPrevio) ;
+			
 			for (Object[] row : resultados)
 			{
 				Long diaSemana = (Long) row[0];
@@ -223,21 +227,23 @@ public class ReservasFijasRest
 				String recurso = (String) row[5];
 
 				// Mapeo a ReservaDto
-				listaReservas
-						.add(new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recurso));
+				listaReservas.add(new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recurso));
 			}
-//			Encontramos todos los recursos y los introducimos en una lista para mostrarlos más adelante
+
+			// Encontramos todos los recursos y los introducimos en una lista para mostrarlos más adelante
 
 			return ResponseEntity.ok(listaReservas);
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
-//			Captura la excepcion personalizada, devolvera un 404
+			// Captura la excepcion personalizada, devolvera un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
-//			Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error al acceder a la bade de datos",
-					exception);
+			// Captura los errores relacionados con la base de datos, devolverá un 500
+			ReservaException reservaException = new ReservaException(100, "Error al acceder a la bade de datos", exception);
+			
 			log.error("Error al acceder a la bade de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
@@ -251,153 +257,53 @@ public class ReservasFijasRest
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/bookings")
 	public ResponseEntity<?> realizarReservaFija(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestHeader(value = "email", required = true) String email,
-			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
-			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
-			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
-			@RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
+												 @RequestHeader(value = "email", required = true) String email,
+												 @RequestHeader(value = "recurso", required = true) String recursoPrevio,
+												 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
+												 @RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
+												 @RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
 	{
 		try
 		{
-			String errorReserva = this.validacionesGlobalesPreviasReservaFija();
-
-			if (errorReserva != null)
-			{
-				log.error(errorReserva);
-				throw new ReservaException(22, errorReserva);
-			}
-			// Si el role del usuario es Administrador, creará la reserva con el email
-			// recibido en la cabecera
-			// Si el role del usuario no es Administrador, se verificará primero que el
-			// email coincide con el que viene en DtoUsuario. Enviando excepción si no es
-			// correcto
+			// Validaciones previas a la reserva
+			this.validacionesGlobalesPreviasReservaFija() ;
+			
+			// Si el role del usuario es Administrador, creará la reserva con el email recibido en la cabecera
+			// Si el role del usuario no es Administrador, se verificará primero que el email coincide con el que viene en DtoUsuario. 
+			// Enviando excepción si no es correcto
 
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFijas> optinalReserva = this.reservasRepository.encontrarReserva(aulaYCarritos,
-					diaDeLaSemana, tramosHorarios);
+			Optional<ReservaFija> optionalReserva = this.reservasRepository.encontrarReserva(recursoPrevio, diaDeLaSemana, tramosHorarios) ;
 
-			if (optinalReserva.isPresent())
+			if (optionalReserva.isPresent())
 			{
 				String mensajeError = "Ya existe una la reserva con esos datos";
+				
 				log.error(mensajeError);
-				throw new ReservaException(6, mensajeError);
+				throw new ReservaException(5, mensajeError);
 			}
 
-			RecursosPrevios recurso = new RecursosPrevios();
-			recurso.setAulaYCarritos(aulaYCarritos);
+			// Creamos la instancia de reserva
+			ReservaFija reserva = this.crearInstanciaDeReserva(usuario, email, recursoPrevio, diaDeLaSemana, tramosHorarios, nAlumnos) ;
 
-			DiasSemana diasSemana = new DiasSemana();
-			diasSemana.setId(diaDeLaSemana);
+			// Si no existe una reserva previa, se guarda la nueva reserva en la base de datos
+			this.reservasRepository.saveAndFlush(reserva) ;
 
-			TramosHorarios tramos = new TramosHorarios();
-			tramos.setId(tramosHorarios);
+			log.info("Se ha reservado correctamente") ;
 
-			Profesores profesor = null;
-			Optional<Profesores> optionalProfesor = null;
+			return ResponseEntity.ok().body("Reserva realizada correctamente") ;
 
-			if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
-			{
-				optionalProfesor = this.profesoresRepository.findById(usuario.getEmail());
-
-				if (optionalProfesor.isEmpty())
-				{
-					profesor = new Profesores(usuario.getEmail(), usuario.getNombre(), usuario.getApellidos());
-					this.profesoresRepository.saveAndFlush(profesor);
-				}
-				else
-				{
-					// Creamos un HTTP Client con Timeout
-					CloseableHttpClient closeableHttpClient = HttpClientUtils
-							.crearHttpClientConTimeout(this.httpConnectionTimeout);
-
-					CloseableHttpResponse closeableHttpResponse = null;
-
-					try
-					{
-						HttpGet httpGet = new HttpGet(this.firebaseServerUrl + "/firebase/queries/user");
-
-						// Añadimos el token a la llamada
-						httpGet.addHeader("Authorization", "Bearer " + usuario.getJwt());
-
-						// Hacemos la peticion
-						closeableHttpResponse = closeableHttpClient.execute(httpGet);
-
-						// Comprobamos si viene la cabecera. En caso afirmativo, es porque trae un
-						// fichero a imprimir
-						if (closeableHttpResponse.containsHeader(Constants.HEADER_PRINT_CONTENT_DISPOSITION))
-						{
-							// Convertimos la respuesta en un objeto DtoInfoUsuario
-							ObjectMapper objectMapper = new ObjectMapper();
-							DtoUsuarioBase dtoUsuarioBase = objectMapper
-									.readValue(closeableHttpResponse.getEntity().getContent(), DtoUsuarioBase.class);
-
-							profesor.setNombre(dtoUsuarioBase.getNombre()) ;
-							profesor.setApellidos(dtoUsuarioBase.getApellidos());
-							profesor.setEmail(dtoUsuarioBase.getEmail()) ;
-							
-							this.profesoresRepository.saveAndFlush(profesor);
-						}
-					} catch (SocketTimeoutException socketTimeoutException)
-					{
-						String errorString = "SocketTimeoutException de lectura o escritura al comunicarse con el servidor (búsqueda de tarea de impresión)";
-
-						log.error(errorString, socketTimeoutException);
-						throw new ReservaException(1, errorString, socketTimeoutException);
-					} catch (ConnectTimeoutException connectTimeoutException)
-					{
-						String errorString = "ConnectTimeoutException al intentar conectar con el servidor (búsqueda de tarea de impresión)";
-
-						log.error(errorString, connectTimeoutException);
-						throw new ReservaException(2, errorString, connectTimeoutException);
-					} catch (IOException ioException)
-					{
-						String errorString = "IOException mientras se buscaba la tarea para imprimir en el servidor";
-
-						log.error(errorString, ioException);
-						throw new ReservaException(3, errorString, ioException);
-					}
-					finally
-					{
-						// Cierre de flujos
-						this.cierreFlujos(closeableHttpResponse);
-					}
-				}
-			}
-			else
-			{
-				optionalProfesor = this.profesoresRepository.findById(email);
-				profesor = optionalProfesor.get();
-			}
-
-			ReservasFijasId reservaId = new ReservasFijasId();
-
-			reservaId.setProfesor(profesor);
-			reservaId.setAulaYCarritos(recurso);
-			reservaId.setDiasDeLaSemana(diasSemana);
-			reservaId.setTramosHorarios(tramos);
-
-			ReservaFijas reserva = new ReservaFijas();
-			reserva.setReservaId(reservaId);
-			reserva.setNAlumnos(nAlumnos);
-
-			log.info("Se ha reservado correctamente");
-
-			reserva.setReservaId(reservaId);
-
-//			Si no existe una reserva previa, se guarda la nueva reserva en la base de datos
-			this.reservasRepository.saveAndFlush(reserva);
-
-			return ResponseEntity.ok().body("Reserva realizada correctamente");
-
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
 
-//			Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
-//			que existe una reserva con los mismos datos
+			// Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
+			// que existe una reserva con los mismos datos
 			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
-//			Para cualquier error inesperado, devolverá un 500
+			// Para cualquier error inesperado, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error inesperado al realizar la reserva",
 					exception);
 
@@ -408,10 +314,170 @@ public class ReservasFijasRest
 	}
 
 	/**
+	 * @param usuario usuario
+	 * @param email email
+	 * @param recursoPrevioString recurso previo
+	 * @param diaSemana dia de la semana
+	 * @param tramoHorario
+	 * @param nAlumnos
+	 * @return
+	 * @throws ReservaException
+	 */
+	private ReservaFija crearInstanciaDeReserva(DtoUsuarioExtended usuario, String email, 	   String recursoPrevioString,
+												Long diaSemana, 			Long tramoHorario, int nAlumnos) throws ReservaException
+	{
+		RecursoPrevio recursoPrevio = new RecursoPrevio() ;
+		
+		recursoPrevio.setId(recursoPrevioString) ;
+
+		DiaSemana diasSemana = new DiaSemana() ;
+		diasSemana.setId(diaSemana) ;
+
+		TramoHorario tramos = new TramoHorario();
+		tramos.setId(tramoHorario);
+
+		Profesor profesor = this.buscarProfesor(usuario, email);
+
+		ReservaFijaId reservaId = new ReservaFijaId() ;
+
+		reservaId.setProfesor(profesor) ;
+		reservaId.setRecursoPrevio(recursoPrevio) ;
+		reservaId.setDiaSemana(diasSemana) ;
+		reservaId.setTramoHorario(tramos) ;
+
+		ReservaFija reservaFija = new ReservaFija() ;
+		
+		reservaFija.setReservaFijaId(reservaId) ;
+		reservaFija.setNAlumnos(nAlumnos) ;		
+		
+		return reservaFija ;
+	}
+
+	/**
+	 * @param usuario usuario
+	 * @param email email
+	 * @return el profesor encontrado
+	 * @throws ReservaException con un error
+	 */
+	private Profesor buscarProfesor(DtoUsuarioExtended usuario, String email) throws ReservaException
+	{
+		Profesor profesor = null ;
+		
+		// Si el role es administrador ...
+		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
+		{
+			// Primero buscamos si ya tenemos a ese profesor en nuestra BBDD
+			Optional<Profesor> optionalProfesor = this.profesoresRepository.findById(usuario.getEmail()) ;
+
+			// Si lo encontramos ...
+			if (!optionalProfesor.isEmpty())
+			{
+				// Lo cogemos del optional
+				profesor = optionalProfesor.get() ;
+			}
+			else
+			{
+				// Si no lo encontramos, le pedimos a Firebase que nos lo dé
+				profesor = this.buscarProfesorEnFirebase(usuario.getJwt(), email) ;
+			}
+		}
+		else
+		{
+			// Si el usuario no es administrador, cogemos la información del usuario
+			profesor = new Profesor(usuario.getEmail(), usuario.getNombre(), usuario.getApellidos()) ;
+			
+			// Lo almacenamos en BBDD en caso de que no exista
+			this.profesoresRepository.saveAndFlush(profesor) ;
+		}
+		
+		return profesor ;
+	}
+
+	/**
+	 * @param jwtAdmin JWT del usuario admin
+	 * @param email email del profesor que va a realizar la reserva 
+	 * @return el profesor encontrado enfirebase
+	 * @throws ReservaException con un error
+	 */
+	private Profesor buscarProfesorEnFirebase(String jwtAdmin, String email) throws ReservaException
+	{
+		Profesor profesor = null ;
+
+		// Creamos un HTTP Client con Timeout
+		CloseableHttpClient closeableHttpClient = HttpClientUtils.crearHttpClientConTimeout(this.httpConnectionTimeout) ;
+
+		CloseableHttpResponse closeableHttpResponse = null ;
+		
+		try
+		{
+			HttpGet httpGet = new HttpGet(this.firebaseServerUrl + "/firebase/queries/user");
+
+			// Añadimos el jwt y el email a la llamada
+			httpGet.addHeader("Authorization", "Bearer " + jwtAdmin);
+			httpGet.addHeader("email", email);
+
+			// Hacemos la peticion
+			closeableHttpResponse = closeableHttpClient.execute(httpGet) ;
+
+			// Comprobamos si viene la cabecera. En caso afirmativo, es porque trae un profesor
+			if (closeableHttpResponse.getEntity() == null)
+			{
+				String mensajeError = "Profesor no encontrado en BBDD Global";
+				
+				log.error(mensajeError);
+				throw new ReservaException(11, mensajeError);
+			}
+			
+			// Convertimos la respuesta en un objeto DtoInfoUsuario
+			ObjectMapper objectMapper = new ObjectMapper() ;
+
+			// Obtenemos la respuesta de Firebase
+			DtoUsuarioBase dtoUsuarioBase = objectMapper.readValue(closeableHttpResponse.getEntity().getContent(), DtoUsuarioBase.class) ;
+
+			// Creamos una instancia de profesor con la respuesta de Firebase
+			profesor = new Profesor() ;
+			profesor.setNombre(dtoUsuarioBase.getNombre()) ;
+			profesor.setApellidos(dtoUsuarioBase.getApellidos()) ;
+			profesor.setEmail(dtoUsuarioBase.getEmail()) ;
+			
+			// Almacenamos al profesor en nuestra BBDD
+			this.profesoresRepository.saveAndFlush(profesor) ;
+		}
+		catch (SocketTimeoutException socketTimeoutException)
+		{
+			String errorString = "SocketTimeoutException de lectura o escritura al comunicarse con el servidor (búsqueda de tarea de impresión)";
+
+			log.error(errorString, socketTimeoutException);
+			throw new ReservaException(6, errorString, socketTimeoutException);
+		}
+		catch (ConnectTimeoutException connectTimeoutException)
+		{
+			String errorString = "ConnectTimeoutException al intentar conectar con el servidor (búsqueda de tarea de impresión)";
+
+			log.error(errorString, connectTimeoutException);
+			throw new ReservaException(7, errorString, connectTimeoutException);
+		}
+		catch (IOException ioException)
+		{
+			String errorString = "IOException mientras se buscaba la tarea para imprimir en el servidor";
+
+			log.error(errorString, ioException);
+			throw new ReservaException(8, errorString, ioException);
+		}
+		finally
+		{
+			// Cierre de flujos
+			this.buscarProfesorEnFirebaseCierreFlujos(closeableHttpResponse);
+		}
+		
+		return profesor;
+	}
+
+	/**
 	 * @param closeableHttpResponse closeable HTTP response
 	 * @throws PrinterClientException printer client exception
 	 */
-	private void cierreFlujos(CloseableHttpResponse closeableHttpResponse) throws ReservaException
+	private void buscarProfesorEnFirebaseCierreFlujos(CloseableHttpResponse closeableHttpResponse) throws ReservaException
 	{
 		if (closeableHttpResponse != null)
 		{
@@ -423,7 +489,7 @@ public class ReservasFijasRest
 				String errorString = "IOException mientras se cerraba el closeableHttpResponse en el método que busca la tarea para imprimir en el servidor";
 
 				log.error(errorString, ioException);
-				throw new ReservaException(4, errorString, ioException);
+				throw new ReservaException(9, errorString, ioException);
 			}
 		}
 	}
@@ -435,21 +501,16 @@ public class ReservasFijasRest
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/bookings")
 	public ResponseEntity<?> cancelarRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestHeader(value = "email", required = true) String email,
-			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
-			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
-			@RequestHeader(value = "tramoHorario", required = true) Long tramoHorario,
-			@RequestHeader(value = "numeroSemna", required = true) Integer numeroSemana)
+										 	 @RequestHeader(value = "email", required = true) String email,
+											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
+											 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
+											 @RequestHeader(value = "tramoHorario", required = true) Long tramoHorario)
 	{
 		try
 		{
-			String errorReserva = this.validacionesGlobalesPreviasReservaFija();
+			// Validaciones previas a la reserva
+			this.validacionesGlobalesPreviasReservaFija() ;
 
-			if (errorReserva != null)
-			{
-				log.error(errorReserva);
-				throw new ReservaException(22, errorReserva);
-			}
 			// Si el role del usuario es Administrador, borrará la reserva con el email
 			// recibido en la cabecera
 			// Si el role del usuario no es Administrador, se verificará primero que el
@@ -458,79 +519,92 @@ public class ReservasFijasRest
 
 			// Antes de borrar la reserva verifica si existe una reserva con los mismos
 			// datos
-			Optional<ReservaFijas> optinalReserva = this.reservasRepository.encontrarReserva(aulaYCarritos,
-					diaDeLaSemana, tramoHorario);
+			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(aulaYCarritos, diaDeLaSemana, tramoHorario) ;
 
 			if (!optinalReserva.isPresent())
 			{
 				String mensajeError = "La reserva que quiere borrar no existe";
 				log.error(mensajeError);
-				throw new ReservaException(7, mensajeError);
+				throw new ReservaException(10, mensajeError);
 			}
 
-			RecursosPrevios recurso = new RecursosPrevios();
-			recurso.setAulaYCarritos(aulaYCarritos);
-
-			DiasSemana diasSemana = new DiasSemana();
-			diasSemana.setId(diaDeLaSemana);
-
-			TramosHorarios tramosHorarios = new TramosHorarios();
-			tramosHorarios.setId(tramoHorario);
-
-			Optional<Profesores> profesor = null;
-
-			if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
-			{
-				profesor = this.profesoresRepository.findById(email);
-			} else
-			{
-				profesor = this.profesoresRepository.findById(usuario.getEmail());
-			}
-
-			ReservasFijasId reservaId = new ReservasFijasId();
-
-			if (profesor.isPresent())
-			{
-				reservaId.setProfesor(profesor.get());
-			}
-
-			reservaId.setAulaYCarritos(recurso);
-			reservaId.setDiasDeLaSemana(diasSemana);
-			reservaId.setTramosHorarios(tramosHorarios);
-
-			log.info("La reserva se ha borrado correctamente");
+			// Creamos instancia de ReservaId para luego borrar por este id
+			ReservaFijaId reservaId = this.crearInstanciaDeReservaId(usuario, email, aulaYCarritos, diaDeLaSemana, tramoHorario) ;
 
 			// Si la reserva existe en la base de datos, se borrará
-			this.reservasRepository.deleteById(reservaId);
+			this.reservasRepository.deleteById(reservaId) ;
 
-			return ResponseEntity.ok().build();
+			log.info("La reserva se ha borrado correctamente") ;
+			return ResponseEntity.ok().build() ;
 
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
-//			Si la reserva no existe, devolverá un 404
-			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+			// Si la reserva no existe, devolverá un 404
+			return ResponseEntity.status(404).body(reservaException.getBodyMesagge()) ;
+		}
+		catch (Exception exception)
 		{
-//			Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al cancelar la reserva",
-					exception);
-			log.error("Error inesperado al cancelar la reserva: ", exception);
-			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
+			// Para cualquier error inesperado, devolverá un 500
+			ReservaException reservaException = new ReservaException(100, "Error inesperado al cancelar la reserva", exception) ;
+			log.error("Error inesperado al cancelar la reserva: ", exception) ;
+			return ResponseEntity.status(500).body(reservaException.getBodyMesagge()) ;
 		}
 	}
 
 	/**
-	 * @return error global si existiera
+	 * @param usuario
+	 * @param email
+	 * @param aulaYCarritos
+	 * @param diaDeLaSemana
+	 * @param tramoHorario
+	 * @return
+	 */
+	private ReservaFijaId crearInstanciaDeReservaId(DtoUsuarioExtended usuario, String email, String aulaYCarritos,
+													Long diaDeLaSemana, Long tramoHorario)
+	{
+		RecursoPrevio recurso = new RecursoPrevio();
+		recurso.setId(aulaYCarritos);
+
+		DiaSemana diasSemana = new DiaSemana();
+		diasSemana.setId(diaDeLaSemana);
+
+		TramoHorario tramosHorarios = new TramoHorario();
+		tramosHorarios.setId(tramoHorario);
+
+		Optional<Profesor> profesor = null;
+
+		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
+		{
+			profesor = this.profesoresRepository.findById(email);
+		}
+		else
+		{
+			profesor = this.profesoresRepository.findById(usuario.getEmail());
+		}
+
+		ReservaFijaId reservaId = new ReservaFijaId();
+
+		if (profesor.isPresent())
+		{
+			reservaId.setProfesor(profesor.get());
+		}
+
+		reservaId.setRecursoPrevio(recurso);
+		reservaId.setDiaSemana(diasSemana);
+		reservaId.setTramoHorario(tramosHorarios);
+		return reservaId;
+	}
+
+	/**
 	 * @throws ReservaException con un error
 	 */
-	private String validacionesGlobalesPreviasReservaFija() throws ReservaException
+	private void validacionesGlobalesPreviasReservaFija() throws ReservaException
 	{
 
-		String outcome = null;
-
 		// Vemos si la reserva está deshabilitada
-		Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository
-				.findByClave(Constants.TABLA_CONST_RESERVAS_FIJAS);
+		Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository.findByClave(Constants.TABLA_CONST_RESERVAS_FIJAS);
+		
 		if (!optionalAppDeshabilitada.isPresent())
 		{
 			String errorString = "Error obteniendo parametros";
@@ -541,10 +615,12 @@ public class ReservasFijasRest
 
 		if (!optionalAppDeshabilitada.get().getValor().isEmpty())
 		{
-			outcome = optionalAppDeshabilitada.get().getValor();
+			String infoAppDeshabilitada = optionalAppDeshabilitada.get().getValor();
+			if (infoAppDeshabilitada != null)
+			{
+				log.error(infoAppDeshabilitada);
+				throw new ReservaException(22, infoAppDeshabilitada) ;
+			}
 		}
-
-		return outcome;
 	}
-
 }

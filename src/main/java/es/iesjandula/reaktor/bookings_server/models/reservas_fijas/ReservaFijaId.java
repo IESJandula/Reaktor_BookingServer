@@ -14,23 +14,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class ReservasFijasId implements Serializable
+public class ReservaFijaId implements Serializable
 {
 	private static final long serialVersionUID = 4705657948307458266L;
 
 	@ManyToOne
-	private Profesores profesor;
+	private Profesor profesor;
 
 	@ManyToOne
-	@JoinColumn(name = "recursos_aula_y_carritos", referencedColumnName = "aulaYCarritos")
-	private RecursosPrevios aulaYCarritos;
+	@JoinColumn(name = "recurso_previo_id", referencedColumnName = "id")
+	private RecursoPrevio recursoPrevio ;
 
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "dias_de_la_semana_id", referencedColumnName = "id")
-	private DiasSemana diasDeLaSemana;
+	@JoinColumn(name = "dia_semana_id", referencedColumnName = "id")
+	private DiaSemana diaSemana ;
 
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "tramos_horarios_id", referencedColumnName = "id")
-	private TramosHorarios tramosHorarios;
-
+	@JoinColumn(name = "tramo_horario_id", referencedColumnName = "id")
+	private TramoHorario tramoHorario ;
 }

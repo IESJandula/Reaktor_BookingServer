@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor.bookings_server.iml;
+package es.iesjandula.reaktor.bookings_server.parsers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,36 +9,31 @@ import org.springframework.stereotype.Service;
 
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoProfesor;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesores;
-import es.iesjandula.reaktor.bookings_server.repository.IProfesoresRepository;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesor;
+import es.iesjandula.reaktor.bookings_server.repository.IProfesorRepository;
 
 @Service
 public class ParseoProfesor implements IParseoProfesor
 {
-
 	@Autowired
-	IProfesoresRepository profesorRepository;
+	IProfesorRepository profesorRepository;
 
 	@Override
 	public void parseaFichero(Scanner scanner) throws ReservaException
 	{
 		scanner.nextLine();
-		List<Profesores> profesores = new ArrayList<Profesores>();
+		List<Profesor> profesores = new ArrayList<Profesor>();
 		while (scanner.hasNextLine())
 		{
-
 			String lineaDelFichero = scanner.nextLine();
 
 			String[] lineaDelFicheroTroceada = lineaDelFichero.split(",");
 
-			Profesores profesor = new Profesores(
-					lineaDelFicheroTroceada[0], lineaDelFicheroTroceada[1], lineaDelFicheroTroceada[2]
-			);
+			Profesor profesor = new Profesor(lineaDelFicheroTroceada[0], lineaDelFicheroTroceada[1], lineaDelFicheroTroceada[2]);
 
 			profesores.add(profesor);
-
 		}
+		
 		this.profesorRepository.saveAllAndFlush(profesores);
 	}
-
 }

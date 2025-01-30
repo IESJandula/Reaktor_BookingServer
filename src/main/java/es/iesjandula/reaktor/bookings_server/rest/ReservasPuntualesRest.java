@@ -26,12 +26,12 @@ import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.bookings_server.exception.BookingError;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.Constantes;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiasSemana;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesores;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursosPrevios;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijas;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservasFijasId;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramosHorarios;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiaSemana;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesor;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFija;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijaId;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramoHorario;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Booking;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Classroom;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Classroom2;
@@ -41,8 +41,8 @@ import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Holidays;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Teacher;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Trolley;
 import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IProfesoresRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IReservasRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IProfesorRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IReservaRepository;
 import es.iesjandula.reaktor.bookings_server.repository.reservas_puntuales.IClassroom2Repository;
 import es.iesjandula.reaktor.bookings_server.repository.reservas_puntuales.IDatesRepository;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
@@ -64,10 +64,10 @@ public class ReservasPuntualesRest
 	private ConstantesRepository constantesRepository;
 	
 	@Autowired
-	private IReservasRepository reservasRepository;
+	private IReservaRepository reservasRepository;
 	
 	@Autowired
-	private IProfesoresRepository profesoresRepository;
+	private IProfesorRepository profesoresRepository;
 	
 	@Autowired
 	private IDatesRepository datesRepository;
@@ -905,7 +905,7 @@ public class ReservasPuntualesRest
 			
 			
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFijas> optinalReserva = this.reservasRepository
+			Optional<ReservaFija> optinalReserva = this.reservasRepository
 					.encontrarReserva( aulaYCarritos, diaDeLaSemana, tramosHorarios);
 
 			if (optinalReserva.isPresent())
@@ -915,18 +915,18 @@ public class ReservasPuntualesRest
 				throw new ReservaException(6, mensajeError);
 			}
 
-			RecursosPrevios recurso = new RecursosPrevios();
-			recurso.setAulaYCarritos(aulaYCarritos);
+			RecursoPrevio recurso = new RecursoPrevio();
+			recurso.setId(aulaYCarritos);
 
-			DiasSemana diasSemana = new DiasSemana();
+			DiaSemana diasSemana = new DiaSemana();
 			diasSemana.setId(diaDeLaSemana);
 
-			TramosHorarios tramos = new TramosHorarios();
+			TramoHorario tramos = new TramoHorario();
 			tramos.setId(tramosHorarios);
 
-			Optional<Profesores> profesor = this.profesoresRepository.findById(email);
+			Optional<Profesor> profesor = this.profesoresRepository.findById(email);
 
-			ReservasFijasId reservaId = new ReservasFijasId();
+			ReservaFijaId reservaId = new ReservaFijaId();
 
 			if (!profesor.isPresent())
 			{
@@ -936,17 +936,15 @@ public class ReservasPuntualesRest
 			}
 			reservaId.setProfesor(profesor.get());
 
-			reservaId.setAulaYCarritos(recurso);
-			reservaId.setDiasDeLaSemana(diasSemana);
-			reservaId.setTramosHorarios(tramos);
+			reservaId.setRecursoPrevio(recurso);
+			reservaId.setDiaSemana(diasSemana);
+			reservaId.setTramoHorario(tramos);
 
-			ReservaFijas reserva = new ReservaFijas();
-			reserva.setReservaId(reservaId);
+			ReservaFija reserva = new ReservaFija();
+			reserva.setReservaFijaId(reservaId);
 			reserva.setNAlumnos(nAlumnos);
 
 			log.info("Se ha reservado correctamente");
-
-			reserva.setReservaId(reservaId);
 
 //			Si no existe una reserva previa, se guarda la nueva reserva en la base de datos
 			this.reservasRepository.saveAndFlush(reserva);

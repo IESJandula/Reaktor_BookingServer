@@ -2,21 +2,24 @@ package es.iesjandula.reaktor.bookings_server.models.reservas_fijas;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @Entity
+@Data
 @NoArgsConstructor
-public class DiasSemana
+@AllArgsConstructor
+public class Profesor
 {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	@Column(length = 100)
+	private String email ;
 
-	@Column(length = 9)
-	private String diasDeLaSemana;
+	@Column(length = 100)
+	private String nombre ;
+
+	@Column(length = 150)
+	private String apellidos ;
 }

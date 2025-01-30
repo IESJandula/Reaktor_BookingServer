@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor.bookings_server.iml;
+package es.iesjandula.reaktor.bookings_server.parsers;
 
 import java.util.Scanner;
 
@@ -7,21 +7,18 @@ import org.springframework.stereotype.Service;
 
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoRecurso;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursosPrevios;
-import es.iesjandula.reaktor.bookings_server.repository.IRecursosRepository;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio;
+import es.iesjandula.reaktor.bookings_server.repository.IRecursoPrevioRepository;
 
 @Service
 public class ParseoRecurso implements IParseoRecurso
 {
-
 	@Autowired
-	private IRecursosRepository recursosRepository;
+	private IRecursoPrevioRepository recursosRepository;
 
 	@Override
 	public void parseaFichero(Scanner scanner) throws ReservaException
 	{
-		// TODO Auto-generated method stub
-
 		scanner.nextLine();
 
 		while (scanner.hasNextLine())
@@ -31,13 +28,11 @@ public class ParseoRecurso implements IParseoRecurso
 
 			String[] lineaDelFicheroTroceada = lineaDelFichero.split(",");
 
-			RecursosPrevios recursos = new RecursosPrevios();
+			RecursoPrevio recursos = new RecursoPrevio();
 
-			recursos.setAulaYCarritos(lineaDelFicheroTroceada[0]);
+			recursos.setId(lineaDelFicheroTroceada[0]);
 
 			this.recursosRepository.saveAndFlush(recursos);
 		}
-
 	}
-
 }

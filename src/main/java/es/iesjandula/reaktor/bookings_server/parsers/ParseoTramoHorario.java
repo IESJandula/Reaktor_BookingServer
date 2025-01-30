@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor.bookings_server.iml;
+package es.iesjandula.reaktor.bookings_server.parsers;
 
 import java.util.Scanner;
 
@@ -7,36 +7,31 @@ import org.springframework.stereotype.Service;
 
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoTramoHorario;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramosHorarios;
-import es.iesjandula.reaktor.bookings_server.repository.ITramosHorariosRepository;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramoHorario;
+import es.iesjandula.reaktor.bookings_server.repository.ITramoHorarioRepository;
 
 @Service
 public class ParseoTramoHorario implements IParseoTramoHorario
 {
-
 	@Autowired
-	private ITramosHorariosRepository tramoHorarioRepository;
+	private ITramoHorarioRepository tramoHorarioRepository;
 
 	@Override
 	public void parseaFichero(Scanner scanner) throws ReservaException
 	{
-
 		scanner.nextLine();
 
 		while (scanner.hasNextLine())
 		{
-
 			String lineaDelFichero = scanner.nextLine();
 
 			String[] valores = lineaDelFichero.split(",");
 
-			TramosHorarios tramos = new TramosHorarios();
+			TramoHorario tramos = new TramoHorario();
 
-			tramos.setTramosHorarios(valores[0]);
+			tramos.setTramoHorario(valores[0]);
 
 			this.tramoHorarioRepository.saveAndFlush(tramos);
 		}
-
 	}
-
 }

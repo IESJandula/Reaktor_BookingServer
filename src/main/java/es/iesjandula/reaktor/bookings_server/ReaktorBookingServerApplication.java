@@ -9,10 +9,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.iesjandula.reaktor.bookings_server.interfaces.IGestorParseo;
-import es.iesjandula.reaktor.bookings_server.repository.IDiasSemanaRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IProfesoresRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IRecursosRepository;
-import es.iesjandula.reaktor.bookings_server.repository.ITramosHorariosRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IDiaSemanaRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IProfesorRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IRecursoPrevioRepository;
+import es.iesjandula.reaktor.bookings_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
 
 @SpringBootApplication
@@ -25,16 +25,16 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 	private IGestorParseo iGestorParseo;
 
 	@Autowired
-	private IRecursosRepository recursosRepository;
+	private IRecursoPrevioRepository recursosRepository;
 
 	@Autowired
-	private ITramosHorariosRepository tramosHorariosRepository;
+	private ITramoHorarioRepository tramosHorariosRepository;
 
 	@Autowired
-	private IProfesoresRepository profesoreRepository;
+	private IProfesorRepository profesoreRepository;
 
 	@Autowired
-	private IDiasSemanaRepository diasSemanaRepository;
+	private IDiaSemanaRepository diasSemanaRepository;
 
 	public static void main(String[] args)
 	{
