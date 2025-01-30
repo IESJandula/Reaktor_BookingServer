@@ -1,7 +1,6 @@
 package es.iesjandula.reaktor.bookings_server.rest;
 
 import java.io.IOException;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,11 +21,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.iesjandula.reaktor.base.security.models.DtoUsuario;
+import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.bookings_server.exception.BookingError;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
-import es.iesjandula.reaktor.bookings_server.models.Constante;
+import es.iesjandula.reaktor.bookings_server.models.Constantes;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiasSemana;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesores;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursosPrevios;
@@ -41,12 +40,12 @@ import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Dates;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Holidays;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Teacher;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.Trolley;
-import es.iesjandula.reaktor.bookings_server.repository.ConstanteRepository;
+import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IProfesoresRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IReservasRepository;
 import es.iesjandula.reaktor.bookings_server.repository.reservas_puntuales.IClassroom2Repository;
 import es.iesjandula.reaktor.bookings_server.repository.reservas_puntuales.IDatesRepository;
-import es.iesjandula.reaktor.bookings_server.utils.Costantes;
+import es.iesjandula.reaktor.bookings_server.utils.Constants;
 import es.iesjandula.reaktor.bookings_server.utils.Utils;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.log4j.Log4j2;
@@ -62,7 +61,7 @@ public class ReservasPuntualesRest
 {
 	
 	@Autowired
-	private ConstanteRepository constanteRepository;
+	private ConstantesRepository constantesRepository;
 	
 	@Autowired
 	private IReservasRepository reservasRepository;
@@ -885,7 +884,7 @@ public class ReservasPuntualesRest
 	
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/one_time_bookings")
-	public ResponseEntity<?> realizarReservaPuntual(@AuthenticationPrincipal DtoUsuario usuario,
+	public ResponseEntity<?> realizarReservaPuntual(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 											 @RequestHeader(value = "email", required = true) String email,
 											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
 											 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
@@ -983,12 +982,12 @@ public class ReservasPuntualesRest
 		String outcome = null;
 		
 		// Vemos si la reserva está deshabilitada
-		Optional<Constante> optionalAppDeshabilitada = this.constanteRepository.findByClave(Costantes.TABLA_CONST_RESERVAS_PUNTUALES);
+		Optional<Constantes> optionalAppDeshabilitada = this.constantesRepository.findByClave(Constants.TABLA_CONST_RESERVAS_PUNTUALES);
 		if(!optionalAppDeshabilitada.isPresent()) 
 		{
 			String errorString = "Error obteniendo parametros";
 			
-			log.error(errorString + ". " + Costantes.TABLA_CONST_RESERVAS_PUNTUALES);
+			log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_PUNTUALES);
 			throw new ReservaException(22, errorString);
 		}
 		

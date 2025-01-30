@@ -13,7 +13,7 @@ import es.iesjandula.reaktor.bookings_server.repository.IDiasSemanaRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IProfesoresRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IRecursosRepository;
 import es.iesjandula.reaktor.bookings_server.repository.ITramosHorariosRepository;
-import es.iesjandula.reaktor.bookings_server.utils.Costantes;
+import es.iesjandula.reaktor.bookings_server.utils.Constants;
 
 @SpringBootApplication
 @EnableScheduling
@@ -46,23 +46,23 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 	{
 		if (this.recursosRepository.findAll().isEmpty())
 		{
-			this.iGestorParseo.parseaFichero(Costantes.FICHERO_RECURSO);
+			this.iGestorParseo.parseaFichero(Constants.FICHERO_RECURSO);
 		}
 
 		if (this.tramosHorariosRepository.findAll().isEmpty())
 		{
 
-			this.iGestorParseo.parseaFichero(Costantes.FICHERO_TRAMOS_HORARIOS);
+			this.iGestorParseo.parseaFichero(Constants.FICHERO_TRAMOS_HORARIOS);
 		}
 
 		if (this.diasSemanaRepository.findAll().isEmpty())
 		{
-			this.iGestorParseo.parseaFichero(Costantes.FICHERO_DIAS_SEMANAS);
+			this.iGestorParseo.parseaFichero(Constants.FICHERO_DIAS_SEMANAS);
 		}
 		
 		if (this.profesoreRepository.findAll().isEmpty())
 		{
-			this.iGestorParseo.parseaFichero(Costantes.FICHERO_PROFESORES);
+			this.iGestorParseo.parseaFichero(Constants.FICHERO_PROFESORES);
 		}
 	}
 

@@ -7,11 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import es.iesjandula.reaktor.bookings_server.dto.DtoConstante;
-import es.iesjandula.reaktor.bookings_server.models.Constante;
+import es.iesjandula.reaktor.bookings_server.dto.DtoConstantes;
+import es.iesjandula.reaktor.bookings_server.models.Constantes;
 
 @Repository
-public interface ConstanteRepository extends JpaRepository<Constante, String>
+public interface ConstantesRepository extends JpaRepository<Constantes, String>
 {
 	
 	/**
@@ -19,10 +19,10 @@ public interface ConstanteRepository extends JpaRepository<Constante, String>
      * @param clave clave de la constante
      * @return constante encontrada
      */
-	Optional<Constante> findByClave(String clave);
+	Optional<Constantes> findByClave(String clave);
 	
-	@Query("SELECT new es.iesjandula.reaktor.bookings_server.dto.DtoConstante(c.clave, c.valor) "
-			+ "FROM Constante c")
-	List<DtoConstante> encontrarTodoComoDto();
+	@Query("SELECT new es.iesjandula.reaktor.bookings_server.dto.DtoConstantes(c.clave, c.valor) "
+			+ "FROM Constantes c")
+	List<DtoConstantes> encontrarTodoComoDto();
 	
 }

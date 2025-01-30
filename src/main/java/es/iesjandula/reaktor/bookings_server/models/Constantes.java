@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name= "costantes")
-public class Constante 
+@Table(name= "constantes")
+public class Constantes 
 {
 	
 	@Id

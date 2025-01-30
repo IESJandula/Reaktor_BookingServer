@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import es.iesjandula.reaktor.bookings_server.models.Constante;
-import es.iesjandula.reaktor.bookings_server.repository.ConstanteRepository;
-import es.iesjandula.reaktor.bookings_server.utils.Costantes;
+import es.iesjandula.reaktor.bookings_server.models.Constantes;
+import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
+import es.iesjandula.reaktor.bookings_server.utils.Constants;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 
@@ -18,15 +18,15 @@ public class InicializacionSistema
 {
 	
 	@Autowired
-	private ConstanteRepository constanteRepository;
+	private ConstantesRepository constanteRepository;
 	
 	@Value("${spring.jpa.hibernate.ddl-auto}")
 	private String modoDdl;
 	
-	@Value("${" + Costantes.PARAM_YAML_RESERVAS_FIJAS + "}")
+	@Value("${" + Constants.PARAM_YAML_RESERVAS_FIJAS + "}")
 	private String reservasFijas;
 
-	@Value("${" + Costantes.PARAM_YAML_RESERVAS_PUNTUALES + "}")
+	@Value("${" + Constants.PARAM_YAML_RESERVAS_PUNTUALES + "}")
 	private String reservasPuntuales;
 	
 	/**
@@ -37,7 +37,7 @@ public class InicializacionSistema
 	public void inicializarSistema()
 	{
 		
-		if(Costantes.MODO_DDL_CREATE.equalsIgnoreCase(this.modoDdl)) 
+		if(Constants.MODO_DDL_CREATE.equalsIgnoreCase(this.modoDdl)) 
 		{
 			this.inicializarSistemaConConstantes();
 			
@@ -50,19 +50,19 @@ public class InicializacionSistema
 	 */
 	private void inicializarSistemaConConstantes()
 	{
-		this.cargarPropiedad(Costantes.TABLA_CONST_RESERVAS_FIJAS, this.reservasFijas) ;
-		this.cargarPropiedad(Costantes.TABLA_CONST_RESERVAS_PUNTUALES, this.reservasPuntuales) ;
+		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_FIJAS, this.reservasFijas) ;
+		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_PUNTUALES, this.reservasPuntuales) ;
 	}
 	
 	private void cargarPropiedad(String key, String value)
 	{
 		// Verificamos si tiene algún valor
-        Optional<Constante> property = this.constanteRepository.findById(key) ;
+        Optional<Constantes> property = this.constanteRepository.findById(key) ;
         
         // Si está vacío, lo seteamos con el valor del YAML
         if (property.isEmpty())
         {
-        	Constante constante = new Constante() ;
+        	Constantes constante = new Constantes() ;
         	
             constante.setClave(key) ;
             constante.setValor(value) ;

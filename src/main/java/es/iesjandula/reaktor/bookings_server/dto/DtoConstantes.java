@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoConstante 
+public class DtoConstantes 
 {
 	
 	private String clave;

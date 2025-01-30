@@ -15,7 +15,7 @@ import es.iesjandula.reaktor.bookings_server.interfaces.IParseoDiasSemana;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoProfesor;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoRecurso;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoTramoHorario;
-import es.iesjandula.reaktor.bookings_server.utils.Costantes;
+import es.iesjandula.reaktor.bookings_server.utils.Constants;
 
 @Service
 public class GestorParseo implements IGestorParseo
@@ -37,7 +37,7 @@ public class GestorParseo implements IGestorParseo
 	{
 		switch (nombreFichero)
 		{
-			case Costantes.FICHERO_RECURSO:
+			case Constants.FICHERO_RECURSO:
 				Scanner scannerRecurso = this.abrirFichero(nombreFichero);
 	
 				this.parseoRecurso.parseaFichero(scannerRecurso);
@@ -45,14 +45,14 @@ public class GestorParseo implements IGestorParseo
 				scannerRecurso.close();
 				break;
 	
-			case Costantes.FICHERO_TRAMOS_HORARIOS:
+			case Constants.FICHERO_TRAMOS_HORARIOS:
 				Scanner scannerTramosHorarios = this.abrirFichero(nombreFichero);
 	
 				this.parseoTramoHorario.parseaFichero(scannerTramosHorarios);
 	
 				scannerTramosHorarios.close();
 				break;
-			case Costantes.FICHERO_DIAS_SEMANAS:
+			case Constants.FICHERO_DIAS_SEMANAS:
 				Scanner scannerDiasSemana = this.abrirFichero(nombreFichero);
 	
 				this.parseoDiasSemana.parseaFichero(scannerDiasSemana);
@@ -60,7 +60,7 @@ public class GestorParseo implements IGestorParseo
 				scannerDiasSemana.close();
 				break;
 	
-			case Costantes.FICHERO_PROFESORES:
+			case Constants.FICHERO_PROFESORES:
 				Scanner scannerProfesor = this.abrirFichero(nombreFichero);
 	
 				this.iParseoProfesor.parseaFichero(scannerProfesor);
