@@ -26,7 +26,7 @@ public class ConstantesController
 	private ConstantesRepository constanteRepository;
 	
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
-	@RequestMapping(method = RequestMethod.GET, value = "/constantes")
+	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<?> actualizarConstantes()
 	{
 		try 
@@ -46,7 +46,7 @@ public class ConstantesController
 	}
 	
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
-	@RequestMapping(method = RequestMethod.POST, value = "/constantes")
+	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> actualizarConstantes(@RequestBody(required = true) List<DtoConstantes> dtoConstantesList)
 	{
 		try 
