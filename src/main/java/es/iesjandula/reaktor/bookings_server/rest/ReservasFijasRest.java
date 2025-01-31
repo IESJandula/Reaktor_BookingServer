@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioBase;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
-import es.iesjandula.reaktor.base.utils.HttpClientUtils;
+import es.iesjandula.reaktor.base_client.utils.HttpClientUtils;
 import es.iesjandula.reaktor.bookings_server.dto.ReservasFijasDto;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.Constantes;
@@ -367,7 +367,7 @@ public class ReservasFijasRest
 		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
 		{
 			// Primero buscamos si ya tenemos a ese profesor en nuestra BBDD
-			Optional<Profesor> optionalProfesor = this.profesoresRepository.findById(usuario.getEmail()) ;
+			Optional<Profesor> optionalProfesor = this.profesoresRepository.findById(email) ;
 
 			// Si lo encontramos ...
 			if (!optionalProfesor.isEmpty())
