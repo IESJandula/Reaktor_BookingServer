@@ -1,8 +1,8 @@
-aulaYCarritos
-Biblioteca
-Salón de actos
-Aula 2.9
-Aula 2.13
-Carritos planta 0
-Carritos planta 1
-Carritos planta 2
+aulaYCarritos,cantidad
+Biblioteca,20
+Salón de actos,30
+Aula 2.9,10
+Aula 2.13,10
+Carritos planta 0,15
+Carritos planta 1,20
+Carritos planta 2,21

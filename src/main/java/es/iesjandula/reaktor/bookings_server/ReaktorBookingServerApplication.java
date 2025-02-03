@@ -9,6 +9,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.iesjandula.reaktor.bookings_server.interfaces.IGestorParseo;
+import es.iesjandula.reaktor.bookings_server.models.Constantes;
+import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IRecursoPrevioRepository;
@@ -35,6 +37,9 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 
 	@Autowired
 	private IDiaSemanaRepository diasSemanaRepository;
+	
+	@Autowired
+	private ConstantesRepository constantesRepository;
 
 	public static void main(String[] args)
 	{
@@ -64,6 +69,12 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 		{
 			this.iGestorParseo.parseaFichero(Constants.FICHERO_PROFESORES);
 		}
+		
+		Constantes constantes1 = new Constantes("Reservas fijas", "");
+		Constantes constantes2 = new Constantes("Reservas puntuales", "");
+	
+		constantesRepository.saveAndFlush(constantes1);
+		constantesRepository.saveAndFlush(constantes2);
 	}
 
 }

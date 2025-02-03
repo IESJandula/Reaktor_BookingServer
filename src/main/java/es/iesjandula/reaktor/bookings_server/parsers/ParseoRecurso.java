@@ -31,6 +31,7 @@ public class ParseoRecurso implements IParseoRecurso
 			RecursoPrevio recursos = new RecursoPrevio();
 
 			recursos.setId(lineaDelFicheroTroceada[0]);
+			recursos.setCantidad(Integer.parseInt(lineaDelFicheroTroceada[1]));
 
 			this.recursosRepository.saveAndFlush(recursos);
 		}

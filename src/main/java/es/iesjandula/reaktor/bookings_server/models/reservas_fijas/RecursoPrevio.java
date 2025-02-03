@@ -14,4 +14,7 @@ public class RecursoPrevio
 	@Id
 	@Column(length = 30)
 	private String id ;
+	
+	@Column(length = 3)
+	private Integer cantidad;
 }
