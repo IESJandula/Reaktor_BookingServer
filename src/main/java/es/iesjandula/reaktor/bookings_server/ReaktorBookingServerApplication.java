@@ -49,14 +49,8 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 	@Transactional(readOnly = false)
 	public void run(String... args) throws Exception
 	{
-		if (this.recursosRepository.findAll().isEmpty())
-		{
-			this.iGestorParseo.parseaFichero(Constants.FICHERO_RECURSO);
-		}
-
 		if (this.tramosHorariosRepository.findAll().isEmpty())
 		{
-
 			this.iGestorParseo.parseaFichero(Constants.FICHERO_TRAMOS_HORARIOS);
 		}
 

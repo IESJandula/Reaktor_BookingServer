@@ -13,15 +13,12 @@ import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.interfaces.IGestorParseo;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoDiasSemana;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoProfesor;
-import es.iesjandula.reaktor.bookings_server.interfaces.IParseoRecurso;
 import es.iesjandula.reaktor.bookings_server.interfaces.IParseoTramoHorario;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
 
 @Service
 public class GestorParseo implements IGestorParseo
 {
-	@Autowired
-	private IParseoRecurso parseoRecurso;
 
 	@Autowired
 	private IParseoTramoHorario parseoTramoHorario;
@@ -36,15 +33,7 @@ public class GestorParseo implements IGestorParseo
 	public void parseaFichero(String nombreFichero) throws ReservaException
 	{
 		switch (nombreFichero)
-		{
-			case Constants.FICHERO_RECURSO:
-				Scanner scannerRecurso = this.abrirFichero(nombreFichero);
-	
-				this.parseoRecurso.parseaFichero(scannerRecurso);
-	
-				scannerRecurso.close();
-				break;
-	
+		{	
 			case Constants.FICHERO_TRAMOS_HORARIOS:
 				Scanner scannerTramosHorarios = this.abrirFichero(nombreFichero);
 	
