@@ -13,7 +13,6 @@ import es.iesjandula.reaktor.bookings_server.models.Constantes;
 import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IProfesorRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IRecursoPrevioRepository;
 import es.iesjandula.reaktor.bookings_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
 
@@ -25,9 +24,6 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 
 	@Autowired
 	private IGestorParseo iGestorParseo;
-
-	@Autowired
-	private IRecursoPrevioRepository recursosRepository;
 
 	@Autowired
 	private ITramoHorarioRepository tramosHorariosRepository;
