@@ -26,93 +26,6 @@ public class ReservasAdminRest
 	@Autowired
 	private IRecursoPrevioRepository recursosRepository;
 
-	/**
-	 * Endpoint de tipo post para añadir un recurso con un recurso
-	 */
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
-	@RequestMapping(method = RequestMethod.POST, value = "/resources")
-	public ResponseEntity<?> agregarRecurso(@RequestHeader(value = "recursos", required = true) String recursos)
-	{
-		try
-		{
-			// Comprueba si existe un recurso con esos datos
-			if (this.recursosRepository.existsById(recursos))
-			{
-				String mensajeError = "El recurso que quieres añadir ya existe";
-				log.error(mensajeError);
-				throw new ReservaException(5, mensajeError);
-			}
-
-			RecursoPrevio nuevoRecurso = new RecursoPrevio();
-			nuevoRecurso.setId(recursos);
-
-			// Si no existen esos recursos, se guardaran en base de datos
-			this.recursosRepository.saveAndFlush(nuevoRecurso);
-
-			return ResponseEntity.ok().build();
-		}
-		catch (ReservaException reservaException)
-		{
-			// Captura la excepcion personalizada y retorna un 409 ya que existe un
-			// conflicto,
-			// que existe un recurso con los mismos datos
-			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		}
-		catch (Exception exception)
-		{
-			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al añadir un recurso",
-					exception);
-
-			log.error("Error inesperado al añadir un recurso: ", exception);
-			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
-		}
-	}
-
-	/**
-	 * Endpoint que recive un nombre de recurso y lo borra de la tabla de recursos
-	 */
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
-	@RequestMapping(method = RequestMethod.DELETE, value = "/resources")
-	public ResponseEntity<?> borrarRecurso(@RequestHeader(value = "recursos", required = true) String recursos)
-	{
-		try
-		{
-			// Comprueba si existe un recurso con esos datos
-			if (!this.recursosRepository.existsById(recursos))
-			{
-				String mensajeError = "El recurso que quieres eliminar no existe";
-				log.error(mensajeError);
-				throw new ReservaException(5, mensajeError);
-			}
-
-			RecursoPrevio nuevoRecurso = new RecursoPrevio();
-			nuevoRecurso.setId(recursos);
-
-			// Si no existen esos recursos, se guardaran en base de datos
-			this.recursosRepository.delete(nuevoRecurso);
-
-			return ResponseEntity.ok().build();
-		}
-		catch (ReservaException reservaException)
-		{
-			// Captura la excepcion personalizada y retorna un 409 ya que existe un
-			// conflicto,
-			// que existe un recurso con los mismos datos
-			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-
-		}
-		catch (Exception exception)
-		{
-			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al añadir un recurso",
-					exception);
-
-			log.error("Error inesperado al añadir un recurso: ", exception);
-			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
-		}
-	}
-
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/resources")
 	public ResponseEntity<?> crearRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
@@ -156,7 +69,7 @@ public class ReservasAdminRest
 	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
 	 * un recurso, un día de la semana, un tramo horario
 	 */
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources")
 	public ResponseEntity<?> eliminarRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "recurso", required = true) String recurso)
