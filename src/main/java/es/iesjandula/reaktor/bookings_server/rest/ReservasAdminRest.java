@@ -27,14 +27,14 @@ public class ReservasAdminRest
 {
 	@Autowired
 	private IRecursoPrevioRepository recursoPrevioRepository;
-	
+
 	@Autowired
 	private IRecursoFinalRepository recursoFinalRepository;
 
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/resources")
 	public ResponseEntity<?> crearRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestHeader(value = "switchStatus", required = true) Boolean switchStatus,
+			@RequestHeader(value = "switchStatus", required = true) boolean switchStatus,
 			@RequestHeader(value = "recurso", required = true) String recurso,
 			@RequestHeader(value = "cantidad", required = true) Integer cantidad)
 	{
@@ -47,7 +47,7 @@ public class ReservasAdminRest
 				log.error(mensajeError);
 				throw new ReservaException(5, mensajeError);
 			}
-			
+
 			if (recursoFinalRepository.encontrarRecurso(recurso).isPresent())
 			{
 				String mensajeError = "Ya existe un recurso con esos datos";
@@ -55,20 +55,21 @@ public class ReservasAdminRest
 				log.error(mensajeError);
 				throw new ReservaException(5, mensajeError);
 			}
-			
+
 			// Comprobación del tipo de recurso
-			if(switchStatus) {
+			if (switchStatus)
+			{
 				RecursoFinal recursoFinal = new RecursoFinal(recurso, cantidad);
 				recursoFinalRepository.saveAndFlush(recursoFinal);
 				return ResponseEntity.ok().body(recursoFinal);
-			}else {
+			}
+			else
+			{
 				RecursoPrevio recursoPrevio = new RecursoPrevio(recurso, cantidad);
 				recursoPrevioRepository.saveAndFlush(recursoPrevio);
 				return ResponseEntity.ok().body(recursoPrevio);
 			}
-			
 
-			
 		}
 		catch (ReservaException reservaException)
 		{
@@ -96,45 +97,37 @@ public class ReservasAdminRest
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources")
 	public ResponseEntity<?> eliminarRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestHeader(value = "switchStatus", required = true) Boolean switchStatus,
+			@RequestHeader(value = "switchStatus", required = true) boolean switchStatus,
 			@RequestHeader(value = "recurso", required = true) String recurso)
 	{
 		try
 		{
-			Optional<RecursoFinal> optinalRecursoFinal = null;
-			Optional<RecursoPrevio> optinalRecursoPrevio = null;
-			if(switchStatus) {
-				optinalRecursoFinal = this.recursoFinalRepository.findById(recurso);
-			}else {
-				optinalRecursoPrevio = this.recursoPrevioRepository.findById(recurso);
-			}
-			
-			
-			
-			
+			Optional<RecursoFinal> optinalRecursoFinal = this.recursoFinalRepository.findById(recurso);
+			Optional<RecursoPrevio> optinalRecursoPrevio = this.recursoPrevioRepository.findById(recurso);
 
-			if (!optinalRecursoFinal.isPresent())
+			if (!optinalRecursoFinal.isPresent() && switchStatus)
 			{
 				String mensajeError = "El recurso que quiere borrar no existe";
 				log.error(mensajeError);
 				throw new ReservaException(10, mensajeError);
 			}
-			if (!optinalRecursoPrevio.isPresent())
+			if (!optinalRecursoPrevio.isPresent() && !switchStatus)
 			{
 				String mensajeError = "El recurso que quiere borrar no existe";
 				log.error(mensajeError);
 				throw new ReservaException(10, mensajeError);
 			}
 
-			
-			if(switchStatus) {
+			if (switchStatus)
+			{
 				// Si la reserva existe en la base de datos, se borrará
 				this.recursoFinalRepository.deleteById(recurso);
-			}else {
+			}
+			else
+			{
 				// Si la reserva existe en la base de datos, se borrará
 				this.recursoPrevioRepository.deleteById(recurso);
 			}
-			
 
 			log.info("El recurso se ha borrado correctamente");
 			return ResponseEntity.ok().build();
