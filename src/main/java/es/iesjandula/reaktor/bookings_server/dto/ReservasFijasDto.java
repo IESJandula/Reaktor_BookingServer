@@ -18,13 +18,14 @@ public class ReservasFijasDto
 	private String email;
 
 	private String nombreYapellidos;
-	
+
 	private String recurso;
 
-	public ReservasFijasDto(Long diaSemana, Long tramoHorario) {
+	public ReservasFijasDto(Long diaSemana, Long tramoHorario)
+	{
 		super();
 		this.diaSemana = diaSemana;
 		this.tramoHorario = tramoHorario;
 
-	}	
+	}
 }

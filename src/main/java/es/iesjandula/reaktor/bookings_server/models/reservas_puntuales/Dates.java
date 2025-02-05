@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class Dates 
+public class Dates
 {
 	@Id
-	@Column(length =9)
+	@Column(length = 9)
 	private String fechaInicio;
 	@Column(length = 9)
 	private String fechaFin;

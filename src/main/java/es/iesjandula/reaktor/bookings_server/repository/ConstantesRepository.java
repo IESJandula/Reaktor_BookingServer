@@ -13,16 +13,17 @@ import es.iesjandula.reaktor.bookings_server.models.Constantes;
 @Repository
 public interface ConstantesRepository extends JpaRepository<Constantes, String>
 {
-	
+
 	/**
-     * Búsqueda de constante por clave
-     * @param clave clave de la constante
-     * @return constante encontrada
-     */
+	 * Búsqueda de constante por clave
+	 * 
+	 * @param clave clave de la constante
+	 * @return constante encontrada
+	 */
 	Optional<Constantes> findByClave(String clave);
-	
+
 	@Query("SELECT new es.iesjandula.reaktor.bookings_server.dto.DtoConstantes(c.clave, c.valor) "
 			+ "FROM Constantes c")
 	List<DtoConstantes> encontrarTodoComoDto();
-	
+
 }

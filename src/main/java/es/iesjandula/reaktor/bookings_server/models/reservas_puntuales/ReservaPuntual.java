@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-public class ReservaPuntual 
+public class ReservaPuntual
 {
 	@EmbeddedId
 	private ReservaFijaId reservaId;
 
 	@Column(nullable = false)
 	private int nAlumnos;
-	
+
 	@Column(nullable = false)
 	private int nSemana;
 

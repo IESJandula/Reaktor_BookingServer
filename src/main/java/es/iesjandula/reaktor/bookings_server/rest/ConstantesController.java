@@ -17,53 +17,56 @@ import es.iesjandula.reaktor.bookings_server.models.Constantes;
 import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
 import lombok.extern.log4j.Log4j2;
 
-@RequestMapping(value = "/bookings/constants", produces = {"application/json"})
+@RequestMapping(value = "/bookings/constants", produces =
+{ "application/json" })
 @RestController
 @Log4j2
-public class ConstantesController 
+public class ConstantesController
 {
 	@Autowired
 	private ConstantesRepository constanteRepository;
-	
+
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<?> actualizarConstantes()
 	{
-		try 
+		try
 		{
 			List<DtoConstantes> dtoConstantesList = this.constanteRepository.encontrarTodoComoDto();
-			
+
 			return ResponseEntity.ok(dtoConstantesList);
 		}
-		catch (Exception exception) 
+		catch (Exception exception)
 		{
 
-			ReservaException reservaException = new ReservaException(0, "Excepción genérica al obtener las costantes", exception);
-			
+			ReservaException reservaException = new ReservaException(0, "Excepción genérica al obtener las costantes",
+					exception);
+
 			log.error("Excepción genérica al obtener las costantes", reservaException);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> actualizarConstantes(@RequestBody(required = true) List<DtoConstantes> dtoConstantesList)
 	{
-		try 
+		try
 		{
-			for(DtoConstantes dtoConstantes : dtoConstantesList) 
+			for (DtoConstantes dtoConstantes : dtoConstantesList)
 			{
 				Constantes constantes = new Constantes(dtoConstantes.getClave(), dtoConstantes.getValor());
-				
+
 				this.constanteRepository.saveAndFlush(constantes);
 			}
-			
+
 			return ResponseEntity.ok().build();
 		}
-		catch (Exception exception) 
+		catch (Exception exception)
 		{
-			ReservaException reservaException = new ReservaException(0, "Excepción genérica al obtener las costantes", exception);
-			
+			ReservaException reservaException = new ReservaException(0, "Excepción genérica al obtener las costantes",
+					exception);
+
 			log.error("Excepción genérica al actualizar las costantes");
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}

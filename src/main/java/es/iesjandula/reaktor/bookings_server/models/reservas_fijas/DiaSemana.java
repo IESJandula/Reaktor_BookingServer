@@ -15,8 +15,8 @@ public class DiaSemana
 {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id ;
+	private long id;
 
 	@Column(length = 9)
-	private String diaSemana ;
+	private String diaSemana;
 }

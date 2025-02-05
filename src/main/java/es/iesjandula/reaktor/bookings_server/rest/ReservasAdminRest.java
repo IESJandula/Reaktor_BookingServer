@@ -24,8 +24,8 @@ import lombok.extern.log4j.Log4j2;
 public class ReservasAdminRest
 {
 	@Autowired
-	private IRecursoPrevioRepository recursosRepository ;	
-	
+	private IRecursoPrevioRepository recursosRepository;
+
 	/**
 	 * Endpoint de tipo post para añadir un recurso con un recurso
 	 */
@@ -43,26 +43,28 @@ public class ReservasAdminRest
 				throw new ReservaException(5, mensajeError);
 			}
 
-			RecursoPrevio nuevoRecurso = new RecursoPrevio() ;
-			nuevoRecurso.setId(recursos) ;
+			RecursoPrevio nuevoRecurso = new RecursoPrevio();
+			nuevoRecurso.setId(recursos);
 
 			// Si no existen esos recursos, se guardaran en base de datos
-			this.recursosRepository.saveAndFlush(nuevoRecurso) ;
+			this.recursosRepository.saveAndFlush(nuevoRecurso);
 
 			return ResponseEntity.ok().build();
-		} 
+		}
 		catch (ReservaException reservaException)
 		{
-			// Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
-			//que existe un recurso con los mismos datos
+			// Captura la excepcion personalizada y retorna un 409 ya que existe un
+			// conflicto,
+			// que existe un recurso con los mismos datos
 			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		} 
+		}
 		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al añadir un recurso", exception) ;
-			
-			log.error("Error inesperado al añadir un recurso: ", exception) ;
+			ReservaException reservaException = new ReservaException(100, "Error inesperado al añadir un recurso",
+					exception);
+
+			log.error("Error inesperado al añadir un recurso: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -94,21 +96,23 @@ public class ReservasAdminRest
 		}
 		catch (ReservaException reservaException)
 		{
-			// Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
+			// Captura la excepcion personalizada y retorna un 409 ya que existe un
+			// conflicto,
 			// que existe un recurso con los mismos datos
 			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-			
+
 		}
 		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al añadir un recurso", exception) ;
+			ReservaException reservaException = new ReservaException(100, "Error inesperado al añadir un recurso",
+					exception);
 
 			log.error("Error inesperado al añadir un recurso: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/resources")
 	public ResponseEntity<?> crearRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
@@ -124,9 +128,9 @@ public class ReservasAdminRest
 				log.error(mensajeError);
 				throw new ReservaException(5, mensajeError);
 			}
-			RecursoPrevio recursoPrevio = new RecursoPrevio(recurso,cantidad);
+			RecursoPrevio recursoPrevio = new RecursoPrevio(recurso, cantidad);
 			recursosRepository.saveAndFlush(recursoPrevio);
-			
+
 			return ResponseEntity.ok().body(recursoPrevio);
 		}
 		catch (ReservaException reservaException)
@@ -147,7 +151,7 @@ public class ReservasAdminRest
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	/**
 	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
 	 * un recurso, un día de la semana, un tramo horario
@@ -175,11 +179,12 @@ public class ReservasAdminRest
 			return ResponseEntity.ok().build();
 
 		}
-	catch (ReservaException reservaException)
+		catch (ReservaException reservaException)
 		{
 			// Si la reserva no existe, devolverá un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error inesperado al borrar el recurso",

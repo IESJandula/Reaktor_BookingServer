@@ -20,6 +20,5 @@ public class ClassroomId implements Serializable
 	private static final long serialVersionUID = 8610909425495271630L;
 	@ManyToOne
 	private Teacher teacher;
-	
 
 }

@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoConstantes 
+public class DtoConstantes
 {
-	
+
 	private String clave;
-	
+
 	private String valor;
 
 }

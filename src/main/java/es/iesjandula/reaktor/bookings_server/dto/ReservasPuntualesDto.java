@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservasPuntualesDto 
+public class ReservasPuntualesDto
 {
 	private Long diaSemana;
 
@@ -18,9 +18,9 @@ public class ReservasPuntualesDto
 	private String email;
 
 	private String nombreYapellidos;
-	
+
 	private String recurso;
-	
+
 	private int nSemana;
 
 }

@@ -7,12 +7,11 @@ public class Constants
 	/*********************************************************/
 
 	public final static int STD_CODE_ERROR = 500;
-	
-	
+
 	/*********************************************************/
 	/**************** Código de error propio *****************/
 	/*********************************************************/
-	
+
 	// Recursos
 	public final static int RECURSO_NO_ENCONTRADO = 1;
 	public final static int RECURSO_YA_EXISTE = 2;
@@ -21,12 +20,12 @@ public class Constants
 	public final static int ERROR_OBTENIENDO_RECURSOS = 5;
 	public final static int ERROR_ELIMINANDO_RECURSO = 6;
 
-	 // Códigos de error para las excepciones
-    public static final int ERROR_CONNECT_TIMEOUT = 7; 
+	// Códigos de error para las excepciones
+	public static final int ERROR_CONNECT_TIMEOUT = 7;
 	public static final int ERROR_IO_EXCEPTION = 8;
 	public static final int ERROR_SOCKET_TIMEOUT = 9;
 	public static final int ERROR_IO_EXCEPTION_CERRANDO_FLUJO = 12;
-	
+
 	// Tramos Horarios
 	public final static int TRAMO_HORARIO_NO_ENCONTRADO = 10;
 	public final static int ERROR_OBTENIENDO_TRAMOS_HORARIOS = 11;
@@ -34,10 +33,10 @@ public class Constants
 	// Días de la Semana
 	public final static int DIA_SEMANA_NO_ENCONTRADO = 20;
 	public final static int ERROR_OBTENIENDO_DIAS_SEMANA = 21;
-	
-    // Códigos de error para validaciones globales previas a la reserva fija
-    public static final int ERROR_OBTENIENDO_PARAMETROS = 23;
-    public static final int ERROR_APP_DESHABILITADA = 24;
+
+	// Códigos de error para validaciones globales previas a la reserva fija
+	public static final int ERROR_OBTENIENDO_PARAMETROS = 23;
+	public static final int ERROR_APP_DESHABILITADA = 24;
 
 	// Reservas
 	public final static int RESERVA_NO_ENCONTRADA = 30;
@@ -62,7 +61,7 @@ public class Constants
 	public final static int ERROR_CONEXION_FIREBASE = 101;
 	public final static int TIMEOUT_CONEXION_FIREBASE = 102;
 	public final static int IO_EXCEPTION_FIREBASE = 103;
-	
+
 	/*********************************************************/
 	/************************ Ficheros ***********************/
 	/*********************************************************/
@@ -74,29 +73,28 @@ public class Constants
 	public static final String FICHERO_DIAS_SEMANAS = "diasSemana.csv";
 
 	public static final String FICHERO_PROFESORES = "profesor.csv";
-	
-	
+
 	/*********************************************************/
 	/****************** Modo DDL - Create ********************/
 	/*********************************************************/
-	
-	public static final String MODO_DDL_CREATE = "create" ;
-	
+
+	public static final String MODO_DDL_CREATE = "create";
+
 	/*********************************************************/
 	/******************** Tabla Constantes *******************/
 	/*********************************************************/
-	
+
 	public static final String TABLA_CONST_RESERVAS_FIJAS = "Reservas fijas";
 
 	public static final String TABLA_CONST_RESERVAS_PUNTUALES = "Reservas puntuales";
-	
+
 	/*********************************************************/
 	/******************* Parámetros YAML *********************/
 	/*********************************************************/
-	
+
 	/** Constante - Parámetros YAML - Reservas fijas */
-	public static final String PARAM_YAML_RESERVAS_FIJAS = "reaktor.constantes.reservasFijas" ;
-	
+	public static final String PARAM_YAML_RESERVAS_FIJAS = "reaktor.constantes.reservasFijas";
+
 	/** Constante - Parámetros YAML - Reservas puntuales */
-	public static final String PARAM_YAML_RESERVAS_PUNTUALES = "reaktor.constantes.reservasPuntuales" ;
+	public static final String PARAM_YAML_RESERVAS_PUNTUALES = "reaktor.constantes.reservasPuntuales";
 }

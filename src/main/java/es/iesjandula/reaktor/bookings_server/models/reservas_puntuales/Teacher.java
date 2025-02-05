@@ -27,5 +27,5 @@ public class Teacher
 	private String name;
 	@Column(length = 100)
 	private String lastname;
-	
+
 }

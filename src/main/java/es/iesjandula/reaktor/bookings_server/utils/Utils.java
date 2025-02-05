@@ -25,7 +25,8 @@ public class Utils
 				|| hora == 13.45)
 		{
 			return true;
-		} else
+		}
+		else
 		{
 			return false;
 		}
@@ -60,7 +61,8 @@ public class Utils
 					dateBookingList.add(booking);
 				}
 			}
-		} else
+		}
+		else
 		{
 			if (session.getAttribute("classroomList") != null && session.getAttribute("trolleyList") != null)
 			{
@@ -87,7 +89,8 @@ public class Utils
 					}
 				}
 
-			} else if (session.getAttribute("classroomList") != null)
+			}
+			else if (session.getAttribute("classroomList") != null)
 			{
 				classroom = (List<Classroom>) session.getAttribute("classroomList");
 				bookingList.addAll(classroom);
@@ -100,7 +103,8 @@ public class Utils
 						dateBookingList.add(booking);
 					}
 				}
-			} else if (session.getAttribute("trolleyList") != null)
+			}
+			else if (session.getAttribute("trolleyList") != null)
 			{
 				trolley = (List<Trolley>) session.getAttribute("trolleyList");
 				bookingList.addAll(trolley);
@@ -113,7 +117,8 @@ public class Utils
 						dateBookingList.add(booking);
 					}
 				}
-			} else
+			}
+			else
 			{
 				message = "No hay ninguna reserva realizada";
 				log.error(message);
@@ -161,16 +166,20 @@ public class Utils
 			trolleyList.add(trolley);
 			// save the list with the changes in session
 			session.setAttribute("trolleyList", trolleyList);
-		} else if (!correctHour)
+		}
+		else if (!correctHour)
 		{
 			resultado = "La hora no es correcta";
-		} else if (!foundTrolley && !correctDay)
+		}
+		else if (!foundTrolley && !correctDay)
 		{
 			resultado = "No se puede hacer una reserva el fin de semana";
-		} else if (foundTrolley && correctDay)
+		}
+		else if (foundTrolley && correctDay)
 		{
 			resultado = "El carrito ya esta reservado";
-		} else if (!correctTrolleyNumber)
+		}
+		else if (!correctTrolleyNumber)
 		{
 			resultado = "El carrito no existe";
 		}
@@ -211,13 +220,16 @@ public class Utils
 			// save the list with the changes in session
 			session.setAttribute("classroomList", classroomList);
 			resultado = "Reserva realizada correctamente";
-		} else if (!correctHour)
+		}
+		else if (!correctHour)
 		{
 			resultado = "La hora no es correcta";
-		} else if (!foundClassroom && !correctDay)
+		}
+		else if (!foundClassroom && !correctDay)
 		{
 			resultado = "No se puede hacer una reserva el fin de semana";
-		} else if (foundClassroom && correctDay)
+		}
+		else if (foundClassroom && correctDay)
 		{
 			resultado = "La clase ya esta reservada";
 		}

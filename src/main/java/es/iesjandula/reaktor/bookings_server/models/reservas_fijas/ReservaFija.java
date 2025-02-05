@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 public class ReservaFija
 {
 	@EmbeddedId
-	private ReservaFijaId reservaFijaId ;
+	private ReservaFijaId reservaFijaId;
 
 	@Column(nullable = false)
-	private int nAlumnos ;
+	private int nAlumnos;
 }

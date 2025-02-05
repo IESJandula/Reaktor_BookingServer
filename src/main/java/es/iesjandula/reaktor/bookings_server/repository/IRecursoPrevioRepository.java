@@ -10,7 +10,6 @@ import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio
 
 public interface IRecursoPrevioRepository extends JpaRepository<RecursoPrevio, String>
 {
-	@Query("SELECT r FROM RecursoPrevio r WHERE "
-			+ "r.id = :recurso")
-	Optional<RecursoPrevio> encontrarRecurso(@Param("recurso") String recurso) ;
+	@Query("SELECT r FROM RecursoPrevio r WHERE " + "r.id = :recurso")
+	Optional<RecursoPrevio> encontrarRecurso(@Param("recurso") String recurso);
 }

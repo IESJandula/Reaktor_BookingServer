@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Classroom2 
+public class Classroom2
 {
 	@EmbeddedId
 	private ClassroomId classroomId;
@@ -19,7 +19,5 @@ public class Classroom2
 	private String date;
 	@Column(length = 100)
 	private String aula;
-	
-	
 
 }

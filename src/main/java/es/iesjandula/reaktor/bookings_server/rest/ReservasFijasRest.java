@@ -74,7 +74,7 @@ public class ReservasFijasRest
 	private long usersTimeout;
 
 	@Value("${reaktor.http_connection_timeout}")
-	private int httpConnectionTimeout;	
+	private int httpConnectionTimeout;
 
 	/*
 	 * Endpoint de tipo get para mostar una lista con los recursos
@@ -99,11 +99,13 @@ public class ReservasFijasRest
 			}
 
 			return ResponseEntity.ok(listaRecursosPrevios);
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
 			// Captura la excepcion personalizada, devolvera un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos",
@@ -137,11 +139,13 @@ public class ReservasFijasRest
 			}
 
 			return ResponseEntity.ok(listaTramos);
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
 			// Captura la excepcion personalizada, devolvera un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos",
@@ -174,11 +178,13 @@ public class ReservasFijasRest
 			}
 
 			return ResponseEntity.ok(listaDias);
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
 			// Captura la excepcion personalizada, devolvera un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos",
@@ -235,11 +241,13 @@ public class ReservasFijasRest
 			// mostrarlos más adelante
 
 			return ResponseEntity.ok(listaReservas);
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
 			// Captura la excepcion personalizada, devolvera un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error al acceder a la bade de datos",
@@ -299,14 +307,16 @@ public class ReservasFijasRest
 
 			return ResponseEntity.ok().body("Reserva realizada correctamente");
 
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
 
 			// Captura la excepcion personalizada y retorna un 409 ya que existe un
 			// conflicto,
 			// que existe una reserva con los mismos datos
 			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error inesperado al realizar la reserva",
@@ -379,12 +389,14 @@ public class ReservasFijasRest
 			{
 				// Lo cogemos del optional
 				profesor = optionalProfesor.get();
-			} else
+			}
+			else
 			{
 				// Si no lo encontramos, le pedimos a Firebase que nos lo dé
 				profesor = this.buscarProfesorEnFirebase(usuario.getJwt(), email);
 			}
-		} else
+		}
+		else
 		{
 			// Si el usuario no es administrador, cogemos la información del usuario
 			profesor = new Profesor(usuario.getEmail(), usuario.getNombre(), usuario.getApellidos());
@@ -447,25 +459,29 @@ public class ReservasFijasRest
 
 			// Almacenamos al profesor en nuestra BBDD
 			this.profesoresRepository.saveAndFlush(profesor);
-		} catch (SocketTimeoutException socketTimeoutException)
+		}
+		catch (SocketTimeoutException socketTimeoutException)
 		{
 			String errorString = "SocketTimeoutException de lectura o escritura al comunicarse con el servidor (búsqueda de tarea de impresión)";
 
 			log.error(errorString, socketTimeoutException);
 			throw new ReservaException(6, errorString, socketTimeoutException);
-		} catch (ConnectTimeoutException connectTimeoutException)
+		}
+		catch (ConnectTimeoutException connectTimeoutException)
 		{
 			String errorString = "ConnectTimeoutException al intentar conectar con el servidor (búsqueda de tarea de impresión)";
 
 			log.error(errorString, connectTimeoutException);
 			throw new ReservaException(7, errorString, connectTimeoutException);
-		} catch (IOException ioException)
+		}
+		catch (IOException ioException)
 		{
 			String errorString = "IOException mientras se buscaba la tarea para imprimir en el servidor";
 
 			log.error(errorString, ioException);
 			throw new ReservaException(8, errorString, ioException);
-		} finally
+		}
+		finally
 		{
 			// Cierre de flujos
 			this.buscarProfesorEnFirebaseCierreFlujos(closeableHttpResponse);
@@ -486,7 +502,8 @@ public class ReservasFijasRest
 			try
 			{
 				closeableHttpResponse.close();
-			} catch (IOException ioException)
+			}
+			catch (IOException ioException)
 			{
 				String errorString = "IOException mientras se cerraba el closeableHttpResponse en el método que busca la tarea para imprimir en el servidor";
 
@@ -541,11 +558,13 @@ public class ReservasFijasRest
 			log.info("La reserva se ha borrado correctamente");
 			return ResponseEntity.ok().build();
 
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
 			// Si la reserva no existe, devolverá un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error inesperado al cancelar la reserva",
@@ -580,7 +599,8 @@ public class ReservasFijasRest
 		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
 		{
 			profesor = this.profesoresRepository.findById(email);
-		} else
+		}
+		else
 		{
 			profesor = this.profesoresRepository.findById(usuario.getEmail());
 		}

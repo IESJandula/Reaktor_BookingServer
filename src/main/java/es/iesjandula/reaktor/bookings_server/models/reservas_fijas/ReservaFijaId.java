@@ -23,13 +23,13 @@ public class ReservaFijaId implements Serializable
 
 	@ManyToOne
 	@JoinColumn(name = "recurso_previo_id", referencedColumnName = "id")
-	private RecursoPrevio recursoPrevio ;
+	private RecursoPrevio recursoPrevio;
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "dia_semana_id", referencedColumnName = "id")
-	private DiaSemana diaSemana ;
+	private DiaSemana diaSemana;
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "tramo_horario_id", referencedColumnName = "id")
-	private TramoHorario tramoHorario ;
+	private TramoHorario tramoHorario;
 }

@@ -29,11 +29,12 @@ public class ParseoProfesor implements IParseoProfesor
 
 			String[] lineaDelFicheroTroceada = lineaDelFichero.split(",");
 
-			Profesor profesor = new Profesor(lineaDelFicheroTroceada[0], lineaDelFicheroTroceada[1], lineaDelFicheroTroceada[2]);
+			Profesor profesor = new Profesor(lineaDelFicheroTroceada[0], lineaDelFicheroTroceada[1],
+					lineaDelFicheroTroceada[2]);
 
 			profesores.add(profesor);
 		}
-		
+
 		this.profesorRepository.saveAllAndFlush(profesores);
 	}
 }

@@ -18,7 +18,8 @@ import es.iesjandula.reaktor.bookings_server.utils.Constants;
 
 @SpringBootApplication
 @EnableScheduling
-@ComponentScan(basePackages = {"es.iesjandula"})
+@ComponentScan(basePackages =
+{ "es.iesjandula" })
 public class ReaktorBookingServerApplication implements CommandLineRunner
 {
 
@@ -33,7 +34,7 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 
 	@Autowired
 	private IDiaSemanaRepository diasSemanaRepository;
-	
+
 	@Autowired
 	private ConstantesRepository constantesRepository;
 
@@ -54,15 +55,15 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 		{
 			this.iGestorParseo.parseaFichero(Constants.FICHERO_DIAS_SEMANAS);
 		}
-		
+
 		if (this.profesoreRepository.findAll().isEmpty())
 		{
 			this.iGestorParseo.parseaFichero(Constants.FICHERO_PROFESORES);
 		}
-		
+
 		Constantes constantes1 = new Constantes("Reservas fijas", "");
 		Constantes constantes2 = new Constantes("Reservas puntuales", "");
-	
+
 		constantesRepository.saveAndFlush(constantes1);
 		constantesRepository.saveAndFlush(constantes2);
 	}

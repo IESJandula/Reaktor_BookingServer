@@ -59,27 +59,26 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ReservasPuntualesRest
 {
-	
+
 	@Autowired
 	private ConstantesRepository constantesRepository;
-	
+
 	@Autowired
 	private IReservaRepository reservasRepository;
-	
+
 	@Autowired
 	private IProfesorRepository profesoresRepository;
-	
+
 	@Autowired
 	private IDatesRepository datesRepository;
-	
+
 	@Autowired
 	private IClassroom2Repository classroom2Repository;
-	
+
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/configDates")
-	public ResponseEntity<?> configDates(	@RequestParam(value = "fechaInicio", required = true) String inicio,
-											@RequestParam(value = "fechaFinal", required = true) String fin
-										)
+	public ResponseEntity<?> configDates(@RequestParam(value = "fechaInicio", required = true) String inicio,
+			@RequestParam(value = "fechaFinal", required = true) String fin)
 	{
 		try
 		{
@@ -89,7 +88,7 @@ public class ReservasPuntualesRest
 			String message = "Fechas asignadas correctamente";
 			log.info(message);
 			return ResponseEntity.ok().body(message);
-		} 
+		}
 		catch (Exception exception)
 		{
 			String message = "Error generico";
@@ -118,7 +117,8 @@ public class ReservasPuntualesRest
 			}
 			log.info(listaFechas);
 			return ResponseEntity.ok(listaFechas);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Server Error";
 			log.error(message, exception);
@@ -136,19 +136,16 @@ public class ReservasPuntualesRest
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/classroom", consumes = "multipart/form-data")
-	public ResponseEntity<?> postClassroom(
-										 @RequestHeader(value = "date", required = true) String date,
-										 @RequestHeader(value = "aula", required = true) String aula,
-										 @RequestHeader(value = "dni", required = true) String dni,
-										 @RequestHeader(value = "name", required = true) String name,
-										 @RequestHeader(value = "lastName", required = true) String lastName
-			)
+	public ResponseEntity<?> postClassroom(@RequestHeader(value = "date", required = true) String date,
+			@RequestHeader(value = "aula", required = true) String aula,
+			@RequestHeader(value = "dni", required = true) String dni,
+			@RequestHeader(value = "name", required = true) String name,
+			@RequestHeader(value = "lastName", required = true) String lastName)
 	{
-		
-		
+
 		try
 		{
-			
+
 			Classroom2 classroom2 = new Classroom2();
 			classroom2.setAula(aula);
 			classroom2.setDate(date);
@@ -156,10 +153,10 @@ public class ReservasPuntualesRest
 			teacher.setDni(dni);
 			teacher.setLastname(lastName);
 			teacher.setName(name);
-			ClassroomId classroomId= new ClassroomId();
+			ClassroomId classroomId = new ClassroomId();
 			classroomId.setTeacher(teacher);
 			classroom2.setClassroomId(classroomId);
-			
+
 			// Creamos una variable para mostrar que todo a ido correctamente
 			String message = "Data loading was successful";
 			log.info(message);
@@ -167,8 +164,8 @@ public class ReservasPuntualesRest
 			// Devolvemos en un 200, el mensaje de la variable
 			return ResponseEntity.ok().build();
 
-		} 
-		
+		}
+
 		catch (Exception exception)
 		{
 			// Si hay algun fallo que no se controle devolvemos un error generico
@@ -194,16 +191,17 @@ public class ReservasPuntualesRest
 	{
 		try
 		{
-			List<Classroom2> listaClases= this.classroom2Repository.findAll();
-			if(this.classroom2Repository.findAll().isEmpty())
+			List<Classroom2> listaClases = this.classroom2Repository.findAll();
+			if (this.classroom2Repository.findAll().isEmpty())
 			{
 				String message = "No hay clases cargadas";
-				
+
 				log.error(message);
-				throw new BookingError(9,message);
+				throw new BookingError(9, message);
 			}
 			return ResponseEntity.ok(listaClases);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Server Error";
 			log.error(message, exception);
@@ -273,7 +271,8 @@ public class ReservasPuntualesRest
 			// Devolvemos en un 200 el mensaje de la variable
 			return ResponseEntity.ok().body(message);
 
-		} catch (IOException ioException)
+		}
+		catch (IOException ioException)
 		{
 			// Si hay algún fallo al leer el csv nos saldrá éste error de lectura
 			// entrada/salida
@@ -282,7 +281,8 @@ public class ReservasPuntualesRest
 			BookingError exerciseError = new BookingError(1, message, ioException);
 			// Devolvemos en forma de mapa el objeto propio con la información del fallo
 			return ResponseEntity.status(400).body(exerciseError.getMapError());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Si hay algun fallo que no se controle devolvemos un error generico
 			String message = "Error generico";
@@ -291,7 +291,8 @@ public class ReservasPuntualesRest
 			// Al no controlar que fallo puede llegar a tener el servidor devolvemos un 500,
 			// informando del fallo real que ha ocurrido.
 			return ResponseEntity.status(500).body(exerciseError.getMapError());
-		} finally
+		}
+		finally
 		{
 			if (scanner != null)
 			{
@@ -337,7 +338,8 @@ public class ReservasPuntualesRest
 			{
 				return ResponseEntity.status(400).body(message);
 			}
-		} catch (ParseException parseException)
+		}
+		catch (ParseException parseException)
 		{
 			// Error message for date parsing exception
 			String message = "Error parsing date";
@@ -345,7 +347,8 @@ public class ReservasPuntualesRest
 			BookingError exerciseError = new BookingError(1, message, parseException);
 			// Return an error response with details about the parsing exception
 			return ResponseEntity.status(400).body(exerciseError.getMapError());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Error message for general server error
 			String message = "Server Error";
@@ -355,7 +358,7 @@ public class ReservasPuntualesRest
 			return ResponseEntity.status(500).body(exerciseError.getMapError());
 		}
 	}
-	
+
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/holidays", consumes = "multipart/form-data")
 	public ResponseEntity<?> postHolidays(@RequestPart(value = "csvFile", required = true) MultipartFile csvFile,
@@ -397,7 +400,8 @@ public class ReservasPuntualesRest
 			// Devolvemos en un 200 el mensaje de la variable
 			return ResponseEntity.ok().body(message);
 
-		} catch (IOException ioException)
+		}
+		catch (IOException ioException)
 		{
 			// Si hay algún fallo al leer el csv nos saldrá éste error de lectura
 			// entrada/salida
@@ -406,7 +410,8 @@ public class ReservasPuntualesRest
 			BookingError exerciseError = new BookingError(1, message, ioException);
 			// Devolvemos en forma de mapa el objeto propio con la información del fallo
 			return ResponseEntity.status(400).body(exerciseError.getMapError());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			// Si hay algun fallo que no se controle devolvemos un error generico
 			String message = "Error generico";
@@ -415,7 +420,8 @@ public class ReservasPuntualesRest
 			// Al no controlar que fallo puede llegar a tener el servidor devolvemos un 500,
 			// informando del fallo real que ha ocurrido.
 			return ResponseEntity.status(500).body(exerciseError.getMapError());
-		} finally
+		}
+		finally
 		{
 			if (scanner != null)
 			{
@@ -424,7 +430,7 @@ public class ReservasPuntualesRest
 			}
 		}
 	}
-	
+
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/holidays")
 	public ResponseEntity<?> getHolidays(HttpSession session)
@@ -436,7 +442,8 @@ public class ReservasPuntualesRest
 			if (session.getAttribute("holidaysList") != null)
 			{
 				holidaysList = (List<Holidays>) session.getAttribute("holidaysList");
-			} else
+			}
+			else
 			{
 				String message = "No existe una lista de Festivos todavía";
 				log.error(message);
@@ -445,7 +452,8 @@ public class ReservasPuntualesRest
 			}
 
 			return ResponseEntity.ok().body(holidaysList);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Server Error";
 			log.error(message, exception);
@@ -479,7 +487,8 @@ public class ReservasPuntualesRest
 				}
 			}
 			return ResponseEntity.ok().body(trolleyTabletList);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Error finding tablets";
 			log.error(message, exception);
@@ -513,7 +522,8 @@ public class ReservasPuntualesRest
 				}
 			}
 			return ResponseEntity.ok().body(trolleyPcList);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Error finding pcs";
 			log.error(message, exception);
@@ -543,10 +553,10 @@ public class ReservasPuntualesRest
 	{
 		try
 		{
-			
+
 			String errorReserva = this.validacionesGlobalesPreviasReservaPuntual();
-			
-			if(errorReserva != null) 
+
+			if (errorReserva != null)
 			{
 				log.error(errorReserva);
 				throw new ReservaException(22, errorReserva);
@@ -583,7 +593,8 @@ public class ReservasPuntualesRest
 			session.setAttribute("trolleyList", trolleyList);
 
 			return ResponseEntity.ok().body(resultado);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Error with the trolley cancel";
 			log.error(message, exception);
@@ -609,10 +620,10 @@ public class ReservasPuntualesRest
 	{
 		try
 		{
-			
+
 			String errorReserva = this.validacionesGlobalesPreviasReservaPuntual();
-			
-			if(errorReserva != null) 
+
+			if (errorReserva != null)
 			{
 				log.error(errorReserva);
 				throw new ReservaException(22, errorReserva);
@@ -646,7 +657,8 @@ public class ReservasPuntualesRest
 			session.setAttribute("classroomList", classroomList);
 
 			return ResponseEntity.ok().body(resultado);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Server error";
 			log.error(message, exception);
@@ -678,10 +690,10 @@ public class ReservasPuntualesRest
 	{
 		try
 		{
-			
+
 			String errorReserva = this.validacionesGlobalesPreviasReservaPuntual();
-			
-			if(errorReserva != null) 
+
+			if (errorReserva != null)
 			{
 				log.error(errorReserva);
 				throw new ReservaException(22, errorReserva);
@@ -732,7 +744,8 @@ public class ReservasPuntualesRest
 							{
 								foundClassroom = true;
 							}
-						} else
+						}
+						else
 						{
 							correctDay = false;
 						}
@@ -740,18 +753,18 @@ public class ReservasPuntualesRest
 					i++;
 				}
 				// metodo para validar la reserva de una aula
-				resultado = utils.ValidateClassroomBooking(
-						aula, nombre, apellido, dni, session, dateCompleted, foundClassroom, correctDay, resultado,
-						correctHour, classroomList
-				);
-			} else
+				resultado = utils.ValidateClassroomBooking(aula, nombre, apellido, dni, session, dateCompleted,
+						foundClassroom, correctDay, resultado, correctHour, classroomList);
+			}
+			else
 			{
 				resultado = "No se puede hacer una reserva cuando no hay instituto";
 				log.info(resultado);
 			}
 			log.info(resultado);
 			return ResponseEntity.ok().body(resultado);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Error booking a classroom";
 			log.error(message, exception);
@@ -787,10 +800,10 @@ public class ReservasPuntualesRest
 	{
 		try
 		{
-			
+
 			String errorReserva = this.validacionesGlobalesPreviasReservaPuntual();
-			
-			if(errorReserva != null) 
+
+			if (errorReserva != null)
 			{
 				log.error(errorReserva);
 				throw new ReservaException(22, errorReserva);
@@ -843,7 +856,8 @@ public class ReservasPuntualesRest
 									foundTrolley = true;
 								}
 							}
-						} else if (deviceType.equalsIgnoreCase("tablet"))
+						}
+						else if (deviceType.equalsIgnoreCase("tablet"))
 						{
 							if (trolleyNumber == 1)
 							{
@@ -859,7 +873,8 @@ public class ReservasPuntualesRest
 								}
 							}
 						}
-					} else
+					}
+					else
 					{
 						correctDay = false;
 					}
@@ -867,13 +882,13 @@ public class ReservasPuntualesRest
 				i++;
 			}
 			// metodo para validar una reserva de carritos
-			result = utils.ValidateBookingTrolley(
-					marca, piso, nombre, apellido, dni, dateCompleted, foundTrolley, correctTrolleyNumber, result,
-					correctHour, correctDay, deviceType, trolleyNumber, trolleyList, session
-			);
+			result = utils.ValidateBookingTrolley(marca, piso, nombre, apellido, dni, dateCompleted, foundTrolley,
+					correctTrolleyNumber, result, correctHour, correctDay, deviceType, trolleyNumber, trolleyList,
+					session);
 			log.info(result);
 			return ResponseEntity.ok().body(result);
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String message = "Error booking a trolley";
 			log.error(message, exception);
@@ -881,32 +896,34 @@ public class ReservasPuntualesRest
 			return ResponseEntity.status(400).body(bookingError.getMapError());
 		}
 	}
-	
+
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/one_time_bookings")
 	public ResponseEntity<?> realizarReservaPuntual(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-											 @RequestHeader(value = "email", required = true) String email,
-											 @RequestHeader(value = "recurso", required = true) String aulaYCarritos,
-											 @RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
-											 @RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
-											 @RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
+			@RequestHeader(value = "email", required = true) String email,
+			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
+			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
+			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
+			@RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
 	{
 		try
 		{
 			String errorReserva = this.validacionesGlobalesPreviasReservaPuntual();
-			
-			if(errorReserva != null) 
+
+			if (errorReserva != null)
 			{
 				log.error(errorReserva);
 				throw new ReservaException(22, errorReserva);
 			}
-			// Si el role del usuario es Administrador, creará la reserva con el email recibido en la cabecera
-			// Si el role del usuario no es Administrador, se verificará primero que el email coincide con el que viene en DtoUsuario. Enviando excepción si no es correcto
-			
-			
+			// Si el role del usuario es Administrador, creará la reserva con el email
+			// recibido en la cabecera
+			// Si el role del usuario no es Administrador, se verificará primero que el
+			// email coincide con el que viene en DtoUsuario. Enviando excepción si no es
+			// correcto
+
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFija> optinalReserva = this.reservasRepository
-					.encontrarReserva( aulaYCarritos, diaDeLaSemana, tramosHorarios);
+			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(aulaYCarritos,
+					diaDeLaSemana, tramosHorarios);
 
 			if (optinalReserva.isPresent())
 			{
@@ -951,50 +968,52 @@ public class ReservasPuntualesRest
 
 			return ResponseEntity.ok().body("Reserva realizada correctamente");
 
-		} catch (ReservaException reservaException)
+		}
+		catch (ReservaException reservaException)
 		{
 
 //			Captura la excepcion personalizada y retorna un 409 ya que existe un conflicto,
 //			que existe una reserva con los mismos datos
 			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 //			Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(
-					100, "Error inesperado al realizar la reserva", exception
-			);
+			ReservaException reservaException = new ReservaException(100, "Error inesperado al realizar la reserva",
+					exception);
 
 			log.error("Error inesperado al realizar la reserva: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 
 	}
-	
+
 	/**
 	 * @return error global si existiera
 	 * @throws ReservaException con un error
 	 */
-	private String validacionesGlobalesPreviasReservaPuntual() throws ReservaException 
+	private String validacionesGlobalesPreviasReservaPuntual() throws ReservaException
 	{
-		
+
 		String outcome = null;
-		
+
 		// Vemos si la reserva está deshabilitada
-		Optional<Constantes> optionalAppDeshabilitada = this.constantesRepository.findByClave(Constants.TABLA_CONST_RESERVAS_PUNTUALES);
-		if(!optionalAppDeshabilitada.isPresent()) 
+		Optional<Constantes> optionalAppDeshabilitada = this.constantesRepository
+				.findByClave(Constants.TABLA_CONST_RESERVAS_PUNTUALES);
+		if (!optionalAppDeshabilitada.isPresent())
 		{
 			String errorString = "Error obteniendo parametros";
-			
+
 			log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_PUNTUALES);
 			throw new ReservaException(22, errorString);
 		}
-		
-		if(!optionalAppDeshabilitada.get().getValor().isEmpty()) 
+
+		if (!optionalAppDeshabilitada.get().getValor().isEmpty())
 		{
 			outcome = optionalAppDeshabilitada.get().getValor();
 		}
-		
+
 		return outcome;
-		
+
 	}
 }

@@ -33,32 +33,32 @@ public class GestorParseo implements IGestorParseo
 	public void parseaFichero(String nombreFichero) throws ReservaException
 	{
 		switch (nombreFichero)
-		{	
-			case Constants.FICHERO_TRAMOS_HORARIOS:
-				Scanner scannerTramosHorarios = this.abrirFichero(nombreFichero);
-	
-				this.parseoTramoHorario.parseaFichero(scannerTramosHorarios);
-	
-				scannerTramosHorarios.close();
-				break;
-			case Constants.FICHERO_DIAS_SEMANAS:
-				Scanner scannerDiasSemana = this.abrirFichero(nombreFichero);
-	
-				this.parseoDiasSemana.parseaFichero(scannerDiasSemana);
-	
-				scannerDiasSemana.close();
-				break;
-	
-			case Constants.FICHERO_PROFESORES:
-				Scanner scannerProfesor = this.abrirFichero(nombreFichero);
-	
-				this.iParseoProfesor.parseaFichero(scannerProfesor);
-	
-				scannerProfesor.close();
-				break;
-	
-			default:
-				throw new ReservaException(1, "Fichero" + nombreFichero + "no encontrado");
+		{
+		case Constants.FICHERO_TRAMOS_HORARIOS:
+			Scanner scannerTramosHorarios = this.abrirFichero(nombreFichero);
+
+			this.parseoTramoHorario.parseaFichero(scannerTramosHorarios);
+
+			scannerTramosHorarios.close();
+			break;
+		case Constants.FICHERO_DIAS_SEMANAS:
+			Scanner scannerDiasSemana = this.abrirFichero(nombreFichero);
+
+			this.parseoDiasSemana.parseaFichero(scannerDiasSemana);
+
+			scannerDiasSemana.close();
+			break;
+
+		case Constants.FICHERO_PROFESORES:
+			Scanner scannerProfesor = this.abrirFichero(nombreFichero);
+
+			this.iParseoProfesor.parseaFichero(scannerProfesor);
+
+			scannerProfesor.close();
+			break;
+
+		default:
+			throw new ReservaException(1, "Fichero" + nombreFichero + "no encontrado");
 		}
 	}
 
@@ -70,10 +70,12 @@ public class GestorParseo implements IGestorParseo
 			File fichero = this.getFileFromResource(nombreFichero);
 
 			return new Scanner(fichero);
-		} catch (FileNotFoundException fileNotFoundException)
+		}
+		catch (FileNotFoundException fileNotFoundException)
 		{
 			throw new ReservaException(5, "Fichero " + nombreFichero + " no encontrado!", fileNotFoundException);
-		} catch (URISyntaxException uriSyntaxException)
+		}
+		catch (URISyntaxException uriSyntaxException)
 		{
 			throw new ReservaException(6, "Fichero " + nombreFichero + " no encontrado!", uriSyntaxException);
 		}

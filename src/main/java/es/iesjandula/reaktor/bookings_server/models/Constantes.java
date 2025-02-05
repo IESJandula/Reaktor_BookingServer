@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name= "constantes")
-public class Constantes 
+@Table(name = "constantes")
+public class Constantes
 {
-	
+
 	@Id
 	private String clave;
-	
+
 	@Column
 	private String valor;
 

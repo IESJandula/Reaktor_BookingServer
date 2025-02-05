@@ -15,11 +15,11 @@ public class Profesor
 {
 	@Id
 	@Column(length = 100)
-	private String email ;
+	private String email;
 
 	@Column(length = 100)
-	private String nombre ;
+	private String nombre;
 
 	@Column(length = 150)
-	private String apellidos ;
+	private String apellidos;
 }
