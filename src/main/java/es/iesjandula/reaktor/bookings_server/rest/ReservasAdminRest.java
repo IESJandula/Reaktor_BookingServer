@@ -18,6 +18,7 @@ import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoFinal;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio;
 import es.iesjandula.reaktor.bookings_server.repository.IRecursoFinalRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IRecursoPrevioRepository;
+import es.iesjandula.reaktor.bookings_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
 @RequestMapping(value = "/bookings/admin")
@@ -45,7 +46,7 @@ public class ReservasAdminRest
 				String mensajeError = "Ya existe un recurso con esos datos";
 
 				log.error(mensajeError);
-				throw new ReservaException(5, mensajeError);
+				throw new ReservaException(Constants.RECURSO_YA_EXISTE, mensajeError);
 			}
 
 			if (recursoFinalRepository.encontrarRecurso(recurso).isPresent())
@@ -53,7 +54,7 @@ public class ReservasAdminRest
 				String mensajeError = "Ya existe un recurso con esos datos";
 
 				log.error(mensajeError);
-				throw new ReservaException(5, mensajeError);
+				throw new ReservaException(Constants.RECURSO_YA_EXISTE, mensajeError);
 			}
 
 			// Comprobación del tipo de recurso
@@ -109,13 +110,13 @@ public class ReservasAdminRest
 			{
 				String mensajeError = "El recurso que quiere borrar no existe";
 				log.error(mensajeError);
-				throw new ReservaException(10, mensajeError);
+				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
 			if (!optinalRecursoPrevio.isPresent() && !switchStatus)
 			{
 				String mensajeError = "El recurso que quiere borrar no existe";
 				log.error(mensajeError);
-				throw new ReservaException(10, mensajeError);
+				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
 
 			if (switchStatus)
@@ -141,7 +142,7 @@ public class ReservasAdminRest
 		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al borrar el recurso",
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error inesperado al borrar el recurso",
 					exception);
 			log.error("Error inesperado al borrar el recurso: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());

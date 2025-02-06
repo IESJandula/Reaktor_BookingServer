@@ -15,6 +15,7 @@ import es.iesjandula.reaktor.bookings_server.dto.DtoConstantes;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.Constantes;
 import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
+import es.iesjandula.reaktor.bookings_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
 @RequestMapping(value = "/bookings/constants", produces =
@@ -39,7 +40,7 @@ public class ConstantesController
 		catch (Exception exception)
 		{
 
-			ReservaException reservaException = new ReservaException(0, "Excepción genérica al obtener las costantes",
+			ReservaException reservaException = new ReservaException(Constants.CONSTANTE_NO_ENCONTRADA, "Excepción genérica al obtener las costantes",
 					exception);
 
 			log.error("Excepción genérica al obtener las costantes", reservaException);
@@ -64,7 +65,7 @@ public class ConstantesController
 		}
 		catch (Exception exception)
 		{
-			ReservaException reservaException = new ReservaException(0, "Excepción genérica al obtener las costantes",
+			ReservaException reservaException = new ReservaException(Constants.CONSTANTE_NO_ENCONTRADA, "Excepción genérica al obtener las costantes",
 					exception);
 
 			log.error("Excepción genérica al actualizar las costantes");

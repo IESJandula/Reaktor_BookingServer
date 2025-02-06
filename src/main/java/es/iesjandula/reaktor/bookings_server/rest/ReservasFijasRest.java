@@ -98,19 +98,25 @@ public class ReservasFijasRest
 			// mostrarlos más adelante
 
 			// Comprueba si la base de datos tiene registros de los recurso
-			if (listaRecursosPrevios.isEmpty())
+			if (!switchStatus)
 			{
-				String mensajeError = "No se ha encontrado ningun recurso";
+				if (listaRecursosPrevios.isEmpty())
+				{
+					String mensajeError = "No se ha encontrado ningun recurso";
 
-				log.error(mensajeError);
-				throw new ReservaException(1, mensajeError);
+					log.error(mensajeError);
+					throw new ReservaException(Constants.RECURSO_NO_ENCONTRADO, mensajeError);
+				}
 			}
-			if (listaRecursosFinal.isEmpty())
+			else
 			{
-				String mensajeError = "No se ha encontrado ningun recurso";
+				if (listaRecursosFinal.isEmpty())
+				{
+					String mensajeError = "No se ha encontrado ningun recurso";
 
-				log.error(mensajeError);
-				throw new ReservaException(1, mensajeError);
+					log.error(mensajeError);
+					throw new ReservaException(Constants.RECURSO_NO_ENCONTRADO, mensajeError);
+				}
 			}
 
 			if (switchStatus)
@@ -133,7 +139,7 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos",
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error al acceder a la base de datos",
 					exception);
 
 			log.error("Error al acceder a la bade de datos: ", exception);
@@ -160,7 +166,7 @@ public class ReservasFijasRest
 				String mensajeError = "No se ha encontrado ningun tramo horario";
 
 				log.error(mensajeError);
-				throw new ReservaException(2, mensajeError);
+				throw new ReservaException(Constants.TRAMO_HORARIO_NO_ENCONTRADO, mensajeError);
 			}
 
 			return ResponseEntity.ok(listaTramos);
@@ -173,7 +179,7 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos",
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error al acceder a la base de datos",
 					exception);
 
 			log.error("Error al acceder a la bade de datos: ", exception);
@@ -199,7 +205,7 @@ public class ReservasFijasRest
 			{
 				String mensajeError = "Error al obtener los días de la semana";
 				log.error(mensajeError);
-				throw new ReservaException(3, mensajeError);
+				throw new ReservaException(Constants.ERROR_OBTENIENDO_DIAS_SEMANA, mensajeError);
 			}
 
 			return ResponseEntity.ok(listaDias);
@@ -212,7 +218,7 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error al acceder a la base de datos",
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error al acceder a la base de datos",
 					exception);
 
 			log.error("Error al acceder a la bade de datos: ", exception);
@@ -242,7 +248,7 @@ public class ReservasFijasRest
 			{
 				String mensajeError = "No se ha encontrado ningun recurso";
 				log.error(mensajeError);
-				throw new ReservaException(4, mensajeError);
+				throw new ReservaException(Constants.RECURSO_NO_ENCONTRADO, mensajeError);
 			}
 
 			// Buscamos las reservas por el recurso
@@ -275,7 +281,7 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error al acceder a la bade de datos",
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error al acceder a la bade de datos",
 					exception);
 
 			log.error("Error al acceder a la bade de datos: ", exception);
@@ -317,7 +323,7 @@ public class ReservasFijasRest
 				String mensajeError = "Ya existe una la reserva con esos datos";
 
 				log.error(mensajeError);
-				throw new ReservaException(5, mensajeError);
+				throw new ReservaException(Constants.RESERVA_YA_EXISTE, mensajeError);
 			}
 
 			// Creamos la instancia de reserva
@@ -344,7 +350,7 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al realizar la reserva",
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error inesperado al realizar la reserva",
 					exception);
 
 			log.error("Error inesperado al realizar la reserva: ", exception);
@@ -466,7 +472,7 @@ public class ReservasFijasRest
 				String mensajeError = "Profesor no encontrado en BBDD Global";
 
 				log.error(mensajeError);
-				throw new ReservaException(11, mensajeError);
+				throw new ReservaException(Constants.PROFESOR_NO_ENCONTRADO, mensajeError);
 			}
 
 			// Convertimos la respuesta en un objeto DtoInfoUsuario
@@ -490,21 +496,21 @@ public class ReservasFijasRest
 			String errorString = "SocketTimeoutException de lectura o escritura al comunicarse con el servidor (búsqueda de tarea de impresión)";
 
 			log.error(errorString, socketTimeoutException);
-			throw new ReservaException(6, errorString, socketTimeoutException);
+			throw new ReservaException(Constants.ERROR_CONEXION_FIREBASE, errorString, socketTimeoutException);
 		}
 		catch (ConnectTimeoutException connectTimeoutException)
 		{
 			String errorString = "ConnectTimeoutException al intentar conectar con el servidor (búsqueda de tarea de impresión)";
 
 			log.error(errorString, connectTimeoutException);
-			throw new ReservaException(7, errorString, connectTimeoutException);
+			throw new ReservaException(Constants.TIMEOUT_CONEXION_FIREBASE, errorString, connectTimeoutException);
 		}
 		catch (IOException ioException)
 		{
 			String errorString = "IOException mientras se buscaba la tarea para imprimir en el servidor";
 
 			log.error(errorString, ioException);
-			throw new ReservaException(8, errorString, ioException);
+			throw new ReservaException(Constants.IO_EXCEPTION_FIREBASE, errorString, ioException);
 		}
 		finally
 		{
@@ -533,7 +539,7 @@ public class ReservasFijasRest
 				String errorString = "IOException mientras se cerraba el closeableHttpResponse en el método que busca la tarea para imprimir en el servidor";
 
 				log.error(errorString, ioException);
-				throw new ReservaException(9, errorString, ioException);
+				throw new ReservaException(Constants.IO_EXCEPTION_FIREBASE, errorString, ioException);
 			}
 		}
 	}
@@ -570,7 +576,7 @@ public class ReservasFijasRest
 			{
 				String mensajeError = "La reserva que quiere borrar no existe";
 				log.error(mensajeError);
-				throw new ReservaException(10, mensajeError);
+				throw new ReservaException(Constants.RESERVA_NO_ENCONTRADA, mensajeError);
 			}
 
 			// Creamos instancia de ReservaId para luego borrar por este id
@@ -592,7 +598,7 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al cancelar la reserva",
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error inesperado al cancelar la reserva",
 					exception);
 			log.error("Error inesperado al cancelar la reserva: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
@@ -658,7 +664,7 @@ public class ReservasFijasRest
 			String errorString = "Error obteniendo parametros";
 
 			log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_FIJAS);
-			throw new ReservaException(21, errorString);
+			throw new ReservaException(Constants.ERROR_OBTENIENDO_PARAMETROS, errorString);
 		}
 
 		if (!optionalAppDeshabilitada.get().getValor().isEmpty())
@@ -667,7 +673,7 @@ public class ReservasFijasRest
 			if (infoAppDeshabilitada != null)
 			{
 				log.error(infoAppDeshabilitada);
-				throw new ReservaException(22, infoAppDeshabilitada);
+				throw new ReservaException(Constants.ERROR_APP_DESHABILITADA, infoAppDeshabilitada);
 			}
 		}
 	}
