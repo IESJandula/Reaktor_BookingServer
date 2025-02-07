@@ -14,10 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoFinal;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio;
-import es.iesjandula.reaktor.bookings_server.repository.IRecursoFinalRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IRecursoPrevioRepository;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
+import es.iesjandula.reaktor.bookings_server.repository.IRecursoRepository;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
@@ -27,29 +25,19 @@ import lombok.extern.log4j.Log4j2;
 public class ReservasAdminRest
 {
 	@Autowired
-	private IRecursoPrevioRepository recursoPrevioRepository;
-
-	@Autowired
-	private IRecursoFinalRepository recursoFinalRepository;
+	private IRecursoRepository recursoRepository;
 
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/resources")
 	public ResponseEntity<?> crearRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestHeader(value = "switchStatus", required = true) boolean switchStatus,
+			@RequestHeader(value = "esCompartible", required = true) boolean esCompartible,
 			@RequestHeader(value = "recurso", required = true) String recurso,
 			@RequestHeader(value = "cantidad", required = true) Integer cantidad)
 	{
 		try
 		{
-			if (recursoPrevioRepository.encontrarRecurso(recurso).isPresent())
-			{
-				String mensajeError = "Ya existe un recurso con esos datos";
 
-				log.error(mensajeError);
-				throw new ReservaException(Constants.RECURSO_YA_EXISTE, mensajeError);
-			}
-
-			if (recursoFinalRepository.encontrarRecurso(recurso).isPresent())
+			if (recursoRepository.encontrarRecurso(recurso).isPresent())
 			{
 				String mensajeError = "Ya existe un recurso con esos datos";
 
@@ -58,18 +46,9 @@ public class ReservasAdminRest
 			}
 
 			// Comprobación del tipo de recurso
-			if (switchStatus)
-			{
-				RecursoFinal recursoFinal = new RecursoFinal(recurso, cantidad);
-				recursoFinalRepository.saveAndFlush(recursoFinal);
+				Recurso recursoFinal = new Recurso(recurso, cantidad);
+				recursoRepository.saveAndFlush(recursoFinal);
 				return ResponseEntity.ok().body(recursoFinal);
-			}
-			else
-			{
-				RecursoPrevio recursoPrevio = new RecursoPrevio(recurso, cantidad);
-				recursoPrevioRepository.saveAndFlush(recursoPrevio);
-				return ResponseEntity.ok().body(recursoPrevio);
-			}
 
 		}
 		catch (ReservaException reservaException)
@@ -98,36 +77,24 @@ public class ReservasAdminRest
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources")
 	public ResponseEntity<?> eliminarRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestHeader(value = "switchStatus", required = true) boolean switchStatus,
+			@RequestHeader(value = "esCompartible", required = true) boolean esCompartible,
 			@RequestHeader(value = "recurso", required = true) String recurso)
 	{
 		try
 		{
-			Optional<RecursoFinal> optinalRecursoFinal = this.recursoFinalRepository.findById(recurso);
-			Optional<RecursoPrevio> optinalRecursoPrevio = this.recursoPrevioRepository.findById(recurso);
+			Optional<Recurso> optinalRecurso = this.recursoRepository.findById(recurso);
 
-			if (!optinalRecursoFinal.isPresent() && switchStatus)
-			{
-				String mensajeError = "El recurso que quiere borrar no existe";
-				log.error(mensajeError);
-				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
-			}
-			if (!optinalRecursoPrevio.isPresent() && !switchStatus)
+			if (!optinalRecurso.isPresent() && esCompartible)
 			{
 				String mensajeError = "El recurso que quiere borrar no existe";
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
 
-			if (switchStatus)
+			if (esCompartible)
 			{
 				// Si la reserva existe en la base de datos, se borrará
-				this.recursoFinalRepository.deleteById(recurso);
-			}
-			else
-			{
-				// Si la reserva existe en la base de datos, se borrará
-				this.recursoPrevioRepository.deleteById(recurso);
+				this.recursoRepository.deleteById(recurso);
 			}
 
 			log.info("El recurso se ha borrado correctamente");

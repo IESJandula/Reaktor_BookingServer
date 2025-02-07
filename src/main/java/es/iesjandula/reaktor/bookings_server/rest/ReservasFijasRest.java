@@ -31,7 +31,7 @@ import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.Constantes;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiaSemana;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesor;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoFinal;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijaId;
@@ -39,8 +39,7 @@ import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramoHorario;
 import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IProfesorRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IRecursoFinalRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IRecursoPrevioRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IRecursoRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IReservaRepository;
 import es.iesjandula.reaktor.bookings_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
@@ -52,10 +51,7 @@ import lombok.extern.log4j.Log4j2;
 public class ReservasFijasRest
 {
 	@Autowired
-	private IRecursoPrevioRepository recursoPrevioRepository;
-
-	@Autowired
-	private IRecursoFinalRepository recursoFinalRepository;
+	private IRecursoRepository recursoRepository;
 
 	@Autowired
 	private IProfesorRepository profesoresRepository;
@@ -87,20 +83,23 @@ public class ReservasFijasRest
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/resources")
 	public ResponseEntity<?> obtenerRecurso(
-			@RequestHeader(value = "switchStatus", required = true) boolean switchStatus)
+			@RequestHeader(value = "esCompartible", required = true) boolean esCompartible)
 	{
 		try
 		{
-			List<RecursoPrevio> listaRecursosPrevios = this.recursoPrevioRepository.findAll();
-			List<RecursoFinal> listaRecursosFinal = this.recursoFinalRepository.findAll();
+			List<Recurso> listaRecursos = this.recursoRepository.findAll();
 
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
 
 			// Comprueba si la base de datos tiene registros de los recurso
-			if (!switchStatus)
+			if (!esCompartible)
 			{
-				if (listaRecursosPrevios.isEmpty())
+
+			}
+			else
+			{
+				if (listaRecursos.isEmpty())
 				{
 					String mensajeError = "No se ha encontrado ningun recurso";
 
@@ -108,28 +107,8 @@ public class ReservasFijasRest
 					throw new ReservaException(Constants.RECURSO_NO_ENCONTRADO, mensajeError);
 				}
 			}
-			else
-			{
-				if (listaRecursosFinal.isEmpty())
-				{
-					String mensajeError = "No se ha encontrado ningun recurso";
 
-					log.error(mensajeError);
-					throw new ReservaException(Constants.RECURSO_NO_ENCONTRADO, mensajeError);
-				}
-			}
-
-			if (switchStatus)
-			{
-
-				return ResponseEntity.ok(listaRecursosFinal);
-			}
-			else
-			{
-
-				return ResponseEntity.ok(listaRecursosPrevios);
-			}
-
+			return ResponseEntity.ok(listaRecursos);
 		}
 		catch (ReservaException reservaException)
 		{
@@ -139,8 +118,8 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error al acceder a la base de datos",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error al acceder a la base de datos", exception);
 
 			log.error("Error al acceder a la bade de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
@@ -179,8 +158,8 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error al acceder a la base de datos",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error al acceder a la base de datos", exception);
 
 			log.error("Error al acceder a la bade de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
@@ -218,8 +197,8 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error al acceder a la base de datos",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error al acceder a la base de datos", exception);
 
 			log.error("Error al acceder a la bade de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
@@ -244,7 +223,7 @@ public class ReservasFijasRest
 			List<ReservasFijasDto> listaReservas = new ArrayList<ReservasFijasDto>();
 
 			// Comprueba si la base de datos tiene registros de los recurso
-			if (this.recursoPrevioRepository.count() == 0)
+			if (this.recursoRepository.count() == 0)
 			{
 				String mensajeError = "No se ha encontrado ningun recurso";
 				log.error(mensajeError);
@@ -281,8 +260,8 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error al acceder a la bade de datos",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error al acceder a la bade de datos", exception);
 
 			log.error("Error al acceder a la bade de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
@@ -298,7 +277,7 @@ public class ReservasFijasRest
 	@RequestMapping(method = RequestMethod.POST, value = "/bookings")
 	public ResponseEntity<?> realizarReservaFija(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "email", required = true) String email,
-			@RequestHeader(value = "recurso", required = true) String recursoPrevio,
+			@RequestHeader(value = "recurso", required = true) String recurso,
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
 			@RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
@@ -315,8 +294,8 @@ public class ReservasFijasRest
 			// Enviando excepción si no es correcto
 
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFija> optionalReserva = this.reservasRepository.encontrarReserva(recursoPrevio,
-					diaDeLaSemana, tramosHorarios);
+			Optional<ReservaFija> optionalReserva = this.reservasRepository.encontrarReserva(recurso, diaDeLaSemana,
+					tramosHorarios);
 
 			if (optionalReserva.isPresent())
 			{
@@ -327,8 +306,8 @@ public class ReservasFijasRest
 			}
 
 			// Creamos la instancia de reserva
-			ReservaFija reserva = this.crearInstanciaDeReserva(usuario, email, recursoPrevio, diaDeLaSemana,
-					tramosHorarios, nAlumnos);
+			ReservaFija reserva = this.crearInstanciaDeReserva(usuario, email, recurso, diaDeLaSemana, tramosHorarios,
+					nAlumnos);
 
 			// Si no existe una reserva previa, se guarda la nueva reserva en la base de
 			// datos
@@ -350,8 +329,8 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error inesperado al realizar la reserva",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error inesperado al realizar la reserva", exception);
 
 			log.error("Error inesperado al realizar la reserva: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
@@ -598,8 +577,8 @@ public class ReservasFijasRest
 		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error inesperado al cancelar la reserva",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error inesperado al cancelar la reserva", exception);
 			log.error("Error inesperado al cancelar la reserva: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}

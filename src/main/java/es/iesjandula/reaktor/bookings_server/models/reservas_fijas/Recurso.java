@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class RecursoFinal
+public class Recurso
 {
 	@Id
-	@Column(length = 30)
+	@Column(length = 150)
 	private String id;
 
 	@Column(length = 3)

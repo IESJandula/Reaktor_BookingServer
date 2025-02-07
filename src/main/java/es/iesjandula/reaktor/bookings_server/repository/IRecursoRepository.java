@@ -6,10 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoFinal;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
 
-public interface IRecursoFinalRepository extends JpaRepository<RecursoFinal, String>
+public interface IRecursoRepository extends JpaRepository<Recurso, String>
 {
 	@Query("SELECT r FROM RecursoFinal r WHERE " + "r.id = :recurso")
-	Optional<RecursoFinal> encontrarRecurso(@Param("recurso") String recurso);
+	Optional<Recurso> encontrarRecurso(@Param("recurso") String recurso);
 }
