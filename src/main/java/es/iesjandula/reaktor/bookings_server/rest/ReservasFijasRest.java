@@ -32,7 +32,6 @@ import es.iesjandula.reaktor.bookings_server.models.Constantes;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiaSemana;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesor;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijaId;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramoHorario;
@@ -215,7 +214,7 @@ public class ReservasFijasRest
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/bookings")
-	public ResponseEntity<?> obtenerReservasDto(@RequestHeader(value = "aulaYCarritos") String recursoPrevio)
+	public ResponseEntity<?> obtenerReservasDto(@RequestHeader(value = "aulaYCarritos") String recurso)
 	{
 		try
 		{
@@ -231,7 +230,7 @@ public class ReservasFijasRest
 			}
 
 			// Buscamos las reservas por el recurso
-			List<Object[]> resultados = this.reservasRepository.encontrarReservaPorRecurso(recursoPrevio);
+			List<Object[]> resultados = this.reservasRepository.encontrarReservaPorRecurso(recurso);
 
 			for (Object[] row : resultados)
 			{
@@ -240,11 +239,11 @@ public class ReservasFijasRest
 				Integer nAlumnos = (row[2] != null) ? (Integer) row[2] : 0;
 				String email = (String) row[3];
 				String nombreYapellidos = (String) row[4];
-				String recurso = (String) row[5];
+				String recursos = (String) row[5];
 
 				// Mapeo a ReservaDto
 				listaReservas
-						.add(new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recurso));
+						.add(new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recursos));
 			}
 
 			// Encontramos todos los recursos y los introducimos en una lista para
@@ -341,19 +340,19 @@ public class ReservasFijasRest
 	/**
 	 * @param usuario             usuario
 	 * @param email               email
-	 * @param recursoPrevioString recurso previo
+	 * @param recursoString recurso previo
 	 * @param diaSemana           dia de la semana
 	 * @param tramoHorario
 	 * @param nAlumnos
 	 * @return
 	 * @throws ReservaException
 	 */
-	private ReservaFija crearInstanciaDeReserva(DtoUsuarioExtended usuario, String email, String recursoPrevioString,
+	private ReservaFija crearInstanciaDeReserva(DtoUsuarioExtended usuario, String email, String recursoString,
 			Long diaSemana, Long tramoHorario, int nAlumnos) throws ReservaException
 	{
-		RecursoPrevio recursoPrevio = new RecursoPrevio();
+		Recurso recurso = new Recurso();
 
-		recursoPrevio.setId(recursoPrevioString);
+		recurso.setId(recursoString);
 
 		DiaSemana diasSemana = new DiaSemana();
 		diasSemana.setId(diaSemana);
@@ -366,7 +365,7 @@ public class ReservasFijasRest
 		ReservaFijaId reservaId = new ReservaFijaId();
 
 		reservaId.setProfesor(profesor);
-		reservaId.setRecursoPrevio(recursoPrevio);
+		reservaId.setRecurso(recurso);
 		reservaId.setDiaSemana(diasSemana);
 		reservaId.setTramoHorario(tramos);
 
@@ -472,21 +471,21 @@ public class ReservasFijasRest
 		}
 		catch (SocketTimeoutException socketTimeoutException)
 		{
-			String errorString = "SocketTimeoutException de lectura o escritura al comunicarse con el servidor (búsqueda de tarea de impresión)";
+			String errorString = "SocketTimeoutException de lectura o escritura al comunicarse con el servidor (búsqueda del profesor asociado a la reserva)";
 
 			log.error(errorString, socketTimeoutException);
 			throw new ReservaException(Constants.ERROR_CONEXION_FIREBASE, errorString, socketTimeoutException);
 		}
 		catch (ConnectTimeoutException connectTimeoutException)
 		{
-			String errorString = "ConnectTimeoutException al intentar conectar con el servidor (búsqueda de tarea de impresión)";
+			String errorString = "ConnectTimeoutException al intentar conectar con el servidor (búsqueda del profesor asociado a la reserva)";
 
 			log.error(errorString, connectTimeoutException);
 			throw new ReservaException(Constants.TIMEOUT_CONEXION_FIREBASE, errorString, connectTimeoutException);
 		}
 		catch (IOException ioException)
 		{
-			String errorString = "IOException mientras se buscaba la tarea para imprimir en el servidor";
+			String errorString = "IOException mientras se buscaba el profesor asociado a la reserva";
 
 			log.error(errorString, ioException);
 			throw new ReservaException(Constants.IO_EXCEPTION_FIREBASE, errorString, ioException);
@@ -515,7 +514,7 @@ public class ReservasFijasRest
 			}
 			catch (IOException ioException)
 			{
-				String errorString = "IOException mientras se cerraba el closeableHttpResponse en el método que busca la tarea para imprimir en el servidor";
+				String errorString = "IOException mientras se cerraba el closeableHttpResponse en el método que busca al profesor de la reserva";
 
 				log.error(errorString, ioException);
 				throw new ReservaException(Constants.IO_EXCEPTION_FIREBASE, errorString, ioException);
@@ -595,7 +594,7 @@ public class ReservasFijasRest
 	private ReservaFijaId crearInstanciaDeReservaId(DtoUsuarioExtended usuario, String email, String aulaYCarritos,
 			Long diaDeLaSemana, Long tramoHorario)
 	{
-		RecursoPrevio recurso = new RecursoPrevio();
+		Recurso recurso = new Recurso();
 		recurso.setId(aulaYCarritos);
 
 		DiaSemana diasSemana = new DiaSemana();
@@ -622,7 +621,7 @@ public class ReservasFijasRest
 			reservaId.setProfesor(profesor.get());
 		}
 
-		reservaId.setRecursoPrevio(recurso);
+		reservaId.setRecurso(recurso);
 		reservaId.setDiaSemana(diasSemana);
 		reservaId.setTramoHorario(tramosHorarios);
 		return reservaId;

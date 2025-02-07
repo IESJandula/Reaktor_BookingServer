@@ -22,8 +22,8 @@ public class ReservaFijaId implements Serializable
 	private Profesor profesor;
 
 	@ManyToOne
-	@JoinColumn(name = "recurso_previo_id", referencedColumnName = "id")
-	private RecursoPrevio recursoPrevio;
+	@JoinColumn(name = "recurso_id", referencedColumnName = "id")
+	private Recurso recurso;
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "dia_semana_id", referencedColumnName = "id")

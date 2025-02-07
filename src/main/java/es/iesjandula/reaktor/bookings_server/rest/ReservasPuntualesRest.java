@@ -28,7 +28,7 @@ import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.Constantes;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.DiaSemana;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Profesor;
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.RecursoPrevio;
+import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijaId;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.TramoHorario;
@@ -932,7 +932,7 @@ public class ReservasPuntualesRest
 				throw new ReservaException(6, mensajeError);
 			}
 
-			RecursoPrevio recurso = new RecursoPrevio();
+			Recurso recurso = new Recurso();
 			recurso.setId(aulaYCarritos);
 
 			DiaSemana diasSemana = new DiaSemana();
@@ -953,7 +953,7 @@ public class ReservasPuntualesRest
 			}
 			reservaId.setProfesor(profesor.get());
 
-			reservaId.setRecursoPrevio(recurso);
+			reservaId.setRecurso(recurso);
 			reservaId.setDiaSemana(diasSemana);
 			reservaId.setTramoHorario(tramos);
 
