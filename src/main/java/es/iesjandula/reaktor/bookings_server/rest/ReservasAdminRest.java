@@ -46,7 +46,7 @@ public class ReservasAdminRest
 			}
 
 			// Comprobación del tipo de recurso
-				Recurso recursoFinal = new Recurso(recurso, cantidad);
+				Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible);
 				recursoRepository.saveAndFlush(recursoFinal);
 				return ResponseEntity.ok().body(recursoFinal);
 

@@ -1,5 +1,6 @@
 package es.iesjandula.reaktor.bookings_server.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,8 @@ public interface IRecursoRepository extends JpaRepository<Recurso, String>
 {
 	@Query("SELECT r FROM Recurso r WHERE " + "r.id = :recurso")
 	Optional<Recurso> encontrarRecurso(@Param("recurso") String recurso);
+	
+	
+	@Query("SELECT r FROM Recurso r WHERE " + "r.esCompartible = :esCompartible")
+	List<Recurso> encontrarRecursoCompartible(@Param("esCompartible") boolean esCompartible);
 }
