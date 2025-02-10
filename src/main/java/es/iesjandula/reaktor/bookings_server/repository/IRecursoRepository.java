@@ -10,6 +10,6 @@ import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
 
 public interface IRecursoRepository extends JpaRepository<Recurso, String>
 {
-	@Query("SELECT r FROM RecursoFinal r WHERE " + "r.id = :recurso")
+	@Query("SELECT r FROM Recurso r WHERE " + "r.id = :recurso")
 	Optional<Recurso> encontrarRecurso(@Param("recurso") String recurso);
 }

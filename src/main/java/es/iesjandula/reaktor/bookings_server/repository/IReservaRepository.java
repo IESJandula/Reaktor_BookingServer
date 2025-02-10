@@ -15,9 +15,9 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 
 //	Consulta que recupera la información sobre las reservas que están asociadas a 
 //	un email, una aulaYCarritos, un diasDeLaSemana y un tramosHorarios
-	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recursoPrevio.id = :recursoPrevio AND "
+	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recurso AND "
 			+ "r.reservaFijaId.diaSemana.id = :diaSemana AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorario")
-	Optional<ReservaFija> encontrarReserva(@Param("recursoPrevio") String recursoPrevio,
+	Optional<ReservaFija> encontrarReserva(@Param("recurso") String recurso,
 			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario);
 
 //	Consulta que recupera la información sobre las reservas que están asociadas a un recurso específico..
@@ -25,8 +25,8 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 			+ "FROM dia_semana d, tramo_horario t, reserva_fija r, profesor p "
 			+ "WHERE ((d.id, t.id) NOT IN (SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_fija r)) " + "UNION "
 			+ "SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, "
-			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_previo_id " + "FROM reserva_fija r2, profesor p "
-			+ "WHERE r2.profesor_email = p.email AND r2.recurso_previo_id = :recursoPrevio "
+			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id " + "FROM reserva_fija r2, profesor p "
+			+ "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso "
 			+ "ORDER BY 1, 2", nativeQuery = true)
-	List<Object[]> encontrarReservaPorRecurso(@Param("recursoPrevio") String recursoPrevio);
+	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso);
 }
