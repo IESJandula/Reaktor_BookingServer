@@ -86,13 +86,8 @@ public class ReservasFijasRest
 	{
 		try
 		{
-			List<Recurso> listaRecursos = this.recursoRepository.encontrarRecursoCompartible(esCompartible);
-
-			// Encontramos todos los recursos y los introducimos en una lista para
-			// mostrarlos más adelante
-
-			// Comprueba si la base de datos tiene registros de los recurso
-			
+			// Encontramos todos los recurso diferenciando si son compartibles o no y los introducimos en una lista para mostrarlos
+			List<Recurso> listaRecursos = this.recursoRepository.encontrarRecursoCompartible(esCompartible);		
 
 			return ResponseEntity.ok(listaRecursos);
 		}
