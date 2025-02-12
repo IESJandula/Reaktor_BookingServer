@@ -77,25 +77,23 @@ public class ReservasAdminRest
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources")
 	public ResponseEntity<?> eliminarRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestHeader(value = "esCompartible", required = true) boolean esCompartible,
 			@RequestHeader(value = "recurso", required = true) String recurso)
 	{
 		try
 		{
 			Optional<Recurso> optinalRecurso = this.recursoRepository.findById(recurso);
 
-			if (!optinalRecurso.isPresent() && esCompartible)
+			if (!optinalRecurso.isPresent())
 			{
 				String mensajeError = "El recurso que quiere borrar no existe";
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
 
-			if (esCompartible)
-			{
+			
 				// Si la reserva existe en la base de datos, se borrará
 				this.recursoRepository.deleteById(recurso);
-			}
+			
 
 			log.info("El recurso se ha borrado correctamente");
 			return ResponseEntity.ok().build();
