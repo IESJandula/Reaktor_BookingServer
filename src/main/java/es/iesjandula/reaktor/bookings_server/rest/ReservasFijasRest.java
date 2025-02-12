@@ -268,7 +268,7 @@ public class ReservasFijasRest
 
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
-
+			
 			return ResponseEntity.ok(listaReservas);
 		}
 		catch (ReservaException reservaException)
@@ -313,7 +313,7 @@ public class ReservasFijasRest
 			// Enviando excepción si no es correcto
 
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFija> optionalReserva = this.reservasRepository.encontrarReserva(recurso, diaDeLaSemana,
+			Optional<ReservaFija> optionalReserva = this.reservasRepository.encontrarReserva(email,recurso, diaDeLaSemana,
 					tramosHorarios);
 
 			if (optionalReserva.isPresent())
@@ -567,7 +567,7 @@ public class ReservasFijasRest
 
 			// Antes de borrar la reserva verifica si existe una reserva con los mismos
 			// datos
-			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(aulaYCarritos,
+			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(email,aulaYCarritos,
 					diaDeLaSemana, tramoHorario);
 
 			if (!optinalReserva.isPresent())

@@ -16,8 +16,8 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 //	Consulta que recupera la información sobre las reservas que están asociadas a 
 //	un email, una aulaYCarritos, un diasDeLaSemana y un tramosHorarios
 	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recurso AND "
-			+ "r.reservaFijaId.diaSemana.id = :diaSemana AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorario")
-	Optional<ReservaFija> encontrarReserva(@Param("recurso") String recurso,
+			+ "r.reservaFijaId.diaSemana.id = :diaSemana AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorario AND"+ " r.reservaFijaId.profesor.email = :email")
+	Optional<ReservaFija> encontrarReserva(@Param("email") String email,@Param("recurso") String recurso,
 			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario);
 
 //	Consulta que recupera la información sobre las reservas que están asociadas a un recurso específico..

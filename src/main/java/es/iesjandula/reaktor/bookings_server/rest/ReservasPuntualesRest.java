@@ -922,7 +922,7 @@ public class ReservasPuntualesRest
 			// correcto
 
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(aulaYCarritos,
+			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(email,aulaYCarritos,
 					diaDeLaSemana, tramosHorarios);
 
 			if (optinalReserva.isPresent())
