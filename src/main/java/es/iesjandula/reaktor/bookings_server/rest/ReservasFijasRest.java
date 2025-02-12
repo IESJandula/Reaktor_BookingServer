@@ -251,24 +251,52 @@ public class ReservasFijasRest
 
 			// Buscamos las reservas por el recurso
 			List<Object[]> resultados = this.reservasRepository.encontrarReservaPorRecurso(recurso);
-
+			
+			Long diaSemana = 0l;
+			Long tramoHorario = 0l;
+			List<String> emails = new ArrayList<String>();
+			List<String> nombresYApellidos = new ArrayList<String>();
+			ReservasFijasDto reserva = new ReservasFijasDto();
+			
 			for (Object[] row : resultados)
 			{
-				Long diaSemana = (Long) row[0];
-				Long tramoHorario = (Long) row[1];
-				Integer nAlumnos = (row[2] != null) ? (Integer) row[2] : 0;
-				String email = (String) row[3];
-				String nombreYapellidos = (String) row[4];
-				String recursos = (String) row[5];
-
-				// Mapeo a ReservaDto
-				listaReservas.add(
-						new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, email, nombreYapellidos, recursos));
+				if(diaSemana == (Long) row[0] && tramoHorario==(Long) row[1]) {
+					ReservasFijasDto reservaAntigua = reserva;
+					emails = reserva.getEmail();
+					nombresYApellidos = reserva.getNombreYapellidos();
+					emails.add((String) row[3]);
+					nombresYApellidos.add((String) row[4]);
+					reserva.setEmail(emails);
+					reserva.setNombreYapellidos(nombresYApellidos);
+					
+					listaReservas.remove(reservaAntigua);
+					listaReservas.add(reserva);
+				}
+				else 
+				{
+					diaSemana = (Long) row[0];
+					tramoHorario = (Long) row[1];
+					Integer nAlumnos = (row[2] != null) ? (Integer) row[2] : 0;
+					String email = (String) row[3];
+					String nombreYapellidos = (String) row[4];
+					String recursos = (String) row[5];
+					
+					emails = new ArrayList<String>();
+					emails.add(email);
+					nombresYApellidos = new ArrayList<String>();
+					nombresYApellidos.add(nombreYapellidos);
+					
+					reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, emails, nombresYApellidos, recursos);
+					// Mapeo a ReservaDto
+					listaReservas.add(
+							new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, emails, nombresYApellidos, recursos));
+				}
+				
 			}
 
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
-			
+			log.info(listaReservas);
 			return ResponseEntity.ok(listaReservas);
 		}
 		catch (ReservaException reservaException)

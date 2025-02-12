@@ -1,5 +1,7 @@
 package es.iesjandula.reaktor.bookings_server.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +17,9 @@ public class ReservasFijasDto
 
 	private int nAlumnos;
 
-	private String email;
+	private List<String> email;
 
-	private String nombreYapellidos;
+	private List<String> nombreYapellidos;
 
 	private String recurso;
 
