@@ -255,21 +255,30 @@ public class ReservasFijasRest
 			Long diaSemana = 0l;
 			Long tramoHorario = 0l;
 			List<String> emails = new ArrayList<String>();
+			List<Integer> nAlumnosLista = new ArrayList<Integer>();
 			List<String> nombresYApellidos = new ArrayList<String>();
 			ReservasFijasDto reserva = new ReservasFijasDto();
 			
 			for (Object[] row : resultados)
 			{
 				if(diaSemana == (Long) row[0] && tramoHorario==(Long) row[1]) {
+					
 					ReservasFijasDto reservaAntigua = reserva;
+					
 					emails = reserva.getEmail();
 					nombresYApellidos = reserva.getNombreYapellidos();
+					nAlumnosLista = reserva.getNAlumnos();
+					
 					emails.add((String) row[3]);
 					nombresYApellidos.add((String) row[4]);
+					nAlumnosLista.add( (row[2] != null) ? (Integer) row[2] : 0);
+					
 					reserva.setEmail(emails);
 					reserva.setNombreYapellidos(nombresYApellidos);
+					reserva.setNAlumnos(nAlumnosLista);
 					
 					listaReservas.remove(reservaAntigua);
+					
 					listaReservas.add(reserva);
 				}
 				else 
@@ -285,18 +294,19 @@ public class ReservasFijasRest
 					emails.add(email);
 					nombresYApellidos = new ArrayList<String>();
 					nombresYApellidos.add(nombreYapellidos);
+					nAlumnosLista = new ArrayList<Integer>();
+					nAlumnosLista.add(nAlumnos);
 					
-					reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, emails, nombresYApellidos, recursos);
+					reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos, recursos);
 					// Mapeo a ReservaDto
-					listaReservas.add(
-							new ReservasFijasDto(diaSemana, tramoHorario, nAlumnos, emails, nombresYApellidos, recursos));
+					listaReservas.add(reserva);
 				}
 				
 			}
 
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
-			log.info(listaReservas);
+
 			return ResponseEntity.ok(listaReservas);
 		}
 		catch (ReservaException reservaException)

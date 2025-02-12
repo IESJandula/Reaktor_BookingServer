@@ -15,7 +15,7 @@ public class ReservasFijasDto
 
 	private Long tramoHorario;
 
-	private int nAlumnos;
+	private List<Integer> nAlumnos;
 
 	private List<String> email;
 
