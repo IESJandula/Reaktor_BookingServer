@@ -92,22 +92,11 @@ public class ReservasFijasRest
 			// mostrarlos más adelante
 
 			// Comprueba si la base de datos tiene registros de los recurso
-
-			if (listaRecursos.isEmpty())
-			{
-				String mensajeError = "No se ha encontrado ningun recurso";
-
-				log.error(mensajeError);
-				throw new ReservaException(Constants.RECURSO_NO_ENCONTRADO, mensajeError);
-			}
+			
 
 			return ResponseEntity.ok(listaRecursos);
 		}
-		catch (ReservaException reservaException)
-		{
-			// Captura la excepcion personalizada, devolvera un 404
-			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		}
+		
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
