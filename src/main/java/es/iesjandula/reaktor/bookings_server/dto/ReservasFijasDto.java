@@ -22,6 +22,8 @@ public class ReservasFijasDto
 	private List<String> nombreYapellidos;
 
 	private String recurso;
+	
+	private Integer plazasRestantes;
 
 	public ReservasFijasDto(Long diaSemana, Long tramoHorario)
 	{
