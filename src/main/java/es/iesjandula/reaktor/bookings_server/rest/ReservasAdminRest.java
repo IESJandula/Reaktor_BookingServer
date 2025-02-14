@@ -39,7 +39,7 @@ public class ReservasAdminRest
 
 			if (this.recursoRepository.encontrarRecurso(recurso).isPresent())
 			{
-				String mensajeError = "Ya existe un recurso con esos datos";
+				String mensajeError = "Ya existe un recurso con esos datos: " + recurso;
 
 				log.error(mensajeError);
 				throw new ReservaException(Constants.RECURSO_YA_EXISTE, mensajeError);
@@ -85,7 +85,7 @@ public class ReservasAdminRest
 
 			if (!optinalRecurso.isPresent())
 			{
-				String mensajeError = "El recurso que quiere borrar no existe";
+				String mensajeError = "El recurso que quiere borrar no existe: " + recurso;
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
@@ -93,7 +93,7 @@ public class ReservasAdminRest
 			// Si la reserva existe en la base de datos, se borrará
 			this.recursoRepository.deleteById(recurso);
 
-			log.info("El recurso se ha borrado correctamente");
+			log.info("El recurso se ha borrado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
 
 		}

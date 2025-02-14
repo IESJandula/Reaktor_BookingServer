@@ -245,7 +245,7 @@ public class ReservasFijasRest
 			// Comprueba si la base de datos tiene registros de los recurso
 			if (this.recursoRepository.count() == 0)
 			{
-				String mensajeError = "No se ha encontrado ningun recurso";
+				String mensajeError = "No se ha encontrado ningun recurso con esos datos: " + recurso;
 				log.error(mensajeError);
 				throw new ReservaException(Constants.RECURSO_NO_ENCONTRADO, mensajeError);
 			}
