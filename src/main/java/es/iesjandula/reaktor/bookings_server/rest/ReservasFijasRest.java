@@ -261,58 +261,74 @@ public class ReservasFijasRest
 			ReservasFijasDto reserva = new ReservasFijasDto();
 			Integer plazasRestantes = recursoSeleccionado.getCantidad();
 			
-			for (Object[] row : resultados)
-			{
+			if(resultados.isEmpty()) {
 				
-				if(diaSemana == (Long) row[0] && tramoHorario==(Long) row[1]) {
-					
-					ReservasFijasDto reservaAntigua = reserva;
-					
-					emails = reserva.getEmail();
-					nombresYApellidos = reserva.getNombreYapellidos();
-					nAlumnosLista = reserva.getNAlumnos();
-					plazasRestantes = reserva.getPlazasRestantes();
-					
-					emails.add((String) row[3]);
-					nombresYApellidos.add((String) row[4]);
-					nAlumnosLista.add( (row[2] != null) ? (Integer) row[2] : 0);
-					plazasRestantes = plazasRestantes - ((row[2] != null) ? (Integer) row[2] : 0);
-					
-					reserva.setEmail(emails);
-					reserva.setNombreYapellidos(nombresYApellidos);
-					reserva.setNAlumnos(nAlumnosLista);
-					reserva.setPlazasRestantes(plazasRestantes);
-					
-					listaReservas.remove(reservaAntigua);
-					
-					listaReservas.add(reserva);
-				}
-				else 
+				for (Object[] row : resultados)
 				{
-					plazasRestantes = recursoSeleccionado.getCantidad();
-					diaSemana = (Long) row[0];
-					tramoHorario = (Long) row[1];
-					Integer nAlumnos = (row[2] != null) ? (Integer) row[2] : 0;
-					String email = (String) row[3];
-					String nombreYapellidos = (String) row[4];
-					String recursos = (String) row[5];
-					plazasRestantes = plazasRestantes-nAlumnos;
-					
-					emails = new ArrayList<String>();
-					emails.add(email);
-					nombresYApellidos = new ArrayList<String>();
-					nombresYApellidos.add(nombreYapellidos);
-					nAlumnosLista = new ArrayList<Integer>();
-					nAlumnosLista.add(nAlumnos);
-					
-					reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos, recursos,plazasRestantes);
-					// Mapeo a ReservaDto
-					listaReservas.add(reserva);
+						plazasRestantes = recursoSeleccionado.getCantidad();
+						String recursos = (String) row[5];
+						reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos, recursos,plazasRestantes);
+						// Mapeo a ReservaDto
+						listaReservas.add(reserva);
 				}
-				
-				log.info(listaReservas);
-				
 			}
+			else 
+			{
+				for (Object[] row : resultados)
+				{
+					
+					if(diaSemana == (Long) row[0] && tramoHorario==(Long) row[1]) {
+						
+						ReservasFijasDto reservaAntigua = reserva;
+						
+						emails = reserva.getEmail();
+						nombresYApellidos = reserva.getNombreYapellidos();
+						nAlumnosLista = reserva.getNAlumnos();
+						plazasRestantes = reserva.getPlazasRestantes();
+						
+						emails.add((String) row[3]);
+						nombresYApellidos.add((String) row[4]);
+						nAlumnosLista.add( (row[2] != null) ? (Integer) row[2] : 0);
+						plazasRestantes = plazasRestantes - ((row[2] != null) ? (Integer) row[2] : 0);
+						
+						reserva.setEmail(emails);
+						reserva.setNombreYapellidos(nombresYApellidos);
+						reserva.setNAlumnos(nAlumnosLista);
+						reserva.setPlazasRestantes(plazasRestantes);
+						
+						listaReservas.remove(reservaAntigua);
+						
+						listaReservas.add(reserva);
+					}
+					else 
+					{
+						plazasRestantes = recursoSeleccionado.getCantidad();
+						diaSemana = (Long) row[0];
+						tramoHorario = (Long) row[1];
+						Integer nAlumnos = (row[2] != null) ? (Integer) row[2] : 0;
+						String email = (String) row[3];
+						String nombreYapellidos = (String) row[4];
+						String recursos = (String) row[5];
+						plazasRestantes = plazasRestantes-nAlumnos;
+						
+						emails = new ArrayList<String>();
+						emails.add(email);
+						nombresYApellidos = new ArrayList<String>();
+						nombresYApellidos.add(nombreYapellidos);
+						nAlumnosLista = new ArrayList<Integer>();
+						nAlumnosLista.add(nAlumnos);
+						
+						reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos, recursos,plazasRestantes);
+						// Mapeo a ReservaDto
+						listaReservas.add(reserva);
+					}
+
+				}
+			}
+			
+			
+			
+			log.info(listaReservas);
 
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
