@@ -40,8 +40,8 @@ public class ConstantesController
 		catch (Exception exception)
 		{
 
-			ReservaException reservaException = new ReservaException(Constants.CONSTANTE_NO_ENCONTRADA, "Excepción genérica al obtener las costantes",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.CONSTANTE_NO_ENCONTRADA,
+					"Excepción genérica al obtener las costantes", exception);
 
 			log.error("Excepción genérica al obtener las costantes", reservaException);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
@@ -65,8 +65,8 @@ public class ConstantesController
 		}
 		catch (Exception exception)
 		{
-			ReservaException reservaException = new ReservaException(Constants.CONSTANTE_NO_ENCONTRADA, "Excepción genérica al obtener las costantes",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.CONSTANTE_NO_ENCONTRADA,
+					"Excepción genérica al obtener las costantes", exception);
 
 			log.error("Excepción genérica al actualizar las costantes");
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());

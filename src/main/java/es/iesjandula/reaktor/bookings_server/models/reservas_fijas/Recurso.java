@@ -19,7 +19,7 @@ public class Recurso
 
 	@Column(length = 3)
 	private Integer cantidad;
-	
+
 	@Column
 	private boolean esCompartible;
 }

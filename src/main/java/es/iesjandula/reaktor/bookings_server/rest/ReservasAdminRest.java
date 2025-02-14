@@ -37,7 +37,7 @@ public class ReservasAdminRest
 		try
 		{
 
-			if (recursoRepository.encontrarRecurso(recurso).isPresent())
+			if (this.recursoRepository.encontrarRecurso(recurso).isPresent())
 			{
 				String mensajeError = "Ya existe un recurso con esos datos";
 
@@ -46,9 +46,9 @@ public class ReservasAdminRest
 			}
 
 			// Comprobación del tipo de recurso
-				Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible);
-				recursoRepository.saveAndFlush(recursoFinal);
-				return ResponseEntity.ok().body(recursoFinal);
+			Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible);
+			this.recursoRepository.saveAndFlush(recursoFinal);
+			return ResponseEntity.ok().body(recursoFinal);
 
 		}
 		catch (ReservaException reservaException)
@@ -90,10 +90,8 @@ public class ReservasAdminRest
 				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
 
-			
-				// Si la reserva existe en la base de datos, se borrará
-				this.recursoRepository.deleteById(recurso);
-			
+			// Si la reserva existe en la base de datos, se borrará
+			this.recursoRepository.deleteById(recurso);
 
 			log.info("El recurso se ha borrado correctamente");
 			return ResponseEntity.ok().build();
@@ -107,8 +105,8 @@ public class ReservasAdminRest
 		catch (Exception exception)
 		{
 			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error inesperado al borrar el recurso",
-					exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error inesperado al borrar el recurso", exception);
 			log.error("Error inesperado al borrar el recurso: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}

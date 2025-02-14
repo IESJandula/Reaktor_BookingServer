@@ -86,12 +86,13 @@ public class ReservasFijasRest
 	{
 		try
 		{
-			// Encontramos todos los recurso diferenciando si son compartibles o no y los introducimos en una lista para mostrarlos
-			List<Recurso> listaRecursos = this.recursoRepository.encontrarRecursoCompartible(esCompartible);		
+			// Encontramos todos los recurso diferenciando si son compartibles o no y los
+			// introducimos en una lista para mostrarlos
+			List<Recurso> listaRecursos = this.recursoRepository.encontrarRecursoCompartible(esCompartible);
 
 			return ResponseEntity.ok(listaRecursos);
 		}
-		
+
 		catch (Exception exception)
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
@@ -102,7 +103,7 @@ public class ReservasFijasRest
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	/*
 	 * Endpoint de tipo get para mostar una lista con los recursos
 	 */
@@ -252,7 +253,7 @@ public class ReservasFijasRest
 			// Buscamos las reservas por el recurso
 			List<Object[]> resultados = this.reservasRepository.encontrarReservaPorRecurso(recurso);
 			Recurso recursoSeleccionado = this.recursoRepository.getById(recurso);
-			
+
 			Long diaSemana = 0l;
 			Long tramoHorario = 0l;
 			List<String> emails = new ArrayList<String>();
@@ -260,76 +261,59 @@ public class ReservasFijasRest
 			List<String> nombresYApellidos = new ArrayList<String>();
 			ReservasFijasDto reserva = new ReservasFijasDto();
 			Integer plazasRestantes = recursoSeleccionado.getCantidad();
-			
-			if(resultados.isEmpty()) {
-				
-				for (Object[] row : resultados)
-				{
-						plazasRestantes = recursoSeleccionado.getCantidad();
-						String recursos = (String) row[5];
-						reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos, recursos,plazasRestantes);
-						// Mapeo a ReservaDto
-						listaReservas.add(reserva);
-				}
-			}
-			else 
+
+			for (Object[] row : resultados)
 			{
-				for (Object[] row : resultados)
+
+				if (diaSemana == (Long) row[0] && tramoHorario == (Long) row[1])
 				{
-					
-					if(diaSemana == (Long) row[0] && tramoHorario==(Long) row[1]) {
-						
-						ReservasFijasDto reservaAntigua = reserva;
-						
-						emails = reserva.getEmail();
-						nombresYApellidos = reserva.getNombreYapellidos();
-						nAlumnosLista = reserva.getNAlumnos();
-						plazasRestantes = reserva.getPlazasRestantes();
-						
-						emails.add((String) row[3]);
-						nombresYApellidos.add((String) row[4]);
-						nAlumnosLista.add( (row[2] != null) ? (Integer) row[2] : 0);
-						plazasRestantes = plazasRestantes - ((row[2] != null) ? (Integer) row[2] : 0);
-						
-						reserva.setEmail(emails);
-						reserva.setNombreYapellidos(nombresYApellidos);
-						reserva.setNAlumnos(nAlumnosLista);
-						reserva.setPlazasRestantes(plazasRestantes);
-						
-						listaReservas.remove(reservaAntigua);
-						
-						listaReservas.add(reserva);
-					}
-					else 
-					{
-						plazasRestantes = recursoSeleccionado.getCantidad();
-						diaSemana = (Long) row[0];
-						tramoHorario = (Long) row[1];
-						Integer nAlumnos = (row[2] != null) ? (Integer) row[2] : 0;
-						String email = (String) row[3];
-						String nombreYapellidos = (String) row[4];
-						String recursos = (String) row[5];
-						plazasRestantes = plazasRestantes-nAlumnos;
-						
-						emails = new ArrayList<String>();
-						emails.add(email);
-						nombresYApellidos = new ArrayList<String>();
-						nombresYApellidos.add(nombreYapellidos);
-						nAlumnosLista = new ArrayList<Integer>();
-						nAlumnosLista.add(nAlumnos);
-						
-						reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos, recursos,plazasRestantes);
-						// Mapeo a ReservaDto
-						listaReservas.add(reserva);
-					}
 
+					ReservasFijasDto reservaAntigua = reserva;
+
+					emails = reserva.getEmail();
+					nombresYApellidos = reserva.getNombreYapellidos();
+					nAlumnosLista = reserva.getNAlumnos();
+					plazasRestantes = reserva.getPlazasRestantes();
+
+					emails.add((String) row[3]);
+					nombresYApellidos.add((String) row[4]);
+					nAlumnosLista.add((row[2] != null) ? (Integer) row[2] : 0);
+					plazasRestantes = plazasRestantes - ((row[2] != null) ? (Integer) row[2] : 0);
+
+					reserva.setEmail(emails);
+					reserva.setNombreYapellidos(nombresYApellidos);
+					reserva.setNAlumnos(nAlumnosLista);
+					reserva.setPlazasRestantes(plazasRestantes);
+
+					listaReservas.remove(reservaAntigua);
+
+					listaReservas.add(reserva);
 				}
-			}
-			
-			
-			
-			log.info(listaReservas);
+				else
+				{
+					plazasRestantes = recursoSeleccionado.getCantidad();
+					diaSemana = (Long) row[0];
+					tramoHorario = (Long) row[1];
+					Integer nAlumnos = (row[2] != null) ? (Integer) row[2] : 0;
+					String email = (String) row[3];
+					String nombreYapellidos = (String) row[4];
+					String recursos = (String) row[5];
+					plazasRestantes = plazasRestantes - nAlumnos;
 
+					emails = new ArrayList<String>();
+					emails.add(email);
+					nombresYApellidos = new ArrayList<String>();
+					nombresYApellidos.add(nombreYapellidos);
+					nAlumnosLista = new ArrayList<Integer>();
+					nAlumnosLista.add(nAlumnos);
+
+					reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos,
+							recursos, plazasRestantes);
+					// Mapeo a ReservaDto
+					listaReservas.add(reserva);
+				}
+
+			}
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
 
@@ -377,8 +361,8 @@ public class ReservasFijasRest
 			// Enviando excepción si no es correcto
 
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFija> optionalReserva = this.reservasRepository.encontrarReserva(email,recurso, diaDeLaSemana,
-					tramosHorarios);
+			Optional<ReservaFija> optionalReserva = this.reservasRepository.encontrarReserva(email, recurso,
+					diaDeLaSemana, tramosHorarios);
 
 			if (optionalReserva.isPresent())
 			{
@@ -631,7 +615,7 @@ public class ReservasFijasRest
 
 			// Antes de borrar la reserva verifica si existe una reserva con los mismos
 			// datos
-			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(email,aulaYCarritos,
+			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(email, aulaYCarritos,
 					diaDeLaSemana, tramoHorario);
 
 			if (!optinalReserva.isPresent())
