@@ -371,6 +371,24 @@ public class ReservasFijasRest
 				log.error(mensajeError);
 				throw new ReservaException(Constants.RESERVA_YA_EXISTE, mensajeError);
 			}
+			
+			Optional<Recurso> optinalRecurso = this.recursoRepository.findById(recurso);
+			
+			if(nAlumnos <= 0)
+			{
+				String mensajeError = "El numero de Alumnos no puede ser 0 o menor que 0";
+
+				log.error(mensajeError);
+				throw new ReservaException(Constants.NUMERO_ALUMNOS_NO_VALIDO, mensajeError);
+			}
+			
+			if(nAlumnos > optinalRecurso.get().getCantidad())
+			{
+				String mensajeError = "El numero de Alumnos no puede ser mayor que la cantidad maxima del Recurso";
+
+				log.error(mensajeError);
+				throw new ReservaException(Constants.NUMERO_ALUMNOS_NO_VALIDO, mensajeError);
+			}
 
 			// Creamos la instancia de reserva
 			ReservaFija reserva = this.crearInstanciaDeReserva(usuario, email, recurso, diaDeLaSemana, tramosHorarios,

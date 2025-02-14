@@ -33,7 +33,10 @@ public class Constants
 	// Días de la Semana
 	public final static int DIA_SEMANA_NO_ENCONTRADO = 20;
 	public final static int ERROR_OBTENIENDO_DIAS_SEMANA = 21;
-
+	
+	//Numero de Alumnos 
+	public final static int NUMERO_ALUMNOS_NO_VALIDO = 13;
+	
 	// Códigos de error para validaciones globales previas a la reserva fija
 	public static final int ERROR_OBTENIENDO_PARAMETROS = 23;
 	public static final int ERROR_APP_DESHABILITADA = 24;
