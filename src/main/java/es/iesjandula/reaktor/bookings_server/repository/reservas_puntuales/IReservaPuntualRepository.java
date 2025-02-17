@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.ReservaPuntual;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.ReservaPuntualId;
 

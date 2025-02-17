@@ -1,5 +1,7 @@
 package es.iesjandula.reaktor.bookings_server.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,14 +15,23 @@ public class ReservasPuntualesDto
 
 	private Long tramoHorario;
 
-	private int nAlumnos;
+	private List<Integer> nAlumnos;
 
-	private String email;
+	private List<String> email;
 
-	private String nombreYapellidos;
+	private List<String> nombreYapellidos;
 
 	private String recurso;
 
-	private int nSemana;
+	private Integer plazasRestantes;
+	
+	private Integer numSemana;
 
+	public ReservasPuntualesDto(Long diaSemana, Long tramoHorario)
+	{
+		super();
+		this.diaSemana = diaSemana;
+		this.tramoHorario = tramoHorario;
+
+	}
 }
