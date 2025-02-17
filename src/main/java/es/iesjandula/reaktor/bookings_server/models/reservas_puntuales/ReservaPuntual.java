@@ -1,6 +1,5 @@
 package es.iesjandula.reaktor.bookings_server.models.reservas_puntuales;
 
-import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijaId;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -13,12 +12,8 @@ import lombok.NoArgsConstructor;
 public class ReservaPuntual
 {
 	@EmbeddedId
-	private ReservaFijaId reservaId;
+	private ReservaPuntualId reservaPuntualId;
 
 	@Column(nullable = false)
 	private int nAlumnos;
-
-	@Column(nullable = false)
-	private int nSemana;
-
 }
