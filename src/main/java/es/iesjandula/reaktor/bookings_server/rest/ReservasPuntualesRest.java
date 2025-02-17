@@ -211,7 +211,7 @@ public class ReservasPuntualesRest
 		try
 		{
 			// Validaciones previas a la reserva
-			this.validacionesGlobalesPreviasReservaPuntua();
+			this.validacionesGlobalesPreviasReservaPuntual();
 
 			// Si el role del usuario es Administrador, creará la reserva con el email
 			// recibido en la cabecera
@@ -484,7 +484,7 @@ public class ReservasPuntualesRest
 		try
 		{
 			// Validaciones previas a la reserva
-			this.validacionesGlobalesPreviasReservaPuntua();
+			this.validacionesGlobalesPreviasReservaPuntual();
 
 			// Si el role del usuario es Administrador, borrará la reserva con el email
 			// recibido en la cabecera
@@ -578,7 +578,7 @@ public class ReservasPuntualesRest
 	/**
 	 * @throws ReservaException con un error
 	 */
-	private void validacionesGlobalesPreviasReservaPuntua() throws ReservaException
+	private void validacionesGlobalesPreviasReservaPuntual() throws ReservaException
 	{
 
 		// Vemos si la reserva está deshabilitada
