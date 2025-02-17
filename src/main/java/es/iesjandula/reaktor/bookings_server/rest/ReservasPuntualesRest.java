@@ -100,6 +100,7 @@ public class ReservasPuntualesRest
 			// Buscamos las reservas por el recurso y num semana
 			List<Object[]> resultados = this.reservaPuntualRepository.encontrarReservaPorRecurso(recurso);
 			
+			
 			@SuppressWarnings("deprecation")
 			Recurso recursoSeleccionado = this.recursoRepository.getById(recurso);
 
@@ -166,7 +167,14 @@ public class ReservasPuntualesRest
 			}
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
-
+			
+			for (ReservasPuntualesDto reservaPuntual : listaReservas)
+			{
+				if(reservaPuntual.getNumSemana() != numSemana) {
+					listaReservas.remove(reservaPuntual);
+				}
+			}
+			
 			return ResponseEntity.ok(listaReservas);
 		}
 		catch (ReservaException reservaException)
