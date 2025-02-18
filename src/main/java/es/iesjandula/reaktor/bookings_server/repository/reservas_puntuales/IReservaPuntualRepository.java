@@ -27,6 +27,6 @@ public interface IReservaPuntualRepository extends JpaRepository<ReservaPuntual,
 			+ "WHERE ((d.id, t.id) NOT IN (SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_puntual r)) " + "UNION "
 			+ "SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, "
 			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id " + "FROM reserva_puntual r2, profesor p "
-			+ "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso " + "ORDER BY 1, 2", nativeQuery = true)
-	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso);
+			+ "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso and r2.num_semana = :numSemana " + "ORDER BY 1, 2", nativeQuery = true)
+	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso,@Param("numSemana") Integer numSemana);
 }

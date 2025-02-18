@@ -98,7 +98,7 @@ public class ReservasPuntualesRest
 			}
 
 			// Buscamos las reservas por el recurso y num semana
-			List<Object[]> resultados = this.reservaPuntualRepository.encontrarReservaPorRecurso(recurso);
+			List<Object[]> resultados = this.reservaPuntualRepository.encontrarReservaPorRecurso(recurso,numSemana);
 			
 			
 			@SuppressWarnings("deprecation")
