@@ -206,7 +206,7 @@ public class ReservasPuntualesRest
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
 			@RequestHeader(value = "nAlumnos", required = true) Integer nAlumnos,
-			@RequestHeader(value = "numSemana", required = true) int numSemana)
+			@RequestHeader(value = "numSemana", required = true) Integer numSemana)
 	{
 		try
 		{
