@@ -12,7 +12,6 @@ import es.iesjandula.reaktor.bookings_server.interfaces.IGestorParseo;
 import es.iesjandula.reaktor.bookings_server.models.Constantes;
 import es.iesjandula.reaktor.bookings_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.bookings_server.repository.IDiaSemanaRepository;
-import es.iesjandula.reaktor.bookings_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.bookings_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
 
@@ -28,9 +27,6 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 
 	@Autowired
 	private ITramoHorarioRepository tramosHorariosRepository;
-
-	@Autowired
-	private IProfesorRepository profesoreRepository;
 
 	@Autowired
 	private IDiaSemanaRepository diasSemanaRepository;
@@ -54,11 +50,6 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 		if (this.diasSemanaRepository.findAll().isEmpty())
 		{
 			this.iGestorParseo.parseaFichero(Constants.FICHERO_DIAS_SEMANAS);
-		}
-
-		if (this.profesoreRepository.findAll().isEmpty())
-		{
-			this.iGestorParseo.parseaFichero(Constants.FICHERO_PROFESORES);
 		}
 
 		Constantes constantes1 = new Constantes("Reservas fijas", "");
