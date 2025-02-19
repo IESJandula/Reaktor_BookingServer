@@ -36,27 +36,35 @@ public class ReservasAdminRest
 	{
 		try
 		{
+			Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible);
 
 			if (this.recursoRepository.encontrarRecurso(recurso).isPresent())
 			{
-				String mensajeError = "Ya existe un recurso con esos datos: " + recurso;
+				Optional<Recurso> recursoOptional = this.recursoRepository.encontrarRecurso(recurso);
+				Recurso recursoAntiguo = recursoOptional.get();
+				
+				if (recursoAntiguo.getCantidad() == recursoFinal.getCantidad())
+				{
+					String mensajeError = "Ya existe un recurso con esos datos: " + recurso;
+					log.error(mensajeError);
+					throw new ReservaException(Constants.RECURSO_YA_EXISTE, mensajeError);
+				}
 
-				log.error(mensajeError);
-				throw new ReservaException(Constants.RECURSO_YA_EXISTE, mensajeError);
+				recursoFinal = new Recurso(recursoAntiguo.getId(), cantidad, esCompartible);
+			}
+			else
+			{
+				recursoFinal = new Recurso(recurso, cantidad, esCompartible);
 			}
 
-			// Comprobación del tipo de recurso
-			Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible);
 			this.recursoRepository.saveAndFlush(recursoFinal);
-			
-			log.info( "El recurso se ha creado correctamente: " + recurso);
-			
-			return ResponseEntity.ok().body(recursoFinal);
 
+			log.info("El recurso se ha creado correctamente: " + recurso);
+
+			return ResponseEntity.ok().body(recursoFinal);
 		}
 		catch (ReservaException reservaException)
 		{
-
 			// Captura la excepcion personalizada y retorna un 409 ya que existe un
 			// conflicto,
 			// que existe un recurso con los mismos datos
@@ -67,7 +75,6 @@ public class ReservasAdminRest
 			// Para cualquier error inesperado, devolverá un 500
 			ReservaException reservaException = new ReservaException(100, "Error inesperado al crear el recurso",
 					exception);
-
 			log.error("Error inesperado al crear el recurso: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
