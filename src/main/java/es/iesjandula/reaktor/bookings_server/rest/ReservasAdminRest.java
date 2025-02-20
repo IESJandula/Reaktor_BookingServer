@@ -1,5 +1,6 @@
 package es.iesjandula.reaktor.bookings_server.rest;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
+import es.iesjandula.reaktor.bookings_server.dto.RecursoCantMaxDto;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.bookings_server.repository.IRecursoRepository;
+import es.iesjandula.reaktor.bookings_server.repository.IReservaRepository;
+import es.iesjandula.reaktor.bookings_server.repository.reservas_puntuales.IReservaPuntualRepository;
 import es.iesjandula.reaktor.bookings_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
@@ -26,6 +30,14 @@ public class ReservasAdminRest
 {
 	@Autowired
 	private IRecursoRepository recursoRepository;
+	
+	@Autowired
+	private IReservaPuntualRepository reservaPuntualRepository;
+	
+	@Autowired
+	private IReservaRepository reservaRepository;
+	
+
 
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/resources")
@@ -118,6 +130,30 @@ public class ReservasAdminRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error inesperado al borrar el recurso", exception);
 			log.error("Error inesperado al borrar el recurso: ", exception);
+			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
+		}
+	}
+	
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
+	@RequestMapping(method = RequestMethod.GET, value = "/resources/cantMax")
+	public ResponseEntity<?> obtenerCantidadMaximaRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario)
+	{
+		try
+		{
+			List<RecursoCantMaxDto> listaRecursoCantMaxDtos = this.reservaRepository.reservaFijaMax();
+			List<RecursoCantMaxDto> listaRecursoCantMaxDtos2 = this.reservaPuntualRepository.reservaPuntualMax();
+
+			listaRecursoCantMaxDtos.addAll(listaRecursoCantMaxDtos2);
+
+			log.info(listaRecursoCantMaxDtos);
+			return ResponseEntity.ok().body(listaRecursoCantMaxDtos);
+		}
+		catch (Exception exception)
+		{
+			// Para cualquier error inesperado, devolverá un 500
+			ReservaException reservaException = new ReservaException(100, "Error inesperado al crear el recurso",
+					exception);
+			log.error("Error inesperado al crear el recurso: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}

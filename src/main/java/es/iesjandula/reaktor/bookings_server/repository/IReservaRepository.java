@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import es.iesjandula.reaktor.bookings_server.dto.RecursoCantMaxDto;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.ReservaFijaId;
 
@@ -28,5 +29,11 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 			+ "SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, "
 			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id " + "FROM reserva_fija r2, profesor p "
 			+ "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso " + "ORDER BY 1, 2", nativeQuery = true)
-	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso);
+	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso);    
+
+	@Query(value = "SELECT recurso_id, MAX(total_alumnos) AS max_alumnos "
+			+ "FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_fija GROUP BY recurso_id, dia_semana_id, tramo_horario_id) "
+			+ "GROUP BY recurso_id"
+			+ "", nativeQuery = true)
+	List<RecursoCantMaxDto> reservaFijaMax();
 }
