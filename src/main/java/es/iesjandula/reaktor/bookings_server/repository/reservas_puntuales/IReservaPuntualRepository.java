@@ -48,9 +48,8 @@ public interface IReservaPuntualRepository extends JpaRepository<ReservaPuntual,
 	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso);
 	
 	@Query(value = "SELECT recurso_id, MAX(total_alumnos) AS max_alumnos "
-			+ "FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_puntual GROUP BY recurso_id, dia_semana_id, tramo_horario_id) "
-			+ "GROUP BY recurso_id"
-			+ "", nativeQuery = true)
-	List<RecursoCantMaxDto> reservaPuntualMax();
+			+ "FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_puntual GROUP BY recurso_id, dia_semana_id, tramo_horario_id) AS Puntual "
+			+ "GROUP BY recurso_id" , nativeQuery = true)
+	List<Object[]> reservaPuntualMax();
 
 }

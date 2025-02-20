@@ -1,5 +1,7 @@
 package es.iesjandula.reaktor.bookings_server.rest;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.bookings_server.dto.RecursoCantMaxDto;
+import es.iesjandula.reaktor.bookings_server.dto.ReservasFijasDto;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.bookings_server.repository.IRecursoRepository;
@@ -140,13 +143,59 @@ public class ReservasAdminRest
 	{
 		try
 		{
-			List<RecursoCantMaxDto> listaRecursoCantMaxDtos = this.reservaRepository.reservaFijaMax();
-			List<RecursoCantMaxDto> listaRecursoCantMaxDtos2 = this.reservaPuntualRepository.reservaPuntualMax();
-
-			listaRecursoCantMaxDtos.addAll(listaRecursoCantMaxDtos2);
-
-			log.info(listaRecursoCantMaxDtos);
-			return ResponseEntity.ok().body(listaRecursoCantMaxDtos);
+			List<Object[]> reservaFijaMax = this.reservaRepository.reservaFijaMax();
+			List<Object[]> reservaPuntualMax = this.reservaPuntualRepository.reservaPuntualMax();
+			
+			List<RecursoCantMaxDto> listaRecursoFija = new ArrayList<RecursoCantMaxDto>();
+			List<RecursoCantMaxDto> listaRecursoPuntuales = new ArrayList<RecursoCantMaxDto>();
+			
+			List<RecursoCantMaxDto> listaFinal = new ArrayList<RecursoCantMaxDto>();
+			
+			for (Object[] reservaPuntual : reservaPuntualMax)
+			{
+				RecursoCantMaxDto cantMaxDto = new RecursoCantMaxDto();
+				cantMaxDto.setRecurso((String)reservaPuntual[0]);
+				cantMaxDto.setCantMax((BigDecimal) reservaPuntual[1]);
+				listaRecursoPuntuales.add(cantMaxDto);
+			}
+			
+			for (Object[] reservaFija : reservaFijaMax)
+			{
+				RecursoCantMaxDto cantMaxDto = new RecursoCantMaxDto();
+				cantMaxDto.setRecurso((String)reservaFija[0]);
+				cantMaxDto.setCantMax((BigDecimal) reservaFija[1]);
+				listaRecursoFija.add(cantMaxDto);
+			}
+			
+			for (RecursoCantMaxDto puntual : listaRecursoPuntuales)
+			{
+				for (RecursoCantMaxDto fija: listaRecursoFija)
+				{
+					if(fija.getRecurso().equals(puntual.getRecurso()))
+					{
+						Integer cantidadPuntual = puntual.getCantMax().intValue();
+						Integer cantidadFija = fija.getCantMax().intValue();
+						if(cantidadPuntual > cantidadFija)
+						{
+							listaFinal.add(puntual);
+						}
+						else
+						{
+							listaFinal.add(fija);
+						}
+					}
+					else if(listaRecursoFija.contains(puntual) && !listaRecursoPuntuales.contains(puntual))
+					{
+						listaFinal.add(puntual);
+					}
+					else
+					{
+						listaFinal.add(fija);
+					}
+				}
+			}
+			log.info(listaFinal);
+			return ResponseEntity.ok().body(listaFinal);
 		}
 		catch (Exception exception)
 		{
