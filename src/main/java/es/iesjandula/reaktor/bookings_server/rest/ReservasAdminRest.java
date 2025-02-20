@@ -2,6 +2,7 @@ package es.iesjandula.reaktor.bookings_server.rest;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -193,9 +194,15 @@ public class ReservasAdminRest
 						listaFinal.add(fija);
 					}
 				}
+			}			
+			HashMap<String, BigDecimal> mapaFinal = new HashMap<>();
+			for (RecursoCantMaxDto recursoFinal : listaFinal)
+			{
+				mapaFinal.put(recursoFinal.getRecurso(), recursoFinal.getCantMax());
 			}
-			log.info(listaFinal);
-			return ResponseEntity.ok().body(listaFinal);
+			
+			log.info(mapaFinal);
+			return ResponseEntity.ok().body(mapaFinal);
 		}
 		catch (Exception exception)
 		{
