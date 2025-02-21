@@ -134,7 +134,6 @@ public class ReservasPuntualesRest
 					reserva.setNombreYapellidos(nombresYApellidos);
 					reserva.setNAlumnos(nAlumnosLista);
 					reserva.setPlazasRestantes(plazasRestantes);
-					reserva.setNumSemana(numSemana);
 
 					listaReservas.remove(reservaAntigua);
 
@@ -157,9 +156,10 @@ public class ReservasPuntualesRest
 					nombresYApellidos.add(nombreYapellidos);
 					nAlumnosLista = new ArrayList<Integer>();
 					nAlumnosLista.add(nAlumnos);
-
+					Long esFija = (Long) row[6];
+					
 					reserva = new ReservasPuntualesDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos,
-							recursos, plazasRestantes,numSemana);
+							recursos, plazasRestantes,esFija);
 					// Mapeo a ReservaDto
 					listaReservas.add(reserva);
 				}
@@ -168,13 +168,8 @@ public class ReservasPuntualesRest
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
 			
-			for (ReservasPuntualesDto reservaPuntual : listaReservas)
-			{
-				if(reservaPuntual.getNumSemana() != numSemana) {
-					listaReservas.remove(reservaPuntual);
-				}
-			}
 			
+			log.info(listaReservas);
 			return ResponseEntity.ok(listaReservas);
 		}
 		catch (ReservaException reservaException)

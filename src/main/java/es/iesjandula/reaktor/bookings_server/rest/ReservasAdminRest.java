@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.bookings_server.dto.RecursoCantMaxDto;
-import es.iesjandula.reaktor.bookings_server.dto.ReservasFijasDto;
 import es.iesjandula.reaktor.bookings_server.exception.ReservaException;
 import es.iesjandula.reaktor.bookings_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.bookings_server.repository.IRecursoRepository;

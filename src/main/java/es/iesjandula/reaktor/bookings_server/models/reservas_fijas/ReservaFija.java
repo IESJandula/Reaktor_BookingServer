@@ -16,4 +16,8 @@ public class ReservaFija
 
 	@Column(nullable = false)
 	private int nAlumnos;
+	
+	@Column(nullable = false)
+	private boolean esFija;
+	
 }
