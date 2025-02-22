@@ -200,7 +200,6 @@ public class ReservasAdminRest
 				mapaFinal.put(recursoFinal.getRecurso(), recursoFinal.getCantMax());
 			}
 			
-			log.info(mapaFinal);
 			return ResponseEntity.ok().body(mapaFinal);
 		}
 		catch (Exception exception)

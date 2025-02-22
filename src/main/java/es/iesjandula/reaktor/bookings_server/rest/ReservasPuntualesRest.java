@@ -168,8 +168,6 @@ public class ReservasPuntualesRest
 			// Encontramos todos los recursos y los introducimos en una lista para
 			// mostrarlos más adelante
 			
-			
-			log.info(listaReservas);
 			return ResponseEntity.ok(listaReservas);
 		}
 		catch (ReservaException reservaException)
