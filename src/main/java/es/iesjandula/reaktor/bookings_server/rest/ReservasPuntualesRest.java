@@ -68,9 +68,6 @@ public class ReservasPuntualesRest
 	@Value("${reaktor.http_connection_timeout}")
 	private int httpConnectionTimeout;
 
-
-
-
 	/**
 	 * Recibe un recurso y devuelve una lista de recursos organizados por días y
 	 * tramos horarios, para mostrarlos
@@ -232,6 +229,19 @@ public class ReservasPuntualesRest
 
 				log.error(mensajeError);
 				throw new ReservaException(Constants.NUMERO_ALUMNOS_NO_VALIDO, mensajeError);
+			}
+			
+			if(!optinalRecurso.get().isEsCompartible())
+			{
+				Optional<ReservaPuntual> optionalReservaNoCompartido = this.reservaPuntualRepository.encontrarReservaNoCompartible(recurso,
+						diaDeLaSemana, tramosHorarios,numSemana);
+				if(optionalReservaNoCompartido.isPresent())
+				{
+					String mensajeError = "Ya existe una reserva del recurso: " + recurso + " ese dia, tramo y semana";
+
+					log.error(mensajeError);
+					throw new ReservaException(Constants.RESERVA_YA_EXISTE, mensajeError);
+				}
 			}
 			
 			if(nAlumnos > optinalRecurso.get().getCantidad())

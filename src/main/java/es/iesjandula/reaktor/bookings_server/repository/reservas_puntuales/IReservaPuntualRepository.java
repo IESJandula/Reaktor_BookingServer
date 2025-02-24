@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import es.iesjandula.reaktor.bookings_server.dto.RecursoCantMaxDto;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.ReservaPuntual;
 import es.iesjandula.reaktor.bookings_server.models.reservas_puntuales.ReservaPuntualId;
 
@@ -21,6 +20,14 @@ public interface IReservaPuntualRepository extends JpaRepository<ReservaPuntual,
 			+ "r.reservaPuntualId.tramoHorario.id = :tramoHorario AND"
 			+ " r.reservaPuntualId.profesor.email = :email and r.reservaPuntualId.numSemana = :numSemana")
 	Optional<ReservaPuntual> encontrarReserva(@Param("email") String email, @Param("recurso") String recurso,
+			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario,
+			@Param("numSemana") Integer numSemana);
+	
+	@Query("SELECT r FROM ReservaPuntual r WHERE " + "r.reservaPuntualId.recurso.id = :recurso AND "
+			+ "r.reservaPuntualId.diaSemana.id = :diaSemana AND "
+			+ "r.reservaPuntualId.tramoHorario.id = :tramoHorario AND "
+			+ "r.reservaPuntualId.numSemana = :numSemana")
+	Optional<ReservaPuntual> encontrarReservaNoCompartible(@Param("recurso") String recurso,
 			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario,
 			@Param("numSemana") Integer numSemana);
 
