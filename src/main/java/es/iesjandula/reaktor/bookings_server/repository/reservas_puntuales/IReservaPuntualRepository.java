@@ -27,6 +27,13 @@ public interface IReservaPuntualRepository extends JpaRepository<ReservaPuntual,
 			+ "r.reservaPuntualId.diaSemana.id = :diaSemana AND "
 			+ "r.reservaPuntualId.tramoHorario.id = :tramoHorario AND "
 			+ "r.reservaPuntualId.numSemana = :numSemana")
+	Optional<ReservaPuntual> encontrarReservasPorDiaTramo(@Param("recurso") String recurso, @Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario,
+			@Param("numSemana") Integer numSemana);
+	
+	@Query("SELECT r FROM ReservaPuntual r WHERE " + "r.reservaPuntualId.recurso.id = :recurso AND "
+			+ "r.reservaPuntualId.diaSemana.id = :diaSemana AND "
+			+ "r.reservaPuntualId.tramoHorario.id = :tramoHorario AND "
+			+ "r.reservaPuntualId.numSemana = :numSemana")
 	Optional<ReservaPuntual> encontrarReservaNoCompartible(@Param("recurso") String recurso,
 			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario,
 			@Param("numSemana") Integer numSemana);
