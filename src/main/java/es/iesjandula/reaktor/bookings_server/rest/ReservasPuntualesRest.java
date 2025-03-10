@@ -200,7 +200,7 @@ public class ReservasPuntualesRest
 		try
 		{
 			// Validaciones previas a la reserva
-			this.validacionesGlobalesPreviasReservaPuntual();
+			this.validacionesGlobalesPreviasReservaPuntual(usuario);
 
 			// Si el role del usuario es Administrador, creará la reserva con el email
 			// recibido en la cabecera
@@ -486,7 +486,7 @@ public class ReservasPuntualesRest
 		try
 		{
 			// Validaciones previas a la reserva
-			this.validacionesGlobalesPreviasReservaPuntual();
+			this.validacionesGlobalesPreviasReservaPuntual(usuario);
 
 			// Si el role del usuario es Administrador, borrará la reserva con el email
 			// recibido en la cabecera
@@ -580,28 +580,30 @@ public class ReservasPuntualesRest
 	/**
 	 * @throws ReservaException con un error
 	 */
-	private void validacionesGlobalesPreviasReservaPuntual() throws ReservaException
+	private void validacionesGlobalesPreviasReservaPuntual(DtoUsuarioExtended usuario) throws ReservaException
 	{
-
-		// Vemos si la reserva está deshabilitada
-		Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository
-				.findByClave(Constants.TABLA_CONST_RESERVAS_FIJAS);
-
-		if (!optionalAppDeshabilitada.isPresent())
+		if (!usuario.getRoles().contains("ADMINISTRADOR"))
 		{
-			String errorString = "Error obteniendo parametros";
+			// Vemos si la reserva está deshabilitada
+			Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository
+					.findByClave(Constants.TABLA_CONST_RESERVAS_FIJAS);
 
-			log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_FIJAS);
-			throw new ReservaException(Constants.ERROR_OBTENIENDO_PARAMETROS, errorString);
-		}
-
-		if (!optionalAppDeshabilitada.get().getValor().isEmpty())
-		{
-			String infoAppDeshabilitada = optionalAppDeshabilitada.get().getValor();
-			if (infoAppDeshabilitada != null)
+			if (!optionalAppDeshabilitada.isPresent())
 			{
-				log.error(infoAppDeshabilitada);
-				throw new ReservaException(Constants.ERROR_APP_DESHABILITADA, infoAppDeshabilitada);
+				String errorString = "Error obteniendo parametros";
+
+				log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_FIJAS);
+				throw new ReservaException(Constants.ERROR_OBTENIENDO_PARAMETROS, errorString);
+			}
+
+			if (!optionalAppDeshabilitada.get().getValor().isEmpty())
+			{
+				String infoAppDeshabilitada = optionalAppDeshabilitada.get().getValor();
+				if (infoAppDeshabilitada != null)
+				{
+					log.error(infoAppDeshabilitada);
+					throw new ReservaException(Constants.ERROR_APP_DESHABILITADA, infoAppDeshabilitada);
+				}
 			}
 		}
 	}
@@ -622,12 +624,12 @@ public class ReservasPuntualesRest
 			Recurso recursoInstancia = this.recursoRepository.findById(recurso).get();
 
 			boolean presente = false;
-			
+
 			for (Integer semana : semanas)
 			{
 				disponible = false;
 				presente = false;
-				
+
 				presente = this.reservaPuntualRepository
 						.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).isPresent();
 				if (presente)

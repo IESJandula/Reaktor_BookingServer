@@ -252,7 +252,7 @@ public class ReservasFijasRest
 
 			// Buscamos las reservas por el recurso
 			List<Object[]> resultados = this.reservasRepository.encontrarReservaPorRecurso(recurso);
-			
+
 			@SuppressWarnings("deprecation")
 			Recurso recursoSeleccionado = this.recursoRepository.getById(recurso);
 
@@ -354,7 +354,7 @@ public class ReservasFijasRest
 		try
 		{
 			// Validaciones previas a la reserva
-			this.validacionesGlobalesPreviasReservaFija();
+			this.validacionesGlobalesPreviasReservaFija(usuario);
 
 			// Si el role del usuario es Administrador, creará la reserva con el email
 			// recibido en la cabecera
@@ -373,18 +373,18 @@ public class ReservasFijasRest
 				log.error(mensajeError);
 				throw new ReservaException(Constants.RESERVA_YA_EXISTE, mensajeError);
 			}
-			
+
 			Optional<Recurso> optinalRecurso = this.recursoRepository.findById(recurso);
-			
-			if(nAlumnos <= 0)
+
+			if (nAlumnos <= 0)
 			{
 				String mensajeError = "El numero de Alumnos no puede ser 0 o menor que 0";
 
 				log.error(mensajeError);
 				throw new ReservaException(Constants.NUMERO_ALUMNOS_NO_VALIDO, mensajeError);
 			}
-			
-			if(nAlumnos > optinalRecurso.get().getCantidad())
+
+			if (nAlumnos > optinalRecurso.get().getCantidad())
 			{
 				String mensajeError = "El numero de Alumnos no puede ser mayor que la cantidad maxima del Recurso";
 
@@ -625,7 +625,7 @@ public class ReservasFijasRest
 		try
 		{
 			// Validaciones previas a la reserva
-			this.validacionesGlobalesPreviasReservaFija();
+			this.validacionesGlobalesPreviasReservaFija(usuario);
 
 			// Si el role del usuario es Administrador, borrará la reserva con el email
 			// recibido en la cabecera
@@ -718,28 +718,30 @@ public class ReservasFijasRest
 	/**
 	 * @throws ReservaException con un error
 	 */
-	private void validacionesGlobalesPreviasReservaFija() throws ReservaException
+	private void validacionesGlobalesPreviasReservaFija(DtoUsuarioExtended usuario) throws ReservaException
 	{
-
-		// Vemos si la reserva está deshabilitada
-		Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository
-				.findByClave(Constants.TABLA_CONST_RESERVAS_FIJAS);
-
-		if (!optionalAppDeshabilitada.isPresent())
+		if (!usuario.getRoles().contains("ADMINISTRADOR"))
 		{
-			String errorString = "Error obteniendo parametros";
+			// Vemos si la reserva está deshabilitada
+			Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository
+					.findByClave(Constants.TABLA_CONST_RESERVAS_FIJAS);
 
-			log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_FIJAS);
-			throw new ReservaException(Constants.ERROR_OBTENIENDO_PARAMETROS, errorString);
-		}
-
-		if (!optionalAppDeshabilitada.get().getValor().isEmpty())
-		{
-			String infoAppDeshabilitada = optionalAppDeshabilitada.get().getValor();
-			if (infoAppDeshabilitada != null)
+			if (!optionalAppDeshabilitada.isPresent())
 			{
-				log.error(infoAppDeshabilitada);
-				throw new ReservaException(Constants.ERROR_APP_DESHABILITADA, infoAppDeshabilitada);
+				String errorString = "Error obteniendo parametros";
+
+				log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_FIJAS);
+				throw new ReservaException(Constants.ERROR_OBTENIENDO_PARAMETROS, errorString);
+			}
+
+			if (!optionalAppDeshabilitada.get().getValor().isEmpty())
+			{
+				String infoAppDeshabilitada = optionalAppDeshabilitada.get().getValor();
+				if (infoAppDeshabilitada != null)
+				{
+					log.error(infoAppDeshabilitada);
+					throw new ReservaException(Constants.ERROR_APP_DESHABILITADA, infoAppDeshabilitada);
+				}
 			}
 		}
 	}
