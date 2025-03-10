@@ -170,15 +170,25 @@ public class ReservasAdminRest
 				listaRecursoFija.add(cantMaxDto);
 			}
 			
-			for (RecursoCantMaxDto puntual : listaRecursoPuntuales)
-			{
-				for (RecursoCantMaxDto fija: listaRecursoFija)
+			if(!listaRecursoPuntuales.isEmpty() && !listaRecursoFija.isEmpty()) {
+				for (RecursoCantMaxDto puntual : listaRecursoPuntuales)
 				{
-					if(fija.getRecurso().equals(puntual.getRecurso()))
+					for (RecursoCantMaxDto fija: listaRecursoFija)
 					{
-						Integer cantidadPuntual = puntual.getCantMax().intValue();
-						Integer cantidadFija = fija.getCantMax().intValue();
-						if(cantidadPuntual > cantidadFija)
+						if(fija.getRecurso().equals(puntual.getRecurso()))
+						{
+							Integer cantidadPuntual = puntual.getCantMax().intValue();
+							Integer cantidadFija = fija.getCantMax().intValue();
+							if(cantidadPuntual > cantidadFija)
+							{
+								listaFinal.add(puntual);
+							}
+							else
+							{
+								listaFinal.add(fija);
+							}
+						}
+						else if(listaRecursoFija.contains(puntual) && !listaRecursoPuntuales.contains(puntual))
 						{
 							listaFinal.add(puntual);
 						}
@@ -187,16 +197,24 @@ public class ReservasAdminRest
 							listaFinal.add(fija);
 						}
 					}
-					else if(listaRecursoFija.contains(puntual) && !listaRecursoPuntuales.contains(puntual))
+				}
+			}else {
+				
+				if(listaRecursoPuntuales.isEmpty()) {
+					for (RecursoCantMaxDto fija: listaRecursoFija)
 					{
-						listaFinal.add(puntual);
-					}
-					else
-					{
-						listaFinal.add(fija);
+							listaFinal.add(fija);
 					}
 				}
-			}			
+				
+				if(listaRecursoFija.isEmpty()) {
+					for (RecursoCantMaxDto puntual: listaRecursoPuntuales)
+					{
+							listaFinal.add(puntual);
+					}
+				}
+			}
+			
 			HashMap<String, BigDecimal> mapaFinal = new HashMap<>();
 			for (RecursoCantMaxDto recursoFinal : listaFinal)
 			{
