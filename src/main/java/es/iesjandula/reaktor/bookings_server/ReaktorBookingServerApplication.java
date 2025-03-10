@@ -53,7 +53,7 @@ public class ReaktorBookingServerApplication implements CommandLineRunner
 		}
 
 		Constantes constantes1 = new Constantes("Reservas fijas", "");
-		Constantes constantes2 = new Constantes("Reservas puntuales", "");
+		Constantes constantes2 = new Constantes("Reservas temporales", "");
 
 		constantesRepository.saveAndFlush(constantes1);
 		constantesRepository.saveAndFlush(constantes2);

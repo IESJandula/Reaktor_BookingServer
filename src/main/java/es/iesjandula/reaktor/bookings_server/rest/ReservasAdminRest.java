@@ -60,9 +60,12 @@ public class ReservasAdminRest
 				
 				if (recursoAntiguo.getCantidad() == recursoFinal.getCantidad())
 				{
-					String mensajeError = "Ya existe un recurso con esos datos: " + recurso;
-					log.error(mensajeError);
-					throw new ReservaException(Constants.RECURSO_YA_EXISTE, mensajeError);
+					if (recursoAntiguo.isEsCompartible() == recursoFinal.isEsCompartible())
+					{
+						String mensajeError = "Ya existe un recurso con esos datos: " + recurso;
+						log.error(mensajeError);
+						throw new ReservaException(Constants.RECURSO_YA_EXISTE, mensajeError);
+					}
 				}
 
 				recursoFinal = new Recurso(recursoAntiguo.getId(), cantidad, esCompartible);
