@@ -107,6 +107,7 @@ public class ReservasPuntualesRest
 			List<String> nombresYApellidos = new ArrayList<String>();
 			ReservasPuntualesDto reserva = new ReservasPuntualesDto();
 			Integer plazasRestantes = recursoSeleccionado.getCantidad();
+			List<Long> esFijaLista = new ArrayList<Long>();
 
 			for (Object[] row : resultados)
 			{
@@ -120,16 +121,19 @@ public class ReservasPuntualesRest
 					nombresYApellidos = reserva.getNombreYapellidos();
 					nAlumnosLista = reserva.getNAlumnos();
 					plazasRestantes = reserva.getPlazasRestantes();
+					esFijaLista = reserva.getEsfija();
 
 					emails.add((String) row[3]);
 					nombresYApellidos.add((String) row[4]);
 					nAlumnosLista.add((row[2] != null) ? (Integer) row[2] : 0);
 					plazasRestantes = plazasRestantes - ((row[2] != null) ? (Integer) row[2] : 0);
+					esFijaLista.add((Long) row[6]);
 
 					reserva.setEmail(emails);
 					reserva.setNombreYapellidos(nombresYApellidos);
 					reserva.setNAlumnos(nAlumnosLista);
 					reserva.setPlazasRestantes(plazasRestantes);
+					reserva.setEsfija(esFijaLista);
 
 					listaReservas.remove(reservaAntigua);
 
@@ -144,6 +148,7 @@ public class ReservasPuntualesRest
 					String email = (String) row[3];
 					String nombreYapellidos = (String) row[4];
 					String recursos = (String) row[5];
+					Long esFija = (Long) row[6];
 					plazasRestantes = plazasRestantes - nAlumnos;
 
 					emails = new ArrayList<String>();
@@ -152,10 +157,11 @@ public class ReservasPuntualesRest
 					nombresYApellidos.add(nombreYapellidos);
 					nAlumnosLista = new ArrayList<Integer>();
 					nAlumnosLista.add(nAlumnos);
-					Long esFija = (Long) row[6];
+					esFijaLista = new ArrayList<Long>();
+					esFijaLista.add(esFija);
 
 					reserva = new ReservasPuntualesDto(diaSemana, tramoHorario, nAlumnosLista, emails,
-							nombresYApellidos, recursos, plazasRestantes, esFija);
+							nombresYApellidos, recursos, plazasRestantes, esFijaLista);
 					// Mapeo a ReservaDto
 					listaReservas.add(reserva);
 				}

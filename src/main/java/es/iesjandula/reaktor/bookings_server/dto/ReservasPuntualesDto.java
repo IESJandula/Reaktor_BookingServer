@@ -25,7 +25,7 @@ public class ReservasPuntualesDto
 
 	private Integer plazasRestantes;
 
-	private Long esfija;
+	private List<Long> esfija;
 
 	public ReservasPuntualesDto(Long diaSemana, Long tramoHorario)
 	{
