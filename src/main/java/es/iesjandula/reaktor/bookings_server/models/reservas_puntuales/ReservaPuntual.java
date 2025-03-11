@@ -16,4 +16,7 @@ public class ReservaPuntual
 
 	@Column(nullable = false)
 	private int nAlumnos;
+	
+	@Column(nullable = false)
+	private Boolean esSemanal;
 }

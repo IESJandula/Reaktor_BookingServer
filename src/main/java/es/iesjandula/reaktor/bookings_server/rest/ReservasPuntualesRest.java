@@ -201,6 +201,7 @@ public class ReservasPuntualesRest
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
 			@RequestHeader(value = "nAlumnos", required = true) Integer nAlumnos,
+			@RequestHeader(value = "esSemanal", required = true) Boolean esSemanal,
 			@RequestHeader(value = "numSemana", required = true) Integer numSemana)
 	{
 		try
@@ -259,7 +260,7 @@ public class ReservasPuntualesRest
 
 			// Creamos la instancia de reserva
 			ReservaPuntual reserva = this.crearInstanciaDeReserva(usuario, email, recurso, diaDeLaSemana,
-					tramosHorarios, nAlumnos, numSemana);
+					tramosHorarios, nAlumnos, numSemana,esSemanal);
 
 			// Si no existe una reserva previa, se guarda la nueva reserva en la base de
 			// datos
@@ -301,7 +302,7 @@ public class ReservasPuntualesRest
 	 * @throws ReservaException
 	 */
 	private ReservaPuntual crearInstanciaDeReserva(DtoUsuarioExtended usuario, String email, String recursoString,
-			Long diaSemana, Long tramoHorario, int nAlumnos, Integer numSemana) throws ReservaException
+			Long diaSemana, Long tramoHorario, int nAlumnos, Integer numSemana, Boolean esSemanal) throws ReservaException
 	{
 		Recurso recurso = new Recurso();
 
@@ -327,6 +328,7 @@ public class ReservasPuntualesRest
 
 		reservaFija.setReservaPuntualId(reservaId);
 		reservaFija.setNAlumnos(nAlumnos);
+		reservaFija.setEsSemanal(esSemanal);
 
 		return reservaFija;
 	}
@@ -487,6 +489,7 @@ public class ReservasPuntualesRest
 			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramoHorario", required = true) Long tramoHorario,
+			
 			@RequestHeader(value = "numSemana", required = true) Integer numSemana)
 	{
 		try
