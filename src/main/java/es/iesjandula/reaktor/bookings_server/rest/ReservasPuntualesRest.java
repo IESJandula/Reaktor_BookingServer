@@ -3,8 +3,10 @@ package es.iesjandula.reaktor.bookings_server.rest;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -626,40 +628,45 @@ public class ReservasPuntualesRest
 		try
 		{
 			Boolean disponible = false;
-
-			Recurso recursoInstancia = this.recursoRepository.findById(recurso).get();
-
-			boolean presente = false;
-
-			for (Integer semana : semanas)
+			if (!semanas.isEmpty())
 			{
-				disponible = false;
-				presente = false;
+				Recurso recursoInstancia = this.recursoRepository.findById(recurso).get();
+				
+				Set<Integer> sinRepetir = new HashSet<>();
+		        
+		        // Eliminar elementos duplicados
+		        semanas.removeIf(num -> !sinRepetir.add(num));
+				
+				boolean presente = false;
 
-				presente = this.reservaPuntualRepository
-						.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).isPresent();
-				if (presente)
+				for (Integer semana : semanas)
 				{
-					if (((this.reservaPuntualRepository
-							.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).get()
-							.getNAlumnos() + numAlumnos) - recursoInstancia.getCantidad()) >= 0
-							&& recursoInstancia.isEsCompartible())
+					disponible = false;
+					presente = false;
+
+					presente = this.reservaPuntualRepository
+							.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).isPresent();
+					if (presente)
+					{
+						if (( recursoInstancia.getCantidad()) - (this.reservaPuntualRepository
+								.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).get()
+								.getNAlumnos() + numAlumnos) >= 0
+								&& recursoInstancia.isEsCompartible())
+						{
+							disponible = true;
+						}
+					}
+					else
 					{
 						disponible = true;
 					}
-
-					if (!recursoInstancia.isEsCompartible())
-					{
-						disponible = true;
-					}
-
+					
 					if (!disponible)
 					{
 						break;
 					}
 				}
 			}
-
 			return ResponseEntity.ok(disponible);
 		}
 		catch (Exception exception)
