@@ -543,6 +543,9 @@ public class ReservasFijasRest
 
 			// Convertimos la respuesta en un objeto DtoInfoUsuario
 			ObjectMapper objectMapper = new ObjectMapper();
+			
+			// Logueamos
+			log.info("Información del profesor de la reserva asignado por el admin: {}", closeableHttpResponse.getEntity().getContent()) ;
 
 			// Obtenemos la respuesta de Firebase
 			DtoUsuarioBase dtoUsuarioBase = objectMapper.readValue(closeableHttpResponse.getEntity().getContent(),
