@@ -139,6 +139,9 @@ public class InicializacionSistema
 
     			TramoHorario tramos = new TramoHorario();
     			tramos.setTramoHorario(valores[0]);
+    			
+    			// Añadimos a la lista
+    			tramosHorarios.add(tramos) ;
                 
                 // Leemos la siguiente línea
                 linea = reader.readLine() ;
@@ -192,6 +195,9 @@ public class InicializacionSistema
 
     			DiaSemana diaSemana = new DiaSemana();
     			diaSemana.setDiaSemana(valores[0]);
+    			
+    			// Añadimos a la lista
+    			diasSemana.add(diaSemana) ;
                 
                 // Leemos la siguiente línea
                 linea = reader.readLine() ;
