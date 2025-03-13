@@ -262,7 +262,7 @@ public class ReservasPuntualesRest
 
 			// Creamos la instancia de reserva
 			ReservaPuntual reserva = this.crearInstanciaDeReserva(usuario, email, recurso, diaDeLaSemana,
-					tramosHorarios, nAlumnos, numSemana,esSemanal);
+					tramosHorarios, nAlumnos, numSemana, esSemanal);
 
 			// Si no existe una reserva previa, se guarda la nueva reserva en la base de
 			// datos
@@ -304,7 +304,8 @@ public class ReservasPuntualesRest
 	 * @throws ReservaException
 	 */
 	private ReservaPuntual crearInstanciaDeReserva(DtoUsuarioExtended usuario, String email, String recursoString,
-			Long diaSemana, Long tramoHorario, int nAlumnos, Integer numSemana, Boolean esSemanal) throws ReservaException
+			Long diaSemana, Long tramoHorario, int nAlumnos, Integer numSemana, Boolean esSemanal)
+			throws ReservaException
 	{
 		Recurso recurso = new Recurso();
 
@@ -491,8 +492,8 @@ public class ReservasPuntualesRest
 			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramoHorario", required = true) Long tramoHorario,
-			
-			@RequestHeader(value = "numSemana", required = true) Integer numSemana)
+			@RequestHeader(value = "numSemana", required = true) Integer numSemana,
+			@RequestHeader(value = "esSemanal", required = false) Boolean esSemanal)
 	{
 		try
 		{
@@ -510,6 +511,8 @@ public class ReservasPuntualesRest
 			Optional<ReservaPuntual> optinalReserva = this.reservaPuntualRepository.encontrarReserva(email,
 					aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
 
+			ReservaPuntual reservaSeleccionada = optinalReserva.get();
+
 			if (!optinalReserva.isPresent())
 			{
 				String mensajeError = "La reserva que quiere borrar no existe";
@@ -521,8 +524,50 @@ public class ReservasPuntualesRest
 			ReservaPuntualId reservaId = this.crearInstanciaDeReservaId(usuario, email, aulaYCarritos, diaDeLaSemana,
 					tramoHorario, numSemana);
 
-			// Si la reserva existe en la base de datos, se borrará
-			this.reservaPuntualRepository.deleteById(reservaId);
+			Integer semanaInicial = numSemana;
+			ReservaPuntual reservaIterable = new ReservaPuntual();
+			List<ReservaPuntual> listaReservasBorrado = new ArrayList<ReservaPuntual>();
+
+			if (esSemanal)
+			{
+				do
+				{
+					Optional<ReservaPuntual> optinalReservaIterable = this.reservaPuntualRepository
+							.encontrarReserva(email, aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
+					
+					if(optinalReservaIterable.isEmpty())
+					{
+						break;
+					}
+					reservaIterable = optinalReservaIterable.get();
+					listaReservasBorrado.add(reservaIterable);
+					numSemana--;
+				}
+				while (reservaIterable.getEsSemanal());
+
+				numSemana = semanaInicial;
+				do
+				{
+					numSemana++;
+					Optional<ReservaPuntual> optinalReservaIterable = this.reservaPuntualRepository
+							.encontrarReserva(email, aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
+					if(optinalReservaIterable.isEmpty())
+					{
+						break;
+					}
+					reservaIterable = optinalReservaIterable.get();
+					listaReservasBorrado.add(reservaIterable);
+				}
+				while (reservaIterable.getEsSemanal());
+
+				this.reservaPuntualRepository.deleteAll(listaReservasBorrado);
+
+			}
+			else
+			{
+				// Si la reserva existe en la base de datos, se borrará
+				this.reservaPuntualRepository.deleteById(reservaId);
+			}
 
 			log.info("La reserva se ha borrado correctamente");
 			return ResponseEntity.ok().build();
@@ -634,12 +679,12 @@ public class ReservasPuntualesRest
 			if (!semanas.isEmpty())
 			{
 				Recurso recursoInstancia = this.recursoRepository.findById(recurso).get();
-				
+
 				Set<Integer> sinRepetir = new HashSet<>();
-		        
-		        // Eliminar elementos duplicados
-		        semanas.removeIf(num -> !sinRepetir.add(num));
-				
+
+				// Eliminar elementos duplicados
+				semanas.removeIf(num -> !sinRepetir.add(num));
+
 				boolean presente = false;
 
 				for (Integer semana : semanas)
@@ -651,10 +696,9 @@ public class ReservasPuntualesRest
 							.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).isPresent();
 					if (presente)
 					{
-						if (( recursoInstancia.getCantidad()) - (this.reservaPuntualRepository
+						if ((recursoInstancia.getCantidad()) - (this.reservaPuntualRepository
 								.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).get()
-								.getNAlumnos() + numAlumnos) >= 0
-								&& recursoInstancia.isEsCompartible())
+								.getNAlumnos() + numAlumnos) >= 0 && recursoInstancia.isEsCompartible())
 						{
 							disponible = true;
 						}
@@ -663,7 +707,7 @@ public class ReservasPuntualesRest
 					{
 						disponible = true;
 					}
-					
+
 					if (!disponible)
 					{
 						break;
