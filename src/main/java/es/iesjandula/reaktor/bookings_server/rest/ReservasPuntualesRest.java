@@ -3,8 +3,10 @@ package es.iesjandula.reaktor.bookings_server.rest;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -201,6 +203,7 @@ public class ReservasPuntualesRest
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
 			@RequestHeader(value = "nAlumnos", required = true) Integer nAlumnos,
+			@RequestHeader(value = "esSemanal", required = true) Boolean esSemanal,
 			@RequestHeader(value = "numSemana", required = true) Integer numSemana)
 	{
 		try
@@ -259,7 +262,7 @@ public class ReservasPuntualesRest
 
 			// Creamos la instancia de reserva
 			ReservaPuntual reserva = this.crearInstanciaDeReserva(usuario, email, recurso, diaDeLaSemana,
-					tramosHorarios, nAlumnos, numSemana);
+					tramosHorarios, nAlumnos, numSemana, esSemanal);
 
 			// Si no existe una reserva previa, se guarda la nueva reserva en la base de
 			// datos
@@ -301,7 +304,8 @@ public class ReservasPuntualesRest
 	 * @throws ReservaException
 	 */
 	private ReservaPuntual crearInstanciaDeReserva(DtoUsuarioExtended usuario, String email, String recursoString,
-			Long diaSemana, Long tramoHorario, int nAlumnos, Integer numSemana) throws ReservaException
+			Long diaSemana, Long tramoHorario, int nAlumnos, Integer numSemana, Boolean esSemanal)
+			throws ReservaException
 	{
 		Recurso recurso = new Recurso();
 
@@ -327,6 +331,7 @@ public class ReservasPuntualesRest
 
 		reservaFija.setReservaPuntualId(reservaId);
 		reservaFija.setNAlumnos(nAlumnos);
+		reservaFija.setEsSemanal(esSemanal);
 
 		return reservaFija;
 	}
@@ -487,7 +492,8 @@ public class ReservasPuntualesRest
 			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramoHorario", required = true) Long tramoHorario,
-			@RequestHeader(value = "numSemana", required = true) Integer numSemana)
+			@RequestHeader(value = "numSemana", required = true) Integer numSemana,
+			@RequestHeader(value = "esSemanal", required = false) Boolean esSemanal)
 	{
 		try
 		{
@@ -505,6 +511,8 @@ public class ReservasPuntualesRest
 			Optional<ReservaPuntual> optinalReserva = this.reservaPuntualRepository.encontrarReserva(email,
 					aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
 
+			ReservaPuntual reservaSeleccionada = optinalReserva.get();
+
 			if (!optinalReserva.isPresent())
 			{
 				String mensajeError = "La reserva que quiere borrar no existe";
@@ -516,8 +524,50 @@ public class ReservasPuntualesRest
 			ReservaPuntualId reservaId = this.crearInstanciaDeReservaId(usuario, email, aulaYCarritos, diaDeLaSemana,
 					tramoHorario, numSemana);
 
-			// Si la reserva existe en la base de datos, se borrará
-			this.reservaPuntualRepository.deleteById(reservaId);
+			Integer semanaInicial = numSemana;
+			ReservaPuntual reservaIterable = new ReservaPuntual();
+			List<ReservaPuntual> listaReservasBorrado = new ArrayList<ReservaPuntual>();
+
+			if (esSemanal)
+			{
+				do
+				{
+					Optional<ReservaPuntual> optinalReservaIterable = this.reservaPuntualRepository
+							.encontrarReserva(email, aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
+					
+					if(optinalReservaIterable.isEmpty())
+					{
+						break;
+					}
+					reservaIterable = optinalReservaIterable.get();
+					listaReservasBorrado.add(reservaIterable);
+					numSemana--;
+				}
+				while (reservaIterable.getEsSemanal());
+
+				numSemana = semanaInicial;
+				do
+				{
+					numSemana++;
+					Optional<ReservaPuntual> optinalReservaIterable = this.reservaPuntualRepository
+							.encontrarReserva(email, aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
+					if(optinalReservaIterable.isEmpty())
+					{
+						break;
+					}
+					reservaIterable = optinalReservaIterable.get();
+					listaReservasBorrado.add(reservaIterable);
+				}
+				while (reservaIterable.getEsSemanal());
+
+				this.reservaPuntualRepository.deleteAll(listaReservasBorrado);
+
+			}
+			else
+			{
+				// Si la reserva existe en la base de datos, se borrará
+				this.reservaPuntualRepository.deleteById(reservaId);
+			}
 
 			log.info("La reserva se ha borrado correctamente");
 			return ResponseEntity.ok().build();
@@ -626,29 +676,34 @@ public class ReservasPuntualesRest
 		try
 		{
 			Boolean disponible = false;
-
-			Recurso recursoInstancia = this.recursoRepository.findById(recurso).get();
-
-			boolean presente = false;
-
-			for (Integer semana : semanas)
+			if (!semanas.isEmpty())
 			{
-				disponible = false;
-				presente = false;
+				Recurso recursoInstancia = this.recursoRepository.findById(recurso).get();
 
-				presente = this.reservaPuntualRepository
-						.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).isPresent();
-				if (presente)
+				Set<Integer> sinRepetir = new HashSet<>();
+
+				// Eliminar elementos duplicados
+				semanas.removeIf(num -> !sinRepetir.add(num));
+
+				boolean presente = false;
+
+				for (Integer semana : semanas)
 				{
-					if (((this.reservaPuntualRepository
-							.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).get()
-							.getNAlumnos() + numAlumnos) - recursoInstancia.getCantidad()) >= 0
-							&& recursoInstancia.isEsCompartible())
-					{
-						disponible = true;
-					}
+					disponible = false;
+					presente = false;
 
-					if (!recursoInstancia.isEsCompartible())
+					presente = this.reservaPuntualRepository
+							.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).isPresent();
+					if (presente)
+					{
+						if ((recursoInstancia.getCantidad()) - (this.reservaPuntualRepository
+								.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).get()
+								.getNAlumnos() + numAlumnos) >= 0 && recursoInstancia.isEsCompartible())
+						{
+							disponible = true;
+						}
+					}
+					else
 					{
 						disponible = true;
 					}
@@ -659,7 +714,6 @@ public class ReservasPuntualesRest
 					}
 				}
 			}
-
 			return ResponseEntity.ok(disponible);
 		}
 		catch (Exception exception)
