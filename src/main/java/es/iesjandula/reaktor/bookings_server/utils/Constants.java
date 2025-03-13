@@ -1,5 +1,7 @@
 package es.iesjandula.reaktor.bookings_server.utils;
 
+import java.io.File;
+
 public class Constants
 {
 	/*********************************************************/
@@ -64,18 +66,27 @@ public class Constants
 	public final static int ERROR_CONEXION_FIREBASE = 101;
 	public final static int TIMEOUT_CONEXION_FIREBASE = 102;
 	public final static int IO_EXCEPTION_FIREBASE = 103;
+	
+	// Carga de datos
+	public static final int ERR_CODE_PROCESANDO_TRAMO_HORARIO = 200;
+	public static final int ERR_CODE_PROCESANDO_DIA_SEMANA = 201;
+	public static final int ERR_CODE_CIERRE_READER = 202;
 
 	/*********************************************************/
-	/************************ Ficheros ***********************/
+	/******************* Ficheros y carpetas *****************/
 	/*********************************************************/
+	
+	/** Nombre de la carpeta de configuracion */
+	public static final String BOOKING_SERVER_CONFIG      = "booking_server_config" ;
+	
+	/** Nombre de la carpeta de configuracion al ejecutarse */
+	public static final String BOOKING_SERVER_CONFIG_EXEC = "booking_server_config_exec" ;
 
-	public static final String FICHERO_RECURSO = "recursos.csv";
+	/** Fichero con los tramos horarios */
+	public static final String FICHERO_TRAMOS_HORARIOS 	  = BOOKING_SERVER_CONFIG_EXEC + File.separator + "tramosHorarios.csv";
 
-	public static final String FICHERO_TRAMOS_HORARIOS = "tramosHorarios.csv";
-
-	public static final String FICHERO_DIAS_SEMANAS = "diasSemana.csv";
-
-	public static final String FICHERO_PROFESORES = "profesor.csv";
+	/** Fichero con los días de la semana */
+	public static final String FICHERO_DIAS_SEMANAS       = BOOKING_SERVER_CONFIG_EXEC + File.separator + "diasSemana.csv";
 
 	/*********************************************************/
 	/****************** Modo DDL - Create ********************/

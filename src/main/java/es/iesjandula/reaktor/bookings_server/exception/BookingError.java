@@ -50,7 +50,7 @@ public class BookingError extends Exception
 		Map<String, String> mapError = new HashMap<String, String>();
 
 		mapError.put("id", "" + id);
-		mapError.put("message", message);
+		mapError.put("message", this.message);
 
 		if (this.exception != null)
 		{
