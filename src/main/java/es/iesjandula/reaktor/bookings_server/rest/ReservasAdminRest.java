@@ -40,8 +40,6 @@ public class ReservasAdminRest
 	@Autowired
 	private IReservaRepository reservaRepository;
 	
-
-
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/resources")
 	public ResponseEntity<?> crearRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
@@ -179,12 +177,17 @@ public class ReservasAdminRest
 						{
 							Integer cantidadPuntual = puntual.getCantMax().intValue();
 							Integer cantidadFija = fija.getCantMax().intValue();
+							BigDecimal suma;
 							if(cantidadPuntual > cantidadFija)
 							{
+								suma = puntual.getCantMax().add(fija.getCantMax());
+								puntual.setCantMax(suma);
 								listaFinal.add(puntual);
 							}
 							else
 							{
+								suma = puntual.getCantMax().add(fija.getCantMax());
+								fija.setCantMax(suma);
 								listaFinal.add(fija);
 							}
 						}
