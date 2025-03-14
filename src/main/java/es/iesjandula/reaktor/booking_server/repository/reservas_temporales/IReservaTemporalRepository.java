@@ -87,7 +87,7 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 			+ "GROUP BY recurso_id" , nativeQuery = true)
 	List<Object[]> reservaTemporalMax();
 	
-	@Query(value = "Delete * from ReservaTemporal rt where rt.reservaTemporalId.recurso.id = :recurso")
+	@Query(value = "Delete from ReservaTemporal rt where rt.reservaTemporalId.recurso.id = :recurso")
 	void deleteReservas(@Param("recurso") String recurso);
 
 }

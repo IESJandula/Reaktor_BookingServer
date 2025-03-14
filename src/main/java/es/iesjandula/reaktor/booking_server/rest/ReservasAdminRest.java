@@ -255,12 +255,10 @@ public class ReservasAdminRest
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
-			
 				
 			this.reservaRepository.deleteReservas(recurso);
 			this.reservaTemporalRepository.deleteReservas(recurso);
 			
-
 			log.info("Las reservas del recurso se han borrado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
 
