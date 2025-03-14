@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -240,6 +242,8 @@ public class ReservasAdminRest
 	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
 	 * un recurso, un día de la semana, un tramo horario
 	 */
+	@Modifying
+	@Transactional
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources/bookings")
 	public ResponseEntity<?> eliminarReservasRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
@@ -247,16 +251,8 @@ public class ReservasAdminRest
 	{
 		try
 		{
-			Optional<Recurso> optinalRecurso = this.recursoRepository.findById(recurso);
-
-			if (!optinalRecurso.isPresent())
-			{
-				String mensajeError = "El recurso que quiere borrar no existe: " + recurso;
-				log.error(mensajeError);
-				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
-			}
 			
-				
+			log.info(recurso);
 			this.reservaRepository.deleteReservas(recurso);
 			this.reservaTemporalRepository.deleteReservas(recurso);
 			
@@ -264,11 +260,6 @@ public class ReservasAdminRest
 			log.info("Las reservas del recurso se han borrado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
 
-		}
-		catch (ReservaException reservaException)
-		{
-			// Si la reserva no existe, devolverá un 404
-			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
 		}
 		catch (Exception exception)
 		{

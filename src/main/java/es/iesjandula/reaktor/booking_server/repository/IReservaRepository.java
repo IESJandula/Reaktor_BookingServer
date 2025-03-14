@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFijaId;
@@ -36,6 +38,8 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 			+ "", nativeQuery = true)
 	List<Object[]> reservaFijaMax();
 	
-	@Query(value = "Delete * from ReservaFija rt where rt.reservaFijaId.recurso.id = :recurso")
+	@Modifying
+	@Transactional
+	@Query(value = "Delete from ReservaFija rt where rt.reservaFijaId.recurso.id = :recurso")
 	void deleteReservas(@Param("recurso") String recurso);
 }
