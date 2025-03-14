@@ -524,7 +524,6 @@ public class ReservasFijasRest
 
 		try
 		{
-			log.info("La llamada se va a hacer a " + this.firebaseServerUrl + "/firebase/queries/user" + "\n Bearer " + jwtAdmin + "\nemail: " + email) ;
 			HttpGet httpGet = new HttpGet(this.firebaseServerUrl + "/firebase/queries/user");
 
 			// Añadimos el jwt y el email a la llamada
@@ -549,10 +548,7 @@ public class ReservasFijasRest
 		    // Obtengo la respuesta completa como String
 		    String responseContent = EntityUtils.toString(closeableHttpResponse.getEntity(), StandardCharsets.UTF_8);
 
-		    // Ahora sí puedo loguear fácilmente la respuesta
-		    log.info("Información del profesor asignado por admin: {}", responseContent);
-
-		    // Y parsear el DTO
+		    // Y parseo el DTO
 		    DtoUsuarioBase dtoUsuarioBase = objectMapper.readValue(responseContent, DtoUsuarioBase.class);
 
 			// Creamos una instancia de profesor con la respuesta de Firebase
