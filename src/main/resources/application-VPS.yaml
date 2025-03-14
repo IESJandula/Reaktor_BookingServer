@@ -34,6 +34,6 @@ reaktor:
   constantes:
     reservasFijas: ""
     reservasTemporales: ""
-  firebase_server_url: https://somos.iesjandula.es
+  firebase_server_url: https://api.iesjandula.es/
   users_timeout: 30000
   http_connection_timeout: 30000
