@@ -240,7 +240,7 @@ public class ReservasAdminRest
 	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
 	 * un recurso, un día de la semana, un tramo horario
 	 */
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources/bookings")
 	public ResponseEntity<?> eliminarReservasRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "recurso", required = true) String recurso)
