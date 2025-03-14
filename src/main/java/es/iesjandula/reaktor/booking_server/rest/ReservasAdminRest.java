@@ -242,33 +242,16 @@ public class ReservasAdminRest
 	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
 	 * un recurso, un día de la semana, un tramo horario
 	 */
-<<<<<<< HEAD
 	@Modifying
 	@Transactional
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
-=======
+
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
->>>>>>> branch 'main' of https://github.com/IESJandula/Reaktor_BookingServer.git
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources/bookings")
 	public ResponseEntity<?> eliminarReservasRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "recurso", required = true) String recurso)
 	{
 		try
 		{
-<<<<<<< HEAD
-			
-			log.info(recurso);
-=======
-			Optional<Recurso> optinalRecurso = this.recursoRepository.findById(recurso);
-
-			if (!optinalRecurso.isPresent())
-			{
-				String mensajeError = "El recurso que quiere borrar no existe: " + recurso;
-				log.error(mensajeError);
-				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
-			}
-				
->>>>>>> branch 'main' of https://github.com/IESJandula/Reaktor_BookingServer.git
 			this.reservaRepository.deleteReservas(recurso);
 			this.reservaTemporalRepository.deleteReservas(recurso);
 			
