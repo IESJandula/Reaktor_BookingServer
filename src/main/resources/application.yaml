@@ -1,5 +1,5 @@
 spring:
-  jpa.hibernate.ddl-auto: update
+  jpa.hibernate.ddl-auto: create
   datasource:
     url: jdbc:mysql://localhost:3306/reaktor_bookingserver?createDatabaseIfNotExist=true
     username: root
@@ -30,7 +30,7 @@ reaktor:
   clientId: bookings
   constantes:
     reservasFijas: ""
-    reservasPuntuales: ""
+    reservasTemporales: ""
   firebase_server_url: http://localhost:8083
   users_timeout: 30000
   http_connection_timeout: 30000

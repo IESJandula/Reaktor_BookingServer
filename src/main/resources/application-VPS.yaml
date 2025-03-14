@@ -27,4 +27,4 @@ reaktor:
   urlCors: https://somos.iesjandula.es
   constantes:
     reservasFijas: ""
-    reservasPuntuales: ""
+    reservasTemporales: ""
