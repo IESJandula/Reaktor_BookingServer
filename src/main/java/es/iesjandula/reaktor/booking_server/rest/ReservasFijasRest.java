@@ -524,6 +524,7 @@ public class ReservasFijasRest
 
 		try
 		{
+			log.info("La llamada se va a hacer a " + this.firebaseServerUrl + "/firebase/queries/user" + "\n Bearer " + jwtAdmin + "\nemail: " + email) ;
 			HttpGet httpGet = new HttpGet(this.firebaseServerUrl + "/firebase/queries/user");
 
 			// Añadimos el jwt y el email a la llamada
