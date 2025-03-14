@@ -35,4 +35,7 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 			+ "GROUP BY recurso_id"
 			+ "", nativeQuery = true)
 	List<Object[]> reservaFijaMax();
+	
+	@Query(value = "Delete * from ReservaFija rt where rt.reservaFijaId.recurso.id = :recurso")
+	void deleteReservas(@Param("recurso") String recurso);
 }
