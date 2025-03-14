@@ -211,9 +211,9 @@ public class ReservasTemporalesRest
 			// Validaciones previas a la reserva
 			this.validacionesGlobalesPreviasReservaTemporal(usuario);
 
-			// Si el role del usuario es Administrador, creará la reserva con el email
+			// Si el role del usuario es Administrador o Dirección, creará la reserva con el email
 			// recibido en la cabecera
-			// Si el role del usuario no es Administrador, se verificará primero que el
+			// Si el role del usuario no es Administrador o Dirección, se verificará primero que el
 			// email coincide con el que viene en DtoUsuario.
 			// Enviando excepción si no es correcto
 
@@ -346,8 +346,8 @@ public class ReservasTemporalesRest
 	{
 		Profesor profesor = null;
 
-		// Si el role es administrador ...
-		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
+		// Si el role es administrador o dirección ...
+		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR) || usuario.getRoles().contains(BaseConstants.ROLE_DIRECCION))
 		{
 			// Primero buscamos si ya tenemos a ese profesor en nuestra BBDD
 			Optional<Profesor> optionalProfesor = this.profesoresRepository.findById(email);
@@ -366,7 +366,7 @@ public class ReservasTemporalesRest
 		}
 		else
 		{
-			// Si el usuario no es administrador, cogemos la información del usuario
+			// Si el usuario no es administrador o dirección, cogemos la información del usuario
 			profesor = new Profesor(usuario.getEmail(), usuario.getNombre(), usuario.getApellidos());
 
 			// Lo almacenamos en BBDD en caso de que no exista
@@ -500,9 +500,9 @@ public class ReservasTemporalesRest
 			// Validaciones previas a la reserva
 			this.validacionesGlobalesPreviasReservaTemporal(usuario);
 
-			// Si el role del usuario es Administrador, borrará la reserva con el email
+			// Si el role del usuario es Administrador o Dirección, borrará la reserva con el email
 			// recibido en la cabecera
-			// Si el role del usuario no es Administrador, se verificará primero que el
+			// Si el role del usuario no es Administrador o Dirección, se verificará primero que el
 			// email coincide con el que viene en DtoUsuario. Enviando excepción si no es
 			// correcto
 
@@ -608,7 +608,7 @@ public class ReservasTemporalesRest
 
 		Optional<Profesor> profesor = null;
 
-		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
+		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR) || usuario.getRoles().contains(BaseConstants.ROLE_DIRECCION))
 		{
 			profesor = this.profesoresRepository.findById(email);
 		}
@@ -636,7 +636,7 @@ public class ReservasTemporalesRest
 	 */
 	private void validacionesGlobalesPreviasReservaTemporal(DtoUsuarioExtended usuario) throws ReservaException
 	{
-		if (!usuario.getRoles().contains("ADMINISTRADOR"))
+		if (!usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR) && !usuario.getRoles().contains(BaseConstants.ROLE_DIRECCION))
 		{
 			// Vemos si la reserva está deshabilitada
 			Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository

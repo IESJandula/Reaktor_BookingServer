@@ -40,7 +40,7 @@ public class ReservasAdminRest
 	@Autowired
 	private IReservaRepository reservaRepository;
 	
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/resources")
 	public ResponseEntity<?> crearRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "esCompartible", required = true) boolean esCompartible,
@@ -100,7 +100,7 @@ public class ReservasAdminRest
 	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
 	 * un recurso, un día de la semana, un tramo horario
 	 */
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources")
 	public ResponseEntity<?> eliminarRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "recurso", required = true) String recurso)
@@ -138,7 +138,7 @@ public class ReservasAdminRest
 		}
 	}
 	
-	@PreAuthorize("hasRole('" + BaseConstants.ROLE_ADMINISTRADOR + "')")
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/resources/cantMax")
 	public ResponseEntity<?> obtenerCantidadMaximaRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario)
 	{
