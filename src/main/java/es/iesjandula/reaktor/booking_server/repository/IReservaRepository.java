@@ -38,8 +38,11 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 			+ "", nativeQuery = true)
 	List<Object[]> reservaFijaMax();
 	
+<<<<<<< HEAD
 	@Modifying
 	@Transactional
+=======
+>>>>>>> branch 'main' of https://github.com/IESJandula/Reaktor_BookingServer.git
 	@Query(value = "Delete from ReservaFija rt where rt.reservaFijaId.recurso.id = :recurso")
 	void deleteReservas(@Param("recurso") String recurso);
 }
