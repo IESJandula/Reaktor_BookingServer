@@ -471,7 +471,7 @@ public class ReservasFijasRest
 	 * @return el profesor encontrado
 	 * @throws ReservaException con un error
 	 */
-	private Profesor buscarProfesor(DtoUsuarioExtended usuario, String email) throws ReservaException
+	public Profesor buscarProfesor(DtoUsuarioExtended usuario, String email) throws ReservaException
 	{
 		Profesor profesor = null;
 

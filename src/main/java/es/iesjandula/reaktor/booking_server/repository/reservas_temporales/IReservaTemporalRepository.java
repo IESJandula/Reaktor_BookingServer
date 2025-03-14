@@ -86,5 +86,8 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 			+ "FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_temporal GROUP BY recurso_id, dia_semana_id, tramo_horario_id) AS Puntual "
 			+ "GROUP BY recurso_id" , nativeQuery = true)
 	List<Object[]> reservaTemporalMax();
+	
+	@Query(value = "Delete * from ReservaTemporal rt where rt.reservaTemporalId.recurso.id = :recurso")
+	void deleteReservas(@Param("recurso") String recurso);
 
 }

@@ -16,4 +16,6 @@ public interface IRecursoRepository extends JpaRepository<Recurso, String>
 
 	@Query("SELECT r FROM Recurso r WHERE " + "r.esCompartible = :esCompartible")
 	List<Recurso> encontrarRecursoCompartible(@Param("esCompartible") boolean esCompartible);
+	
+	
 }
