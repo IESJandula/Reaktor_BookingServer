@@ -2,6 +2,7 @@ package es.iesjandula.reaktor.booking_server.rest;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -543,13 +545,14 @@ public class ReservasFijasRest
 			// Convertimos la respuesta en un objeto DtoInfoUsuario
 			ObjectMapper objectMapper = new ObjectMapper();
 			
-			// Logueamos
-			log.info("Información del profesor de la reserva asignado por el admin: {}", objectMapper.readValue(closeableHttpResponse.getEntity().getContent(),
-					String.class)) ;
+		    // Obtengo la respuesta completa como String
+		    String responseContent = EntityUtils.toString(closeableHttpResponse.getEntity(), StandardCharsets.UTF_8);
 
-			// Obtenemos la respuesta de Firebase
-			DtoUsuarioBase dtoUsuarioBase = objectMapper.readValue(closeableHttpResponse.getEntity().getContent(),
-					DtoUsuarioBase.class);
+		    // Ahora sí puedo loguear fácilmente la respuesta
+		    log.info("Información del profesor asignado por admin: {}", responseContent);
+
+		    // Y parsear el DTO
+		    DtoUsuarioBase dtoUsuarioBase = objectMapper.readValue(responseContent, DtoUsuarioBase.class);
 
 			// Creamos una instancia de profesor con la respuesta de Firebase
 			profesor = new Profesor();
