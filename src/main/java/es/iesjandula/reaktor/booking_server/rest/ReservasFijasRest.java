@@ -531,8 +531,7 @@ public class ReservasFijasRest
 			// Hacemos la peticion
 			closeableHttpResponse = closeableHttpClient.execute(httpGet);
 
-			// Comprobamos si viene la cabecera. En caso afirmativo, es porque trae un
-			// profesor
+			// Comprobamos si viene la cabecera. En caso afirmativo, es porque trae un profesor
 			if (closeableHttpResponse.getEntity() == null)
 			{
 				String mensajeError = "Profesor no encontrado en BBDD Global";
@@ -545,7 +544,8 @@ public class ReservasFijasRest
 			ObjectMapper objectMapper = new ObjectMapper();
 			
 			// Logueamos
-			log.info("Información del profesor de la reserva asignado por el admin: {}", closeableHttpResponse.getEntity().getContent()) ;
+			log.info("Información del profesor de la reserva asignado por el admin: {}", objectMapper.readValue(closeableHttpResponse.getEntity().getContent(),
+					String.class)) ;
 
 			// Obtenemos la respuesta de Firebase
 			DtoUsuarioBase dtoUsuarioBase = objectMapper.readValue(closeableHttpResponse.getEntity().getContent(),
