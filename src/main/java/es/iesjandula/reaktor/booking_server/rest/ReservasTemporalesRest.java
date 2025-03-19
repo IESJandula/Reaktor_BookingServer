@@ -640,13 +640,13 @@ public class ReservasTemporalesRest
 		{
 			// Vemos si la reserva está deshabilitada
 			Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository
-					.findByClave(Constants.TABLA_CONST_RESERVAS_FIJAS);
+					.findByClave(Constants.TABLA_CONST_RESERVAS_TEMPORALES);
 
 			if (!optionalAppDeshabilitada.isPresent())
 			{
 				String errorString = "Error obteniendo parametros";
 
-				log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_FIJAS);
+				log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_TEMPORALES);
 				throw new ReservaException(Constants.ERROR_OBTENIENDO_PARAMETROS, errorString);
 			}
 
