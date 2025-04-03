@@ -162,7 +162,7 @@ public class InicializacionSistema
         // Guardamos los tramos horarios en la base de datos
         if (!tramosHorarios.isEmpty())
         {
-            this.tramosHorariosRepository.saveAll(tramosHorarios) ;
+            this.tramosHorariosRepository.saveAllAndFlush(tramosHorarios) ;
         }
 	}
 	
@@ -218,7 +218,7 @@ public class InicializacionSistema
         // Guardamos los días de la semana en la base de datos
         if (!diasSemana.isEmpty())
         {
-            this.diaSemanaRepository.saveAll(diasSemana) ;
+            this.diaSemanaRepository.saveAllAndFlush(diasSemana) ;
         }
 	}
 	
@@ -237,7 +237,7 @@ public class InicializacionSistema
 			}
 		    catch (IOException ioException)
 		    {
-				String errorString = "IOException mientras se cerraba el reader de los días festivos" ;
+				String errorString = "IOException mientras se cerraba el reader" ;
 				
 				log.error(errorString, ioException) ;
 				throw new BookingError(Constants.ERR_CODE_CIERRE_READER, errorString, ioException) ;
