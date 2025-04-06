@@ -557,14 +557,31 @@ public class ReservasTemporalesRest
 					listaReservasBorrado.add(reservaIterable);
 				}
 				while (reservaIterable.getEsSemanal());
-
-				this.reservaTemporalRepository.deleteAll(listaReservasBorrado);
+				
+				if((usuario.getRoles().contains("PROFESOR") && email.equals(usuario.getEmail()) && !usuario.getRoles().contains("ADMINISTRADOR") && !usuario.getRoles().contains("DIRECCION")) || (usuario.getRoles().contains("ADMINISTRADOR") || usuario.getRoles().contains("DIRECCION")))
+				{
+					this.reservaTemporalRepository.deleteAll(listaReservasBorrado);
+				}
+				else
+				{
+					String mensajeError = "No puedes borrar reservas de otras personas";
+					log.error(mensajeError);
+					throw new ReservaException(Constants.ERROR_CANCELANDO_RESERVA, mensajeError);
+				}
 
 			}
 			else
 			{
-				// Si la reserva existe en la base de datos, se borrará
-				this.reservaTemporalRepository.deleteById(reservaId);
+				if((usuario.getRoles().contains("PROFESOR") && email.equals(usuario.getEmail()) && !usuario.getRoles().contains("ADMINISTRADOR") && !usuario.getRoles().contains("DIRECCION")) || (usuario.getRoles().contains("ADMINISTRADOR") || usuario.getRoles().contains("DIRECCION")))
+				{
+					this.reservaTemporalRepository.deleteById(reservaId);
+				}
+				else
+				{
+					String mensajeError = "No puedes borrar reservas de otras personas";
+					log.error(mensajeError);
+					throw new ReservaException(Constants.ERROR_CANCELANDO_RESERVA, mensajeError);
+				}
 			}
 
 			log.info("La reserva se ha borrado correctamente");
