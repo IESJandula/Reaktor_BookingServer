@@ -499,6 +499,17 @@ public class ReservasTemporalesRest
 		{
 			// Validaciones previas a la reserva
 			this.validacionesGlobalesPreviasReservaTemporal(usuario);
+			
+			if (usuario.getRoles() != null 	   && 
+				usuario.getRoles().size() == 1 &&
+				usuario.getRoles().contains(BaseConstants.ROLE_PROFESOR) &&
+				!email.equals(usuario.getEmail()))
+			{
+				String mensajeError = "No puedes borrar reservas de otras personas";
+				
+				log.error(mensajeError);
+				throw new ReservaException(Constants.ERROR_CANCELANDO_RESERVA, mensajeError);
+			}
 
 			// Si el role del usuario es Administrador o Dirección, borrará la reserva con el email
 			// recibido en la cabecera
@@ -519,8 +530,7 @@ public class ReservasTemporalesRest
 			}
 
 			// Creamos instancia de ReservaId para luego borrar por este id
-			ReservaTemporalId reservaId = this.crearInstanciaDeReservaId(usuario, email, aulaYCarritos, diaDeLaSemana,
-					tramoHorario, numSemana);
+			ReservaTemporalId reservaId = this.crearInstanciaDeReservaId(usuario, email, aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
 
 			Integer semanaInicial = numSemana;
 			ReservaTemporal reservaIterable = new ReservaTemporal();
@@ -557,31 +567,14 @@ public class ReservasTemporalesRest
 					listaReservasBorrado.add(reservaIterable);
 				}
 				while (reservaIterable.getEsSemanal());
-				
-				if((usuario.getRoles().contains("PROFESOR") && email.equals(usuario.getEmail()) && !usuario.getRoles().contains("ADMINISTRADOR") && !usuario.getRoles().contains("DIRECCION")) || (usuario.getRoles().contains("ADMINISTRADOR") || usuario.getRoles().contains("DIRECCION")))
-				{
-					this.reservaTemporalRepository.deleteAll(listaReservasBorrado);
-				}
-				else
-				{
-					String mensajeError = "No puedes borrar reservas de otras personas";
-					log.error(mensajeError);
-					throw new ReservaException(Constants.ERROR_CANCELANDO_RESERVA, mensajeError);
-				}
 
+				// Borramos las reservas
+				this.reservaTemporalRepository.deleteAll(listaReservasBorrado);
 			}
 			else
 			{
-				if((usuario.getRoles().contains("PROFESOR") && email.equals(usuario.getEmail()) && !usuario.getRoles().contains("ADMINISTRADOR") && !usuario.getRoles().contains("DIRECCION")) || (usuario.getRoles().contains("ADMINISTRADOR") || usuario.getRoles().contains("DIRECCION")))
-				{
-					this.reservaTemporalRepository.deleteById(reservaId);
-				}
-				else
-				{
-					String mensajeError = "No puedes borrar reservas de otras personas";
-					log.error(mensajeError);
-					throw new ReservaException(Constants.ERROR_CANCELANDO_RESERVA, mensajeError);
-				}
+				// Borramos la reserva
+				this.reservaTemporalRepository.deleteById(reservaId);
 			}
 
 			log.info("La reserva se ha borrado correctamente");
