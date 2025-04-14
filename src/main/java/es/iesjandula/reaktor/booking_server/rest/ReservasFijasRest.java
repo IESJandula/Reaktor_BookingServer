@@ -265,6 +265,7 @@ public class ReservasFijasRest
 			List<String> nombresYApellidos = new ArrayList<String>();
 			ReservasFijasDto reserva = new ReservasFijasDto();
 			Integer plazasRestantes = recursoSeleccionado.getCantidad();
+			List<String> motivoCursoLista = new ArrayList<String>();
 
 			for (Object[] row : resultados)
 			{
@@ -288,7 +289,8 @@ public class ReservasFijasRest
 					reserva.setNombreYapellidos(nombresYApellidos);
 					reserva.setNAlumnos(nAlumnosLista);
 					reserva.setPlazasRestantes(plazasRestantes);
-					reserva.setMotivoCurso((String) row[6]);
+					motivoCursoLista.add((String) row[6]);
+					reserva.setMotivoCurso(motivoCursoLista);
 
 					listaReservas.remove(reservaAntigua);
 
@@ -312,9 +314,10 @@ public class ReservasFijasRest
 					nombresYApellidos.add(nombreYapellidos);
 					nAlumnosLista = new ArrayList<Integer>();
 					nAlumnosLista.add(nAlumnos);
+					motivoCursoLista.add(motivoCurso);
 
 					reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos,
-							recursos, plazasRestantes,motivoCurso);
+							recursos, plazasRestantes,motivoCursoLista);
 					// Mapeo a ReservaDto
 					listaReservas.add(reserva);
 				}
@@ -334,9 +337,9 @@ public class ReservasFijasRest
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
-					"Error al acceder a la bade de datos", exception);
+					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
