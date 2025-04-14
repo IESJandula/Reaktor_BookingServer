@@ -51,7 +51,7 @@ public class ReservasAdminRest
 	{
 		try
 		{
-			Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible);
+			Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible,false);
 
 			if (this.recursoRepository.encontrarRecurso(recurso).isPresent())
 			{
@@ -68,11 +68,11 @@ public class ReservasAdminRest
 					}
 				}
 
-				recursoFinal = new Recurso(recursoAntiguo.getId(), cantidad, esCompartible);
+				recursoFinal = new Recurso(recursoAntiguo.getId(), cantidad, esCompartible,false);
 			}
 			else
 			{
-				recursoFinal = new Recurso(recurso, cantidad, esCompartible);
+				recursoFinal = new Recurso(recurso, cantidad, esCompartible,false);
 			}
 
 			this.recursoRepository.saveAndFlush(recursoFinal);
@@ -258,6 +258,49 @@ public class ReservasAdminRest
 			log.info("Las reservas del recurso se han borrado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
 
+		}
+		catch (Exception exception)
+		{
+			// Para cualquier error inesperado, devolverá un 500
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error inesperado al borrar el recurso", exception);
+			log.error("Error inesperado al borrar el recurso: ", exception);
+			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
+		}
+	}
+	
+	/**
+	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
+	 * un recurso, un día de la semana, un tramo horario
+	 */
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@RequestMapping(method = RequestMethod.PUT, value = "/resources")
+	public ResponseEntity<?> modificarBloqueoRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
+			@RequestHeader(value = "bloqueado", required = true) boolean bloqueado,
+			@RequestHeader(value = "recurso", required = true) String recurso)
+	{
+		try
+		{
+			Optional<Recurso> optinalRecurso = this.recursoRepository.findById(recurso);
+
+			if (!optinalRecurso.isPresent())
+			{
+				String mensajeError = "El recurso que quiere modificar no existe: " + recurso;
+				log.error(mensajeError);
+				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
+			}
+
+			optinalRecurso.get().setBloqueado(bloqueado);
+			this.recursoRepository.saveAndFlush(optinalRecurso.get());
+
+			log.info("El recurso se ha modificado correctamente: " + recurso);
+			return ResponseEntity.ok().build();
+
+		}
+		catch (ReservaException reservaException)
+		{
+			// Si la reserva no existe, devolverá un 404
+			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
 		}
 		catch (Exception exception)
 		{

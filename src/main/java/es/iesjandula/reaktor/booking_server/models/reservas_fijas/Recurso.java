@@ -22,4 +22,7 @@ public class Recurso
 
 	@Column
 	private boolean esCompartible;
+	
+	@Column
+	private boolean bloqueado;
 }
