@@ -165,6 +165,7 @@ public class ReservasTemporalesRest
 					nAlumnosLista.add(nAlumnos);
 					esFijaLista = new ArrayList<Long>();
 					esFijaLista.add(esFija);
+					motivoCursoLista = new ArrayList<String>();
 					motivoCursoLista.add(motivoCurso);
 					
 

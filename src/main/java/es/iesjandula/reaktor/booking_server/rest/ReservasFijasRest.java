@@ -314,6 +314,7 @@ public class ReservasFijasRest
 					nombresYApellidos.add(nombreYapellidos);
 					nAlumnosLista = new ArrayList<Integer>();
 					nAlumnosLista.add(nAlumnos);
+					motivoCursoLista = new ArrayList<String>();
 					motivoCursoLista.add(motivoCurso);
 
 					reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos,
