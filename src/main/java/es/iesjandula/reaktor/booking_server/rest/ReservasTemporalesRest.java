@@ -110,6 +110,7 @@ public class ReservasTemporalesRest
 			ReservasPuntualesDto reserva = new ReservasPuntualesDto();
 			Integer plazasRestantes = recursoSeleccionado.getCantidad();
 			List<Long> esFijaLista = new ArrayList<Long>();
+			List<String> motivoCursoLista = new ArrayList<String>();
 
 			for (Object[] row : resultados)
 			{
@@ -130,13 +131,14 @@ public class ReservasTemporalesRest
 					nAlumnosLista.add((row[2] != null) ? (Integer) row[2] : 0);
 					plazasRestantes = plazasRestantes - ((row[2] != null) ? (Integer) row[2] : 0);
 					esFijaLista.add((Long) row[6]);
+					motivoCursoLista.add((String) row[7]);
 
 					reserva.setEmail(emails);
 					reserva.setNombreYapellidos(nombresYApellidos);
 					reserva.setNAlumnos(nAlumnosLista);
 					reserva.setPlazasRestantes(plazasRestantes);
 					reserva.setEsfija(esFijaLista);
-					reserva.setMotivoCurso((String) row[7]);
+					reserva.setMotivoCurso(motivoCursoLista);
 
 					listaReservas.remove(reservaAntigua);
 
@@ -163,9 +165,11 @@ public class ReservasTemporalesRest
 					nAlumnosLista.add(nAlumnos);
 					esFijaLista = new ArrayList<Long>();
 					esFijaLista.add(esFija);
+					motivoCursoLista.add(motivoCurso);
+					
 
 					reserva = new ReservasPuntualesDto(diaSemana, tramoHorario, nAlumnosLista, emails,
-							nombresYApellidos, recursos, plazasRestantes, esFijaLista,motivoCurso);
+							nombresYApellidos, recursos, plazasRestantes, esFijaLista,motivoCursoLista);
 					// Mapeo a ReservaDto
 					listaReservas.add(reserva);
 				}

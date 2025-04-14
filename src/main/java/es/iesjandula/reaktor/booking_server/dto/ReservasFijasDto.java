@@ -25,7 +25,7 @@ public class ReservasFijasDto
 
 	private Integer plazasRestantes;
 	
-	private String motivoCurso;
+	private List<String> motivoCurso;
 
 	public ReservasFijasDto(Long diaSemana, Long tramoHorario)
 	{
