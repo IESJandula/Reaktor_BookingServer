@@ -28,7 +28,7 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 			+ "FROM dia_semana d, tramo_horario t, reserva_fija r, profesor p "
 			+ "WHERE ((d.id, t.id) NOT IN (SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_fija r)) " + "UNION "
 			+ "SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, "
-			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id " + "FROM reserva_fija r2, profesor p "
+			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id ,r2.motivo_curso" + "FROM reserva_fija r2, profesor p "
 			+ "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso " + "ORDER BY 1, 2", nativeQuery = true)
 	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso);    
 
