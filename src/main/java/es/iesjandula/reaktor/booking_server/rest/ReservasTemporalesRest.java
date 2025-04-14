@@ -136,6 +136,7 @@ public class ReservasTemporalesRest
 					reserva.setNAlumnos(nAlumnosLista);
 					reserva.setPlazasRestantes(plazasRestantes);
 					reserva.setEsfija(esFijaLista);
+					reserva.setMotivoCurso((String) row[7]);
 
 					listaReservas.remove(reservaAntigua);
 
@@ -151,6 +152,7 @@ public class ReservasTemporalesRest
 					String nombreYapellidos = (String) row[4];
 					String recursos = (String) row[5];
 					Long esFija = (Long) row[6];
+					String motivoCurso = (String) row[7];
 					plazasRestantes = plazasRestantes - nAlumnos;
 
 					emails = new ArrayList<String>();
@@ -163,7 +165,7 @@ public class ReservasTemporalesRest
 					esFijaLista.add(esFija);
 
 					reserva = new ReservasPuntualesDto(diaSemana, tramoHorario, nAlumnosLista, emails,
-							nombresYApellidos, recursos, plazasRestantes, esFijaLista);
+							nombresYApellidos, recursos, plazasRestantes, esFijaLista,motivoCurso);
 					// Mapeo a ReservaDto
 					listaReservas.add(reserva);
 				}
@@ -204,6 +206,7 @@ public class ReservasTemporalesRest
 			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
 			@RequestHeader(value = "nAlumnos", required = true) Integer nAlumnos,
 			@RequestHeader(value = "esSemanal", required = true) Boolean esSemanal,
+			@RequestHeader(value = "motivoCurso", required = true) String motivoCurso,
 			@RequestHeader(value = "numSemana", required = true) Integer numSemana)
 	{
 		try
@@ -263,6 +266,8 @@ public class ReservasTemporalesRest
 			// Creamos la instancia de reserva
 			ReservaTemporal reserva = this.crearInstanciaDeReserva(usuario, email, recurso, diaDeLaSemana,
 					tramosHorarios, nAlumnos, numSemana, esSemanal);
+			
+			reserva.setMotivoCurso(motivoCurso);
 
 			// Si no existe una reserva previa, se guarda la nueva reserva en la base de
 			// datos

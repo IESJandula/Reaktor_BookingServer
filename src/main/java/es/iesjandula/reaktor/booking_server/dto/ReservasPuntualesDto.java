@@ -27,6 +27,8 @@ public class ReservasPuntualesDto
 
 	private List<Long> esfija;
 
+	private String motivoCurso;
+	
 	public ReservasPuntualesDto(Long diaSemana, Long tramoHorario)
 	{
 		super();

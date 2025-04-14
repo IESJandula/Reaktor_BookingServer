@@ -288,6 +288,7 @@ public class ReservasFijasRest
 					reserva.setNombreYapellidos(nombresYApellidos);
 					reserva.setNAlumnos(nAlumnosLista);
 					reserva.setPlazasRestantes(plazasRestantes);
+					reserva.setMotivoCurso((String) row[6]);
 
 					listaReservas.remove(reservaAntigua);
 
@@ -302,6 +303,7 @@ public class ReservasFijasRest
 					String email = (String) row[3];
 					String nombreYapellidos = (String) row[4];
 					String recursos = (String) row[5];
+					String motivoCurso = (String) row[6];
 					plazasRestantes = plazasRestantes - nAlumnos;
 
 					emails = new ArrayList<String>();
@@ -312,7 +314,7 @@ public class ReservasFijasRest
 					nAlumnosLista.add(nAlumnos);
 
 					reserva = new ReservasFijasDto(diaSemana, tramoHorario, nAlumnosLista, emails, nombresYApellidos,
-							recursos, plazasRestantes);
+							recursos, plazasRestantes,motivoCurso);
 					// Mapeo a ReservaDto
 					listaReservas.add(reserva);
 				}
@@ -349,6 +351,7 @@ public class ReservasFijasRest
 	public ResponseEntity<?> realizarReservaFija(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "email", required = true) String email,
 			@RequestHeader(value = "recurso", required = true) String recurso,
+			@RequestHeader(value = "motivoCurso", required = true) String motivoCurso,
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramosHorarios", required = true) Long tramosHorarios,
 			@RequestHeader(value = "nAlumnos", required = true) int nAlumnos)
@@ -397,6 +400,8 @@ public class ReservasFijasRest
 			// Creamos la instancia de reserva
 			ReservaFija reserva = this.crearInstanciaDeReserva(usuario, email, recurso, diaDeLaSemana, tramosHorarios,
 					nAlumnos);
+			
+			reserva.setMotivoCurso(motivoCurso);
 
 			// Si no existe una reserva previa, se guarda la nueva reserva en la base de
 			// datos

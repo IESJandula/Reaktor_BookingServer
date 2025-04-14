@@ -24,6 +24,8 @@ public class ReservasFijasDto
 	private String recurso;
 
 	private Integer plazasRestantes;
+	
+	private String motivoCurso;
 
 	public ReservasFijasDto(Long diaSemana, Long tramoHorario)
 	{

@@ -20,4 +20,7 @@ public class ReservaFija
 	@Column(nullable = false)
 	private boolean esFija;
 	
+	@Column(nullable = false)
+	private String motivoCurso;
+	
 }

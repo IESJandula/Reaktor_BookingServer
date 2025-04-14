@@ -19,4 +19,7 @@ public class ReservaTemporal
 	
 	@Column(nullable = false)
 	private Boolean esSemanal;
+	
+	@Column(nullable = false)
+	private String motivoCurso;
 }
