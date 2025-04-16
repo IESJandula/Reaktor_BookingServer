@@ -33,4 +33,20 @@ public class LogReservas
 	@Column
 	private String locReserva;
 	
+	@Column
+	private Long numRegistro;
+	
+	@Column
+	private Long countMax;
+
+	public LogReservas(Date fecha, String accion, String recurso, String profesor, String locReserva)
+	{
+		super();
+		this.fecha = fecha;
+		this.accion = accion;
+		this.recurso = recurso;
+		this.profesor = profesor;
+		this.locReserva = locReserva;
+	}
+	
 }

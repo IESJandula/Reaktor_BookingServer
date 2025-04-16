@@ -328,8 +328,14 @@ public class ReservasAdminRest
 	{
 		try
 		{
+			if (pagina < 0)
+			{
+				String mensajeError = "No existen logs";
+				log.error(mensajeError);
+				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
+			}
 			
-			String paginacion = pagina.toString() +"0";
+			String paginacion = pagina.toString() + "0";
 			
 			List<LogReservas> listaLogs = this.logReservasRepository.getPaginacionLogs(Integer.parseInt(paginacion));
 

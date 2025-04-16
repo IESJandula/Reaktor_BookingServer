@@ -14,10 +14,17 @@ import es.iesjandula.reaktor.booking_server.models.LogReservas;
 public interface LogReservasRepository extends JpaRepository<LogReservas, Date>
 {
 
-	@Query(value = "SELECT fecha, accion, loc_reserva, profesor, recurso "
-			+ "FROM log_reservas "
-			+ "ORDER BY fecha DESC "
-			+ "LIMIT 10 OFFSET :inicio", nativeQuery = true)
-	List<LogReservas> getPaginacionLogs(@Param("inicio") Integer inicio);
+	@Query(value = "SELECT "
+            + "  ROW_NUMBER() OVER (ORDER BY fecha DESC) AS num_registro, "
+            + "  fecha, "
+            + "  accion, "
+            + "  loc_reserva, "
+            + "  profesor, "
+            + "  recurso, "
+            + "  COUNT(*) OVER() AS count_max "
+            + "FROM log_reservas "
+            + "ORDER BY fecha DESC "
+            + "LIMIT 10 OFFSET :inicio", nativeQuery = true)
+    List<LogReservas> getPaginacionLogs(@Param("inicio") Integer inicio);
 
 }
