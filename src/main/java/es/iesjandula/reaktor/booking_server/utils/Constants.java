@@ -71,6 +71,9 @@ public class Constants
 	public static final int ERR_CODE_PROCESANDO_TRAMO_HORARIO = 200;
 	public static final int ERR_CODE_PROCESANDO_DIA_SEMANA = 201;
 	public static final int ERR_CODE_CIERRE_READER = 202;
+	
+	// Log Reservas
+	public static final int ERR_CODE_LOG_RESERVA = 203;
 
 	/*********************************************************/
 	/******************* Ficheros y carpetas *****************/

@@ -21,9 +21,11 @@ import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.booking_server.dto.RecursoCantMaxDto;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
+import es.iesjandula.reaktor.booking_server.models.LogReservas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
 import es.iesjandula.reaktor.booking_server.repository.IReservaRepository;
+import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
@@ -38,6 +40,9 @@ public class ReservasAdminRest
 	
 	@Autowired
 	private IReservaTemporalRepository reservaTemporalRepository;
+	
+	@Autowired
+	private LogReservasRepository logReservasRepository;
 	
 	@Autowired
 	private IReservaRepository reservaRepository;
@@ -295,6 +300,47 @@ public class ReservasAdminRest
 
 			log.info("El recurso se ha modificado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
+
+		}
+		catch (ReservaException reservaException)
+		{
+			// Si la reserva no existe, devolverá un 404
+			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
+		}
+		catch (Exception exception)
+		{
+			// Para cualquier error inesperado, devolverá un 500
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error inesperado al borrar el recurso", exception);
+			log.error("Error inesperado al borrar el recurso: ", exception);
+			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
+		}
+	}
+	
+	/**
+	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
+	 * un recurso, un día de la semana, un tramo horario
+	 */
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@RequestMapping(method = RequestMethod.GET, value = "/logs")
+	public ResponseEntity<?> getPaginatedLogs(@AuthenticationPrincipal DtoUsuarioExtended usuario,
+			@RequestHeader(value = "pagina", required = true) Integer pagina)
+	{
+		try
+		{
+			
+			String paginacion = pagina.toString() +"0";
+			
+			List<LogReservas> listaLogs = this.logReservasRepository.getPaginacionLogs(Integer.parseInt(paginacion));
+
+			if (listaLogs.isEmpty())
+			{
+				String mensajeError = "No existen logs";
+				log.error(mensajeError);
+				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
+			}
+			
+			return ResponseEntity.ok().body(listaLogs);
 
 		}
 		catch (ReservaException reservaException)
