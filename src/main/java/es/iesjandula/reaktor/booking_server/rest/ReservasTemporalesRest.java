@@ -3,6 +3,7 @@ package es.iesjandula.reaktor.booking_server.rest;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import es.iesjandula.reaktor.base.utils.HttpClientUtils;
 import es.iesjandula.reaktor.booking_server.dto.ReservasPuntualesDto;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.models.Constantes;
+import es.iesjandula.reaktor.booking_server.models.LogReservas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiaSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesor;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Recurso;
@@ -38,8 +40,11 @@ import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramoHorario;
 import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTemporal;
 import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTemporalId;
 import es.iesjandula.reaktor.booking_server.repository.ConstantesRepository;
+import es.iesjandula.reaktor.booking_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.booking_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
+import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
+import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
@@ -60,6 +65,15 @@ public class ReservasTemporalesRest
 
 	@Autowired
 	private ConstantesRepository constanteRepository;
+	
+	@Autowired
+	private IDiaSemanaRepository diasSemanaRepository;
+
+	@Autowired
+	private ITramoHorarioRepository tramosHorariosRepository;
+
+	@Autowired
+	private LogReservasRepository logReservasRepository;
 
 	@Value("${reaktor.firebase_server_url}")
 	private String firebaseServerUrl;
@@ -279,6 +293,13 @@ public class ReservasTemporalesRest
 			this.reservaTemporalRepository.saveAndFlush(reserva);
 
 			log.info("Se ha reservado correctamente");
+			
+			Optional<DiaSemana> diaString = this.diasSemanaRepository.findById(diaDeLaSemana.toString());
+			Optional<TramoHorario> tramoHorarioString = this.tramosHorariosRepository.findById(tramosHorarios.toString());
+			
+			LogReservas log = new LogReservas(new Date(),"CREACIÓN RESERVA TEMPORAL",recurso,email,diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario());
+
+			this.logReservasRepository.saveAndFlush(log);
 
 			return ResponseEntity.ok().body("Reserva realizada correctamente");
 
@@ -595,6 +616,14 @@ public class ReservasTemporalesRest
 			}
 
 			log.info("La reserva se ha borrado correctamente");
+			
+			Optional<DiaSemana> diaString = this.diasSemanaRepository.findById(diaDeLaSemana.toString());
+			Optional<TramoHorario> tramoHorarioString = this.tramosHorariosRepository.findById(tramoHorario.toString());
+			
+			LogReservas logBorrado = new LogReservas(new Date(),"BORRADO RESERVA TEMPORAL",aulaYCarritos,email,diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario());
+
+			this.logReservasRepository.saveAndFlush(logBorrado);
+			
 			return ResponseEntity.ok().build();
 
 		}

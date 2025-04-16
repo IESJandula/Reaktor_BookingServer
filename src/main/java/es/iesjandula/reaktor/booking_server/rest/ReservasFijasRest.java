@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,7 @@ import es.iesjandula.reaktor.base.utils.HttpClientUtils;
 import es.iesjandula.reaktor.booking_server.dto.ReservasFijasDto;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.models.Constantes;
+import es.iesjandula.reaktor.booking_server.models.LogReservas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiaSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesor;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Recurso;
@@ -43,6 +45,7 @@ import es.iesjandula.reaktor.booking_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
 import es.iesjandula.reaktor.booking_server.repository.IReservaRepository;
 import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
+import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
@@ -69,6 +72,9 @@ public class ReservasFijasRest
 	@Autowired
 	private ConstantesRepository constanteRepository;
 
+	@Autowired
+	private LogReservasRepository logReservasRepository;
+	
 	@Value("${reaktor.firebase_server_url}")
 	private String firebaseServerUrl;
 
@@ -412,7 +418,14 @@ public class ReservasFijasRest
 			this.reservasRepository.saveAndFlush(reserva);
 
 			log.info("Se ha reservado correctamente");
+			
+			Optional<DiaSemana> diaString = this.diasSemanaRepository.findById(diaDeLaSemana.toString());
+			Optional<TramoHorario> tramoHorarioString = this.tramosHorariosRepository.findById(tramosHorarios.toString());
+			
+			LogReservas log = new LogReservas(new Date(),"CREACIÓN RESERVA FIJA",recurso,email,diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario());
 
+			this.logReservasRepository.saveAndFlush(log);
+			
 			return ResponseEntity.ok().body("Reserva realizada correctamente");
 
 		}
@@ -663,6 +676,13 @@ public class ReservasFijasRest
 
 			// Si la reserva existe en la base de datos, se borrará
 			this.reservasRepository.deleteById(reservaId);
+			
+			Optional<DiaSemana> diaString = this.diasSemanaRepository.findById(diaDeLaSemana.toString());
+			Optional<TramoHorario> tramoHorarioString = this.tramosHorariosRepository.findById(tramoHorario.toString());
+			
+			LogReservas logBorrado = new LogReservas(new Date(),"BORRADO RESERVA FIJA",aulaYCarritos,email,diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario());
+
+			this.logReservasRepository.saveAndFlush(logBorrado);
 
 			log.info("La reserva se ha borrado correctamente");
 			return ResponseEntity.ok().build();
