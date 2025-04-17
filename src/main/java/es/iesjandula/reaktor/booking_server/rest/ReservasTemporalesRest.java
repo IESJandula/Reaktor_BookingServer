@@ -1,6 +1,7 @@
 package es.iesjandula.reaktor.booking_server.rest;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -125,6 +126,7 @@ public class ReservasTemporalesRest
 			Integer plazasRestantes = recursoSeleccionado.getCantidad();
 			List<Long> esFijaLista = new ArrayList<Long>();
 			List<String> motivoCursoLista = new ArrayList<String>();
+			List<Long> esSemanalLista = new ArrayList<Long>();
 
 			for (Object[] row : resultados)
 			{
@@ -139,6 +141,7 @@ public class ReservasTemporalesRest
 					nAlumnosLista = reserva.getNAlumnos();
 					plazasRestantes = reserva.getPlazasRestantes();
 					esFijaLista = reserva.getEsfija();
+					esSemanalLista = reserva.getEsSemanal();
 
 					emails.add((String) row[3]);
 					nombresYApellidos.add((String) row[4]);
@@ -146,6 +149,9 @@ public class ReservasTemporalesRest
 					plazasRestantes = plazasRestantes - ((row[2] != null) ? (Integer) row[2] : 0);
 					esFijaLista.add((Long) row[6]);
 					motivoCursoLista.add((String) row[7]);
+					BigDecimal esSemanalBD = (BigDecimal) row[8];
+					Long esSemanal = esSemanalBD != null ? esSemanalBD.longValue() : null;
+					esSemanalLista.add(esSemanal);
 
 					reserva.setEmail(emails);
 					reserva.setNombreYapellidos(nombresYApellidos);
@@ -153,6 +159,7 @@ public class ReservasTemporalesRest
 					reserva.setPlazasRestantes(plazasRestantes);
 					reserva.setEsfija(esFijaLista);
 					reserva.setMotivoCurso(motivoCursoLista);
+					reserva.setEsSemanal(esSemanalLista);
 
 					listaReservas.remove(reservaAntigua);
 
@@ -170,6 +177,8 @@ public class ReservasTemporalesRest
 					Long esFija = (Long) row[6];
 					String motivoCurso = (String) row[7];
 					plazasRestantes = plazasRestantes - nAlumnos;
+					BigDecimal esSemanalBD = (BigDecimal) row[8];
+					Long esSemanal = esSemanalBD != null ? esSemanalBD.longValue() : null;
 
 					emails = new ArrayList<String>();
 					emails.add(email);
@@ -181,10 +190,12 @@ public class ReservasTemporalesRest
 					esFijaLista.add(esFija);
 					motivoCursoLista = new ArrayList<String>();
 					motivoCursoLista.add(motivoCurso);
+					esSemanalLista = new ArrayList<Long>();
+					esSemanalLista.add(esSemanal);
 					
 
 					reserva = new ReservasPuntualesDto(diaSemana, tramoHorario, nAlumnosLista, emails,
-							nombresYApellidos, recursos, plazasRestantes, esFijaLista,motivoCursoLista);
+							nombresYApellidos, recursos, plazasRestantes, esFijaLista, motivoCursoLista, esSemanalLista);
 					// Mapeo a ReservaDto
 					listaReservas.add(reserva);
 				}
@@ -518,7 +529,7 @@ public class ReservasTemporalesRest
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/bookings")
-	public ResponseEntity<?> cancelarRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
+	public ResponseEntity<?> borrarReserva(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "email", required = true) String email,
 			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
@@ -572,7 +583,7 @@ public class ReservasTemporalesRest
 					listaReservasBorrado.add(reservaIterable);
 					numSemana--;
 				}
-				while (reservaIterable.getEsSemanal());
+				while (reservaIterable.isEsSemanal());
 
 				numSemana = semanaInicial;
 				do
@@ -587,7 +598,7 @@ public class ReservasTemporalesRest
 					reservaIterable = optinalReservaIterable.get();
 					listaReservasBorrado.add(reservaIterable);
 				}
-				while (reservaIterable.getEsSemanal());
+				while (reservaIterable.isEsSemanal());
 				
 				if((usuario.getRoles().contains("PROFESOR") && email.equals(usuario.getEmail()) && !usuario.getRoles().contains("ADMINISTRADOR") && !usuario.getRoles().contains("DIRECCION")) || (usuario.getRoles().contains("ADMINISTRADOR") || usuario.getRoles().contains("DIRECCION")))
 				{

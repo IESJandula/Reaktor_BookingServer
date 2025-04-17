@@ -18,8 +18,8 @@ public class ReservaTemporal
 	private int nAlumnos;
 	
 	@Column(nullable = false)
-	private Boolean esSemanal;
+	private String motivoCurso;
 	
 	@Column(nullable = false)
-	private String motivoCurso;
+	private boolean esSemanal;
 }

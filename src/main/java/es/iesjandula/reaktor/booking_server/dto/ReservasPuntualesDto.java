@@ -29,11 +29,12 @@ public class ReservasPuntualesDto
 
 	private List<String> motivoCurso;
 	
+	private List<Long> esSemanal;
+	
 	public ReservasPuntualesDto(Long diaSemana, Long tramoHorario)
 	{
 		super();
 		this.diaSemana = diaSemana;
 		this.tramoHorario = tramoHorario;
-
 	}
 }
