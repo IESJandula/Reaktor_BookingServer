@@ -122,8 +122,17 @@ public class ReservasAdminRest
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
-
-			// Si la reserva existe en la base de datos, se borrará
+			
+			List<String> lista = this.recursoRepository.encontrarReservasPorRecurso(recurso);
+			
+			if (!lista.isEmpty())
+			{
+				String mensajeError = "El recurso que quiere borrar tiene reservas: " + recurso;
+				log.error(mensajeError);
+				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
+			}
+			
+			// Si el recurso existe en la base de datos, se borrará
 			this.recursoRepository.deleteById(recurso);
 
 			log.info("El recurso se ha borrado correctamente: " + recurso);

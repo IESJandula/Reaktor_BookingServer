@@ -15,7 +15,12 @@ public interface IRecursoRepository extends JpaRepository<Recurso, String>
 	Optional<Recurso> encontrarRecurso(@Param("recurso") String recurso);
 
 	@Query("SELECT r FROM Recurso r WHERE " + "r.esCompartible = :esCompartible")
-	List<Recurso> encontrarRecursoCompartible(@Param("esCompartible") boolean esCompartible);
+	List<Recurso> encontrarRecursoCompartible(@Param("esCompartible") boolean esCompartible);	
+	
+	@Query(value = "SELECT motivo_curso FROM reserva_fija WHERE recurso_id = :recurso "
+			+ "UNION "
+			+ "SELECT motivo_curso FROM reserva_temporal WHERE recurso_id = :recurso", nativeQuery = true)
+	List<String> encontrarReservasPorRecurso(@Param("recurso") String recurso);    
 	
 	
 }
