@@ -123,15 +123,6 @@ public class ReservasAdminRest
 				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
 			
-			List<String> lista = this.recursoRepository.encontrarReservasPorRecurso(recurso);
-			
-			if (!lista.isEmpty())
-			{
-				String mensajeError = "El recurso que quiere borrar tiene reservas: " + recurso;
-				log.error(mensajeError);
-				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
-			}
-			
 			// Si el recurso existe en la base de datos, se borrará
 			this.recursoRepository.deleteById(recurso);
 
@@ -150,6 +141,33 @@ public class ReservasAdminRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error inesperado al borrar el recurso", exception);
 			log.error("Error inesperado al borrar el recurso: ", exception);
+			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
+		}
+	}
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@RequestMapping(method = RequestMethod.GET, value = "/checkDelete")
+	public ResponseEntity<?> comprobarEliminacionRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
+			@RequestHeader(value = "recurso", required = true) String recurso)
+	{
+		try
+		{
+			boolean borrado = true;
+			
+			List<String> lista = this.recursoRepository.encontrarReservasPorRecurso(recurso);
+			
+			if (!lista.isEmpty())
+			{
+				borrado = false;
+				String mensajeError = "El recurso que quiere borrar tiene reservas: " + recurso;
+				log.error(mensajeError);
+			}
+			
+			return ResponseEntity.ok().body(borrado);
+		}
+		catch (Exception exception)
+		{
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error inesperado al comprobar el borrado de recurso", exception);
+			log.error("Error inesperado al comprobar el borrado de recurso: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
