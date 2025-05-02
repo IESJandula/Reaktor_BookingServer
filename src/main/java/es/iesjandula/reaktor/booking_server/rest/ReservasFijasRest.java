@@ -422,7 +422,20 @@ public class ReservasFijasRest
 			Optional<DiaSemana> diaString = this.diasSemanaRepository.findById(diaDeLaSemana.toString());
 			Optional<TramoHorario> tramoHorarioString = this.tramosHorariosRepository.findById(tramosHorarios.toString());
 			
-			LogReservas log = new LogReservas(new Date(),"CREACIÓN RESERVA FIJA",recurso,email,diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario());
+			String profesor = this.profesoresRepository.getNombreProfesor(email);
+			
+			String usuarioRealizaAccion = "";
+			
+			if(usuario.getEmail().equals(email) && (!usuario.getRoles().contains("ADMINISTRADOR") || !usuario.getRoles().contains("DIRECCION")))
+			{
+				usuarioRealizaAccion = "-";
+			}
+			else
+			{
+				usuarioRealizaAccion = usuario.getNombre() + " " + usuario.getApellidos();
+			}
+			
+			LogReservas log = new LogReservas(new Date(), profesor, "Crear", "Fija", recurso, diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
 
 			this.logReservasRepository.saveAndFlush(log);
 			
@@ -680,7 +693,20 @@ public class ReservasFijasRest
 			Optional<DiaSemana> diaString = this.diasSemanaRepository.findById(diaDeLaSemana.toString());
 			Optional<TramoHorario> tramoHorarioString = this.tramosHorariosRepository.findById(tramoHorario.toString());
 			
-			LogReservas logBorrado = new LogReservas(new Date(),"BORRADO RESERVA FIJA",aulaYCarritos,email,diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario());
+			String profesor = this.profesoresRepository.getNombreProfesor(email);
+			
+			String usuarioRealizaAccion = "";
+			
+			if(usuario.getEmail().equals(email) && (!usuario.getRoles().contains("ADMINISTRADOR") || !usuario.getRoles().contains("DIRECCION")))
+			{
+				usuarioRealizaAccion = "-";
+			}
+			else
+			{
+				usuarioRealizaAccion = usuario.getNombre() + " " + usuario.getApellidos();
+			}
+			
+			LogReservas logBorrado = new LogReservas(new Date(), profesor, "Borrar", "Fija", aulaYCarritos, diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
 
 			this.logReservasRepository.saveAndFlush(logBorrado);
 

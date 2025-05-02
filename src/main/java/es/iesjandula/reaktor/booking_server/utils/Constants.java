@@ -106,6 +106,8 @@ public class Constants
 
 	/** Constante - Reservas temporales */
 	public static final String TABLA_CONST_RESERVAS_TEMPORALES = "Reservas temporales";
+	
+	public static final String TABLA_CONST_MAX_VISTA_CAL_DIAS = "Máximo vista calendario en días";
 
 	/*********************************************************/
 	/******************* Parámetros YAML *********************/
@@ -116,4 +118,6 @@ public class Constants
 
 	/** Constante - Parámetros YAML - Reservas temporales */
 	public static final String PARAM_YAML_RESERVAS_TEMPORALES = "reaktor.constantes.reservasTemporales";
+	
+	public static final String PARAM_YAML_MAX_CALENDARIO = "reaktor.constantes.maxDiasCalendario";
 }

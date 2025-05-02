@@ -20,18 +20,24 @@ public class LogReservas
 
 	@Id
 	private Date fecha;
+	
+	@Column
+	private String usuario;
 
 	@Column
 	private String accion;
 	
 	@Column
+	private String tipo;
+	
+	@Column
 	private String recurso;
 	
 	@Column
-	private String profesor;
+	private String locReserva;
 	
 	@Column
-	private String locReserva;
+	private String superusuario;
 	
 	@Column
 	private Long numRegistro;
@@ -39,14 +45,17 @@ public class LogReservas
 	@Column
 	private Long countMax;
 
-	public LogReservas(Date fecha, String accion, String recurso, String profesor, String locReserva)
+	public LogReservas(Date fecha, String usuario, String accion, String tipo, String recurso, String locReserva,
+			String superusuario)
 	{
 		super();
 		this.fecha = fecha;
+		this.usuario = usuario;
 		this.accion = accion;
+		this.tipo = tipo;
 		this.recurso = recurso;
-		this.profesor = profesor;
 		this.locReserva = locReserva;
+		this.superusuario = superusuario;
 	}
 	
 }

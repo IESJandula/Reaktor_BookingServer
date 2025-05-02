@@ -16,11 +16,7 @@ public interface LogReservasRepository extends JpaRepository<LogReservas, Date>
 
 	@Query(value = "SELECT "
             + "  ROW_NUMBER() OVER (ORDER BY fecha DESC) AS num_registro, "
-            + "  fecha, "
-            + "  accion, "
-            + "  loc_reserva, "
-            + "  profesor, "
-            + "  recurso, "
+            + "  fecha, usuario, accion, tipo, recurso, loc_reserva, superusuario, "
             + "  COUNT(*) OVER() AS count_max "
             + "FROM log_reservas "
             + "ORDER BY fecha DESC "

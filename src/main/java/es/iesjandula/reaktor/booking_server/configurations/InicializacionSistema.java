@@ -51,6 +51,9 @@ public class InicializacionSistema
 
 	@Value("${" + Constants.PARAM_YAML_RESERVAS_TEMPORALES + "}")
 	private String reservasTemporales ;
+	
+	@Value("${" + Constants.PARAM_YAML_MAX_CALENDARIO + "}")
+	private String maxDiasCalendario;
 
 	/**
 	 * Este método se encarga de inicializar el sistema ya sea en el entorno de
@@ -255,6 +258,7 @@ public class InicializacionSistema
 	{
 		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_FIJAS, this.reservasFijas);
 		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_TEMPORALES, this.reservasTemporales);
+		this.cargarPropiedad(Constants.TABLA_CONST_MAX_VISTA_CAL_DIAS, this.maxDiasCalendario);
 	}
 
 	/**
