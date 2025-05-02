@@ -17,6 +17,6 @@ public class DiaSemana
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@Column(length = 9)
+	@Column(length = 10)
 	private String diaSemana;
 }
