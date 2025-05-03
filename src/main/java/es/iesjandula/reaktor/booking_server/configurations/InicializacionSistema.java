@@ -43,8 +43,8 @@ public class InicializacionSistema
 	@Autowired
 	private ConstantesRepository constantesRepository ;
 
-	@Value("${spring.jpa.hibernate.ddl-auto}")
-	private String modoDdl;
+	@Value("${reaktor.reiniciarParametros}")
+	private boolean reiniciarParametros;
 
 	@Value("${" + Constants.PARAM_YAML_RESERVAS_FIJAS + "}")
 	private String reservasFijas ;
@@ -76,7 +76,7 @@ public class InicializacionSistema
 	    	bookingServerConfig.copyToDirectory(bookingServerConfigExec) ;
 	    }
 		
-		if (Constants.MODO_DDL_CREATE.equalsIgnoreCase(this.modoDdl))
+		if (this.reiniciarParametros)
 		{
 			// Parseamos los tramos horarios
 			this.cargarTramosHorariosDesdeCSVInternal() ;

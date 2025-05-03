@@ -35,3 +35,4 @@ reaktor:
   firebase_server_url: http://localhost:8083
   users_timeout: 30000
   http_connection_timeout: 30000
+  reiniciarParametros: true
