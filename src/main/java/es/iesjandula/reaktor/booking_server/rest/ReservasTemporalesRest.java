@@ -671,7 +671,7 @@ public class ReservasTemporalesRest
 			DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	        String fechaFormateada = fecha.format(formato);
 			
-			LogReservas logBorrado = new LogReservas(new Date(), profesor, "Borrar", "Temporal", aulaYCarritos, fechaFormateada + " | " + diaString.get().getDiaSemana() + " - "+ tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
+			LogReservas logBorrado = new LogReservas(new Date(), profesor, "Borrar", "Temporal", aulaYCarritos, fechaFormateada + " | " + diaString.get().getDiaSemana() + " - " + tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
 
 			this.logReservasRepository.saveAndFlush(logBorrado);
 			
