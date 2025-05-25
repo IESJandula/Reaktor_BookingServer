@@ -5,61 +5,80 @@ import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-public class ReservaException extends Exception
-{
-	/** Serial Version UID */
+/**
+ * Clase que representa una excepción personalizada para errores relacionados
+ * con reservas.
+ * <p>
+ * Extiende de {@link Exception} y añade un código de error, mensaje descriptivo
+ * y la excepción original opcional.
+ * </p>
+ * <p>
+ * Proporciona un método para obtener un mapa con la información del error,
+ * ideal para mostrar mensajes ordenados al usuario.
+ * </p>
+ * 
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
+ */
+public class ReservaException extends Exception {
+
+	/** Serial Version UID para serialización */
 	private static final long serialVersionUID = 4514190388643824325L;
 
-	/** Codigo de error para la excepcion */
+	/** Código identificativo del error */
 	private int code;
 
-	/** Mensaje de error para la excepcion */
+	/** Mensaje descriptivo del error */
 	private String message;
 
-	/** Excepcion de error para la excepcion */
+	/** Excepción original que causó este error, si existe */
 	private Exception exception;
 
 	/**
+	 * Constructor con código y mensaje.
+	 * 
 	 * @param code    código del error
-	 * @param message mensaje del error
+	 * @param message mensaje descriptivo del error
 	 */
-	public ReservaException(int code, String message)
-	{
+	public ReservaException(int code, String message) {
 		super(message);
-
 		this.code = code;
 		this.message = message;
 	}
 
 	/**
+	 * Constructor con código, mensaje y excepción original.
 	 * 
 	 * @param code      código del error
-	 * @param message   mensaje del error
-	 * @param exception excepcion del error
+	 * @param message   mensaje descriptivo del error
+	 * @param exception excepción original que causó el error
 	 */
-	public ReservaException(int code, String message, Exception exception)
-	{
+	public ReservaException(int code, String message, Exception exception) {
 		super(message, exception);
-
 		this.code = code;
 		this.message = message;
 		this.exception = exception;
 	}
 
 	/**
-	 * Metodo que mapea el error para mostrarlo de forma ordenada al usuario
+	 * Obtiene un mapa con la información del error para mostrarla ordenadamente al
+	 * usuario.
+	 * <ul>
+	 * <li>code: código del error</li>
+	 * <li>message: mensaje del error</li>
+	 * <li>stackTrace: traza de pila de la excepción original (si existe)</li>
+	 * </ul>
 	 * 
-	 * @return mapException con clave valor <String,String>
+	 * @return mapa con detalles del error
 	 */
-	public Map<String, String> getBodyMesagge()
-	{
-		Map<String, String> getBodyMesagge = new HashMap<String, String>();
+	public Map<String, String> getBodyMesagge() {
+		Map<String, String> getBodyMesagge = new HashMap<>();
 
 		getBodyMesagge.put("code", String.valueOf(code));
 		getBodyMesagge.put("message", message);
 
-		if (this.exception != null)
-		{
+		if (this.exception != null) {
 			String stackTrace = ExceptionUtils.getStackTrace(this.exception);
 			getBodyMesagge.put("stackTrace", stackTrace);
 		}

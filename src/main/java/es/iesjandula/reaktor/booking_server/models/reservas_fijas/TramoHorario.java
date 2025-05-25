@@ -8,16 +8,28 @@ import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Clase que representa un tramo horario fijo.
+ * <p>
+ * Cada tramo horario tiene un identificador único y una cadena que indica el
+ * intervalo de tiempo, por ejemplo, "11:30/12:30".
+ * </p>
+ * 
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
+ */
 @Data
 @NoArgsConstructor
 @Entity
-public class TramoHorario
-{
+public class TramoHorario {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	// 11:30/12:30
+	/**
+	 * Intervalo de tiempo del tramo horario (por ejemplo "11:30/12:30").
+	 */
 	@Column(length = 20)
 	private String tramoHorario;
 }

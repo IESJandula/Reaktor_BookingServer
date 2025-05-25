@@ -18,6 +18,29 @@ import es.iesjandula.reaktor.booking_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
+
+/**
+ * Controlador REST para gestionar las constantes del sistema.
+ * Permite obtener y actualizar las constantes almacenadas en la base de datos.
+ *
+ * Funcionalidades principales:
+ * <ul>
+ *     <li>Obtener la lista de constantes como objetos DTO mediante método GET.</li>
+ *     <li>Actualizar o insertar nuevas constantes en la base de datos mediante método POST.</li>
+ * </ul>
+ *
+ * Solo los usuarios con roles de administrador o dirección pueden acceder a estos endpoints,
+ * gracias a la protección mediante anotaciones de seguridad (@PreAuthorize).
+ *
+ * Las respuestas son entregadas en formato JSON y cualquier excepción es gestionada
+ * devolviendo una respuesta adecuada con código de error y mensaje personalizado.
+ *
+ * Ruta base del controlador: {@code /bookings/constants}
+ *
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
+ */
 @RequestMapping(value = "/bookings/constants", produces =
 { "application/json" })
 @RestController

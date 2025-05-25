@@ -90,12 +90,18 @@ public class ReservasTemporalesRest
 	private int httpConnectionTimeout;
 
 	/**
-	 * Recibe un recurso y devuelve una lista de recursos organizados por días y
-	 * tramos horarios, para mostrarlos
-	 * 
-	 * @param recursos
-	 * @return
-	 * @throws ReservaException
+	 * Endpoint de tipo GET que devuelve una lista de reservas puntuales organizadas por día de la semana y tramo horario.
+	 * <p>
+	 * A partir del identificador del recurso (aula o carrito) y el número de semana proporcionados por cabecera, 
+	 * consulta las reservas asociadas y las estructura para facilitar su visualización. 
+	 * Si no se encuentra el recurso o si ocurre algún error durante la consulta, se lanza una {@link ReservaException}.
+	 * <p>
+	 * Solo accesible para usuarios con el rol de PROFESOR.
+	 *
+	 * @param recurso   Identificador del recurso (aula o carrito).
+	 * @param numSemana Número de semana para la que se desean obtener las reservas.
+	 * @return Lista de {@link ReservasPuntualesDto} con las reservas encontradas, organizadas por día y tramo horario.
+	 * @throws ReservaException si no se encuentra el recurso o si ocurre un error inesperado al acceder a la base de datos.
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/bookings")
@@ -227,9 +233,33 @@ public class ReservasTemporalesRest
 	}
 
 	/**
-	 * Endpoint de tipo post para realizar una reserva con un correo de un profesor,
-	 * un recurso, un día de la semana, un tramo horario, un profesor y un número de
-	 * alumnos
+	 * Endpoint POST para crear una reserva temporal de un recurso (aula o carrito).
+	 * <p>
+	 * Este método permite a un usuario con rol de PROFESOR registrar una reserva temporal
+	 * indicando el correo del profesor, el recurso, día de la semana, tramo horario, número
+	 * de alumnos, si la reserva es semanal, el motivo del curso y la semana correspondiente.
+	 * <p>
+	 * Realiza diversas validaciones, como:
+	 * <ul>
+	 *   <li>Verificar si ya existe una reserva con los mismos parámetros.</li>
+	 *   <li>Comprobar si el recurso es compartible o no.</li>
+	 *   <li>Validar el número de alumnos (debe ser mayor que 0 y no exceder la capacidad del recurso).</li>
+	 *   <li>Controlar permisos y consistencia del correo del profesor en función del rol del usuario autenticado.</li>
+	 * </ul>
+	 * En caso de éxito, se guarda la reserva en la base de datos y se registra un log de la acción.
+	 *
+	 * @param usuario        Usuario autenticado que realiza la petición.
+	 * @param email          Email del profesor que realiza la reserva.
+	 * @param recurso        Identificador del recurso a reservar.
+	 * @param diaDeLaSemana  Día de la semana en que se desea hacer la reserva (ID).
+	 * @param tramosHorarios Tramo horario en que se desea hacer la reserva (ID).
+	 * @param nAlumnos       Número de alumnos que utilizarán el recurso.
+	 * @param esSemanal      Indica si la reserva se repetirá semanalmente.
+	 * @param motivoCurso    Motivo o descripción de la reserva.
+	 * @param numSemana      Número de semana para la cual se realiza la reserva.
+	 * @return {@link ResponseEntity} con un mensaje de éxito o detalle del error.
+	 * @throws ReservaException si la reserva ya existe, si el recurso no es compartible y ya está reservado,
+	 *                          si el número de alumnos es inválido o si ocurre un error inesperado.
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/bookings")
@@ -359,14 +389,25 @@ public class ReservasTemporalesRest
 	}
 
 	/**
-	 * @param usuario       usuario
-	 * @param email         email
-	 * @param recursoString recurso previo
-	 * @param diaSemana     dia de la semana
-	 * @param tramoHorario
-	 * @param nAlumnos
-	 * @return
-	 * @throws ReservaException
+	 * Crea una instancia de {@link ReservaTemporal} con los datos recibidos.
+	 * <p>
+	 * Este método construye el objeto de reserva temporal asociando el recurso, día
+	 * de la semana, tramo horario, semana, profesor y otros datos como el número de
+	 * alumnos y si la reserva es semanal. Se encarga también de buscar el profesor 
+	 * correspondiente en función del rol del usuario autenticado.
+	 * <p>
+	 * Es utilizado por el endpoint para registrar una nueva reserva en la base de datos.
+	 *
+	 * @param usuario       Usuario autenticado que realiza la solicitud.
+	 * @param email         Email del profesor que solicita la reserva (puede diferir del usuario autenticado).
+	 * @param recursoString Identificador del recurso a reservar (aula o carrito).
+	 * @param diaSemana     ID del día de la semana en que se desea realizar la reserva.
+	 * @param tramoHorario  ID del tramo horario en que se desea realizar la reserva.
+	 * @param nAlumnos      Número de alumnos que utilizarán el recurso.
+	 * @param numSemana     Número de la semana para la que se realiza la reserva.
+	 * @param esSemanal     Indica si la reserva se repetirá semanalmente.
+	 * @return Instancia completamente construida de {@link ReservaTemporal}.
+	 * @throws ReservaException Si ocurre un error al recuperar la información del profesor.
 	 */
 	private ReservaTemporal crearInstanciaDeReserva(DtoUsuarioExtended usuario, String email, String recursoString,
 			Long diaSemana, Long tramoHorario, int nAlumnos, Integer numSemana, Boolean esSemanal)
@@ -402,10 +443,20 @@ public class ReservasTemporalesRest
 	}
 
 	/**
-	 * @param usuario usuario
-	 * @param email   email
-	 * @return el profesor encontrado
-	 * @throws ReservaException con un error
+	 * Recupera la entidad {@link Profesor} correspondiente al email indicado,
+	 * utilizando la información del usuario autenticado y sus roles.
+	 * <p>
+	 * Si el usuario tiene rol de ADMINISTRADOR o DIRECCIÓN, el método intenta recuperar
+	 * el profesor desde la base de datos local. Si no se encuentra, se consulta a Firebase.
+	 * <p>
+	 * Si el usuario no tiene rol privilegiado, se construye el objeto {@link Profesor}
+	 * directamente a partir de los datos del usuario autenticado, y se persiste en base de datos
+	 * si no existía previamente.
+	 *
+	 * @param usuario Usuario autenticado que realiza la solicitud.
+	 * @param email   Email del profesor asociado a la reserva.
+	 * @return El objeto {@link Profesor} correspondiente al email indicado.
+	 * @throws ReservaException Si ocurre un error al consultar Firebase u obtener los datos del profesor.
 	 */
 	private Profesor buscarProfesor(DtoUsuarioExtended usuario, String email) throws ReservaException
 	{
@@ -442,10 +493,16 @@ public class ReservasTemporalesRest
 	}
 
 	/**
-	 * @param jwtAdmin JWT del usuario admin
-	 * @param email    email del profesor que va a realizar la reserva
-	 * @return el profesor encontrado enfirebase
-	 * @throws ReservaException con un error
+	 * Realiza una consulta a Firebase para recuperar los datos de un profesor mediante su email.
+	 * <p>
+	 * Utiliza el JWT del usuario administrador para autenticar la petición HTTP hacia el servidor de Firebase.
+	 * Si el profesor es encontrado, se construye un objeto {@link Profesor} a partir de los datos devueltos
+	 * por Firebase y se persiste en la base de datos local.
+	 *
+	 * @param jwtAdmin JWT del usuario con permisos de administrador, utilizado para autenticar la petición a Firebase.
+	 * @param email    Email del profesor que se desea buscar.
+	 * @return El objeto {@link Profesor} correspondiente al email indicado, obtenido desde Firebase.
+	 * @throws ReservaException Si se produce un error en la conexión, un timeout o si el profesor no se encuentra.
 	 */
 	private Profesor buscarProfesorEnFirebase(String jwtAdmin, String email) throws ReservaException
 	{
@@ -524,8 +581,14 @@ public class ReservasTemporalesRest
 	}
 
 	/**
-	 * @param closeableHttpResponse closeable HTTP response
-	 * @throws PrinterClientException printer client exception
+	 * Cierra de forma segura el flujo {@link CloseableHttpResponse} utilizado en la petición HTTP a Firebase.
+	 * <p>
+	 * Este método debe ser llamado en el bloque {@code finally} para garantizar el cierre del recurso
+	 * y evitar fugas de memoria o conexiones abiertas. En caso de producirse una excepción durante el cierre,
+	 * se lanza una {@link ReservaException} específica con información del error.
+	 *
+	 * @param closeableHttpResponse Respuesta HTTP que debe cerrarse tras la consulta a Firebase.
+	 * @throws ReservaException Si ocurre una {@link IOException} al intentar cerrar el flujo.
 	 */
 	private void buscarProfesorEnFirebaseCierreFlujos(CloseableHttpResponse closeableHttpResponse)
 			throws ReservaException
@@ -547,8 +610,25 @@ public class ReservasTemporalesRest
 	}
 
 	/**
-	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
-	 * un recurso, un día de la semana, un tramo horario y un numero de semana
+	 * Elimina una reserva temporal existente según los parámetros especificados.
+	 * <p>
+	 * Este endpoint permite a un profesor cancelar su propia reserva, o a un usuario con rol
+	 * de ADMINISTRADOR o DIRECCIÓN cancelar reservas de cualquier profesor.
+	 * <p>
+	 * Si la reserva es semanal, se eliminan todas las instancias semanales correlativas hacia atrás y hacia adelante
+	 * mientras compartan el atributo {@code esSemanal = true}.
+	 * <p>
+	 * Se registra la acción de borrado en la tabla de logs.
+	 *
+	 * @param usuario       Usuario autenticado que realiza la petición.
+	 * @param email         Email del profesor cuya reserva se desea cancelar.
+	 * @param aulaYCarritos Identificador del recurso reservado.
+	 * @param diaDeLaSemana Día de la semana en que se hizo la reserva.
+	 * @param tramoHorario  Tramo horario de la reserva.
+	 * @param numSemana     Número de semana correspondiente a la reserva.
+	 * @param esSemanal     Indicador de si la reserva es de tipo semanal (opcional).
+	 * @return {@link ResponseEntity} con estado 200 si se elimina correctamente, 404 si la reserva no existe,
+	 *         o 500 ante errores inesperados.
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/bookings")
@@ -694,12 +774,21 @@ public class ReservasTemporalesRest
 	}
 
 	/**
-	 * @param usuario
-	 * @param email
-	 * @param aulaYCarritos
-	 * @param diaDeLaSemana
-	 * @param tramoHorario
-	 * @return
+	 * Crea una instancia de {@link ReservaTemporalId} a partir de los parámetros proporcionados.
+	 * <p>
+	 * Esta función determina qué profesor debe asociarse con la reserva:
+	 * <ul>
+	 *   <li>Si el usuario tiene rol ADMINISTRADOR o DIRECCIÓN, se usa el email proporcionado.</li>
+	 *   <li>En caso contrario, se usa el email del usuario autenticado.</li>
+	 * </ul>
+	 *
+	 * @param usuario         Usuario autenticado que realiza la solicitud.
+	 * @param email           Email del profesor titular de la reserva.
+	 * @param aulaYCarritos   Identificador del recurso reservado.
+	 * @param diaDeLaSemana   Día de la semana asociado a la reserva.
+	 * @param tramoHorario    Tramo horario en que se realiza la reserva.
+	 * @param numSemana       Número de semana correspondiente a la reserva.
+	 * @return Instancia de {@link ReservaTemporalId} representando la reserva.
 	 */
 	private ReservaTemporalId crearInstanciaDeReservaId(DtoUsuarioExtended usuario, String email, String aulaYCarritos,
 			Long diaDeLaSemana, Long tramoHorario, Integer numSemana)
@@ -739,7 +828,15 @@ public class ReservasTemporalesRest
 	}
 
 	/**
-	 * @throws ReservaException con un error
+	 * Realiza validaciones previas a la creación o cancelación de una reserva temporal.
+	 * <p>
+	 * Esta validación aplica únicamente a los usuarios que no tienen roles de ADMINISTRADOR ni DIRECCIÓN.
+	 * Verifica si el sistema de reservas temporales se encuentra deshabilitado mediante una constante de configuración
+	 * (clave {@link Constants#TABLA_CONST_RESERVAS_TEMPORALES}).
+	 * Si el sistema está deshabilitado, se lanza una {@link ReservaException} con el motivo.
+	 *
+	 * @param usuario Usuario autenticado que intenta realizar la operación de reserva.
+	 * @throws ReservaException Si ocurre un error al obtener los parámetros o si la funcionalidad está deshabilitada.
 	 */
 	private void validacionesGlobalesPreviasReservaTemporal(DtoUsuarioExtended usuario) throws ReservaException
 	{
@@ -769,6 +866,21 @@ public class ReservasTemporalesRest
 		}
 	}
 
+	/**
+	 * Endpoint que permite comprobar si un recurso está disponible para ser reservado
+	 * en un día específico, en un tramo horario determinado, durante una o varias semanas,
+	 * teniendo en cuenta la cantidad de alumnos.
+	 * <p>
+	 * Si el recurso no tiene reservas en alguna de las semanas indicadas o si es compartible
+	 * y hay capacidad suficiente, se considerará disponible.
+	 *
+	 * @param diaDeLaSemana Día de la semana (ej. lunes = 1, martes = 2, etc.).
+	 * @param recurso       Identificador del recurso que se desea comprobar (aula, carrito, etc.).
+	 * @param tramoHorario  Identificador del tramo horario solicitado.
+	 * @param numAlumnos    Número de alumnos que requieren el recurso.
+	 * @param semanas       Lista de números de semana en los que se quiere comprobar la disponibilidad.
+	 * @return {@code ResponseEntity<Boolean>} que indica si el recurso está disponible ({@code true}) o no ({@code false}).
+	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/bookings/available")
 	public ResponseEntity<?> comprobarDisponibilidad(

@@ -7,25 +7,39 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Esta clase es la que habilita que una dirección IP remota pueda hacer
- * llamadas al backend
+ * Clase de configuración para habilitar CORS (Cross-Origin Resource Sharing) en
+ * la aplicación.
+ * <p>
+ * Esta clase permite que direcciones IP remotas puedan comunicarse con el
+ * backend. Los orígenes permitidos se definen en el archivo de propiedades
+ * mediante la variable {@code reaktor.urlCors}.
+ * </p>
  * 
- * @author Pablo Ruiz
+ * <p>
+ * Se permiten los métodos HTTP: GET, POST, PUT y DELETE, así como cualquier
+ * cabecera.
+ * </p>
+ * 
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
  */
 @Configuration
 @EnableWebMvc
-public class CORSConfig implements WebMvcConfigurer
-{
-	/** URL permitida de CORS */
+public class CORSConfig implements WebMvcConfigurer {
+
+	/** Lista de URLs permitidas para realizar peticiones al backend. */
 	@Value("${reaktor.urlCors}")
 	private String[] urlCors;
 
 	/**
-	 * @param registry información del Cors Registry
+	 * Configura los mapeos de CORS para permitir solicitudes cruzadas desde los
+	 * orígenes permitidos.
+	 *
+	 * @param registry Objeto utilizado para registrar las configuraciones de CORS.
 	 */
 	@Override
-	public void addCorsMappings(CorsRegistry registry)
-	{
+	public void addCorsMappings(CorsRegistry registry) {
 		registry.addMapping("/**").allowedOrigins(urlCors).allowedMethods("GET", "POST", "PUT", "DELETE")
 				.allowedHeaders("*");
 	}
