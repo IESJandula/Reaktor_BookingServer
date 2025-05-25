@@ -30,6 +30,19 @@ import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IRese
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
+
+/**
+ * Controlador REST para operaciones administrativas relacionadas con la gestión
+ * de recursos y reservas en el sistema de reservas.
+ * 
+ * <p>Permite a usuarios con roles de administrador o dirección realizar acciones
+ * como crear, eliminar o modificar recursos, obtener estadísticas de uso,
+ * revisar logs de reservas, entre otros.</p>
+ * 
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
+ */
 @RequestMapping(value = "/bookings/admin")
 @RestController
 @Log4j2
@@ -47,6 +60,17 @@ public class ReservasAdminRest
 	@Autowired
 	private IReservaRepository reservaRepository;
 	
+	/**
+	 * Endpoint para crear o actualizar un recurso.
+	 * Si el recurso ya existe con la misma cantidad y configuración de compartibilidad, se lanza una excepción.
+	 * Si el recurso existe pero con diferentes parámetros, se actualiza.
+	 * 
+	 * @param usuario Usuario autenticado que realiza la operación
+	 * @param esCompartible Indica si el recurso puede ser compartido
+	 * @param recurso Nombre del recurso
+	 * @param cantidad Cantidad del recurso
+	 * @return ResponseEntity con el recurso creado o actualizado
+	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/resources")
 	public ResponseEntity<?> crearRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
@@ -104,8 +128,11 @@ public class ReservasAdminRest
 	}
 
 	/**
-	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
-	 * un recurso, un día de la semana, un tramo horario
+	 * Endpoint para eliminar un recurso si existe.
+	 * 
+	 * @param usuario Usuario autenticado que realiza la operación
+	 * @param recurso Nombre del recurso a eliminar
+	 * @return ResponseEntity con estado OK si se elimina correctamente, o error si no existe
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources")
@@ -144,6 +171,14 @@ public class ReservasAdminRest
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
+	
+	/**
+	 * Verifica si un recurso tiene reservas asociadas antes de intentar eliminarlo.
+	 * 
+	 * @param usuario Usuario autenticado
+	 * @param recurso Nombre del recurso a comprobar
+	 * @return ResponseEntity con un booleano indicando si el recurso puede ser eliminado
+	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/checkDelete")
 	public ResponseEntity<?> comprobarEliminacionRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
@@ -172,6 +207,12 @@ public class ReservasAdminRest
 		}
 	}
 	
+	/**
+	 * Obtiene la cantidad máxima reservada para cada recurso combinando reservas fijas y temporales.
+	 * 
+	 * @param usuario Usuario autenticado
+	 * @return ResponseEntity con un mapa de recurso y su cantidad máxima total reservada
+	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/resources/cantMax")
 	public ResponseEntity<?> obtenerCantidadMaximaRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario)
@@ -271,12 +312,14 @@ public class ReservasAdminRest
 	}
 	
 	/**
-	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
-	 * un recurso, un día de la semana, un tramo horario
+	 * Elimina todas las reservas (fijas y temporales) asociadas a un recurso específico.
+	 * 
+	 * @param usuario Usuario autenticado
+	 * @param recurso Nombre del recurso del cual se eliminarán todas las reservas
+	 * @return ResponseEntity con estado OK si las reservas son eliminadas exitosamente
 	 */
 	@Modifying
 	@Transactional
-
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources/bookings")
 	public ResponseEntity<?> eliminarReservasRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
@@ -302,8 +345,12 @@ public class ReservasAdminRest
 	}
 	
 	/**
-	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
-	 * un recurso, un día de la semana, un tramo horario
+	 * Modifica el estado de bloqueo de un recurso (habilitado o deshabilitado para reservas).
+	 * 
+	 * @param usuario Usuario autenticado
+	 * @param bloqueado Nuevo estado de bloqueo del recurso
+	 * @param recurso Nombre del recurso a modificar
+	 * @return ResponseEntity con estado OK si el recurso fue modificado correctamente
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.PUT, value = "/resources")
@@ -345,8 +392,12 @@ public class ReservasAdminRest
 	}
 	
 	/**
-	 * Endpoint de tipo post para cancelar una reserva con un correo de un profesor,
-	 * un recurso, un día de la semana, un tramo horario
+	 * Obtiene logs paginados del sistema de reservas.
+	 * Cada página contiene un conjunto de logs a partir del número de página indicado.
+	 * 
+	 * @param usuario Usuario autenticado
+	 * @param pagina Número de página a recuperar (debe ser mayor o igual a 0)
+	 * @return ResponseEntity con la lista de logs o error si no existen registros
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/logs")

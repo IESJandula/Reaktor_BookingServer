@@ -30,6 +30,28 @@ import es.iesjandula.reaktor.booking_server.utils.Constants;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Clase que gestiona la inicialización del sistema al iniciar la aplicación.
+ * Se encarga de copiar archivos de configuración, cargar datos desde archivos CSV
+ * y establecer valores predeterminados en la base de datos, en caso de ser necesario.
+ *
+ * Funcionalidades principales:
+ * <ul>
+ *     <li>Copia la estructura de carpetas de configuración al entorno de ejecución.</li>
+ *     <li>Reinicia los parámetros del sistema si está activado en el archivo de configuración YAML.</li>
+ *     <li>Carga los tramos horarios desde un archivo CSV y los guarda en la base de datos.</li>
+ *     <li>Carga los días de la semana desde un archivo CSV y los guarda en la base de datos.</li>
+ *     <li>Inicializa las constantes del sistema desde las propiedades definidas.</li>
+ * </ul>
+ *
+ * Esta clase utiliza la anotación {@code @PostConstruct}, lo que significa que
+ * su método principal se ejecuta automáticamente una vez que se ha construido
+ * el contexto de Spring.
+ *
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
+ */
 @Log4j2
 @Service
 public class InicializacionSistema
