@@ -78,11 +78,16 @@ public class InicializacionSistema
 		
 		if (this.reiniciarParametros)
 		{
-			// Parseamos los tramos horarios
-			this.cargarTramosHorariosDesdeCSVInternal() ;
+			if(!(tramosHorariosRepository.count() > 0 || diaSemanaRepository.count() > 0))
+			{
+				// Parseamos los tramos horarios
+				this.cargarTramosHorariosDesdeCSVInternal() ;
 
-			// Parseamos los días de la semana
-			this.cargarDiasSemanaDesdeCSVInternal() ;
+				// Parseamos los días de la semana
+				this.cargarDiasSemanaDesdeCSVInternal() ;
+			}
+			
+			constantesRepository.deleteAll();
 
 			// Inicializamos el sistema con las constantes
 			this.inicializarSistemaConConstantes();
