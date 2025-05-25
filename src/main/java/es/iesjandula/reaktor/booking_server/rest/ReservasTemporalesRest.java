@@ -657,7 +657,7 @@ public class ReservasTemporalesRest
 				usuarioRealizaAccion = usuario.getNombre() + " " + usuario.getApellidos();
 			}
 			
-			LogReservas logBorrado = new LogReservas(new Date(), profesor, "Borrar", "Fija", aulaYCarritos, diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
+			LogReservas logBorrado = new LogReservas(new Date(), profesor, "Borrar", "Temporal", aulaYCarritos, diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
 
 			this.logReservasRepository.saveAndFlush(logBorrado);
 			
