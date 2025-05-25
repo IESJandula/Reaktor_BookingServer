@@ -3,6 +3,10 @@ package es.iesjandula.reaktor.booking_server.rest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.IsoFields;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -321,7 +325,13 @@ public class ReservasTemporalesRest
 				usuarioRealizaAccion = usuario.getNombre() + " " + usuario.getApellidos();
 			}
 			
-			LogReservas log = new LogReservas(new Date(), profesor, "Crear", "Temporal", recurso, diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
+			
+			LocalDate fecha = LocalDate.now().with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, numSemana).with(ChronoField.DAY_OF_WEEK, diaDeLaSemana);
+			DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	        String fechaFormateada = fecha.format(formato);
+			
+			
+			LogReservas log = new LogReservas(new Date(), profesor, "Crear", "Temporal", recurso, fechaFormateada + " | " + diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
 
 			this.logReservasRepository.saveAndFlush(log);
 
@@ -657,7 +667,11 @@ public class ReservasTemporalesRest
 				usuarioRealizaAccion = usuario.getNombre() + " " + usuario.getApellidos();
 			}
 			
-			LogReservas logBorrado = new LogReservas(new Date(), profesor, "Borrar", "Temporal", aulaYCarritos, diaString.get().getDiaSemana()+" - "+tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
+			LocalDate fecha = LocalDate.now().with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, numSemana).with(ChronoField.DAY_OF_WEEK, diaDeLaSemana);
+			DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	        String fechaFormateada = fecha.format(formato);
+			
+			LogReservas logBorrado = new LogReservas(new Date(), profesor, "Borrar", "Temporal", aulaYCarritos, fechaFormateada + " | " + diaString.get().getDiaSemana() + " - "+ tramoHorarioString.get().getTramoHorario(), usuarioRealizaAccion);
 
 			this.logReservasRepository.saveAndFlush(logBorrado);
 			
