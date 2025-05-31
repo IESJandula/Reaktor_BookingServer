@@ -27,7 +27,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "log_reservas")
-public class LogReservas {
+public class LogReservas
+{
 
 	/** Fecha y hora en la que se realizó la acción */
 	@Id
@@ -77,7 +78,8 @@ public class LogReservas {
 	 * @param superusuario Usuario con privilegios de superusuario
 	 */
 	public LogReservas(Date fecha, String usuario, String accion, String tipo, String recurso, String locReserva,
-			String superusuario) {
+			String superusuario)
+	{
 		super();
 		this.fecha = fecha;
 		this.usuario = usuario;

@@ -22,7 +22,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-public class TramoHorario {
+public class TramoHorario
+{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;

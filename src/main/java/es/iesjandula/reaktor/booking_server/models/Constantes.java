@@ -24,7 +24,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "constantes")
-public class Constantes {
+public class Constantes
+{
 
 	/** Clave única que identifica la constante */
 	@Id

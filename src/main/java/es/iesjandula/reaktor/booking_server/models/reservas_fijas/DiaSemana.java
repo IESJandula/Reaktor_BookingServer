@@ -22,7 +22,8 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @NoArgsConstructor
-public class DiaSemana {
+public class DiaSemana
+{
 
 	/** Identificador único del día de la semana */
 	@Id

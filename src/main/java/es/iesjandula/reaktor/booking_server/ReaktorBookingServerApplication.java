@@ -19,15 +19,18 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableScheduling
-@ComponentScan(basePackages = { "es.iesjandula" })
-public class ReaktorBookingServerApplication {
+@ComponentScan(basePackages =
+{ "es.iesjandula" })
+public class ReaktorBookingServerApplication
+{
 
 	/**
 	 * Método principal que lanza la aplicación Spring Boot.
 	 * 
 	 * @param args los argumentos de línea de comandos (opcional).
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 		SpringApplication.run(ReaktorBookingServerApplication.class, args);
 	}
 }

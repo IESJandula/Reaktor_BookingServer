@@ -19,7 +19,8 @@ import es.iesjandula.reaktor.booking_server.models.LogReservas;
  * @author Enrique Contreras
  */
 @Repository
-public interface LogReservasRepository extends JpaRepository<LogReservas, Date> {
+public interface LogReservasRepository extends JpaRepository<LogReservas, Date>
+{
 
 	/**
 	 * Obtiene una lista paginada de logs de reservas ordenados por fecha

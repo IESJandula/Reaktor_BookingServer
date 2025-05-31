@@ -27,7 +27,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RecursoCantMaxDto {
+public class RecursoCantMaxDto
+{
 
 	/** Nombre o identificador del recurso */
 	private String recurso;

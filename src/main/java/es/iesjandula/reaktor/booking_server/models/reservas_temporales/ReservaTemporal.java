@@ -20,7 +20,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-public class ReservaTemporal {
+public class ReservaTemporal
+{
 	@EmbeddedId
 	private ReservaTemporalId reservaTemporalId;
 

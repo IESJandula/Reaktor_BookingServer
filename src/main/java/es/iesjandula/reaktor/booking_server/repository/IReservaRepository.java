@@ -12,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFijaId;
 
-public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFijaId> {
+public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFijaId>
+{
 
 	/**
 	 * Busca la reserva que coincide con el email, recurso, día de la semana y tramo

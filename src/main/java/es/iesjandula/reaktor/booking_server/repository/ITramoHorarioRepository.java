@@ -12,6 +12,7 @@ import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramoHorario;
  * @author Miguel Ríos
  * @author Enrique Contreras
  */
-public interface ITramoHorarioRepository extends JpaRepository<TramoHorario, String> {
+public interface ITramoHorarioRepository extends JpaRepository<TramoHorario, String>
+{
 
 }

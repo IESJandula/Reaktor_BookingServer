@@ -24,7 +24,8 @@ import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTe
  * @author Miguel Ríos
  * @author Enrique Contreras
  */
-public interface IReservaTemporalRepository extends JpaRepository<ReservaTemporal, ReservaTemporalId> {
+public interface IReservaTemporalRepository extends JpaRepository<ReservaTemporal, ReservaTemporalId>
+{
 
 	/**
 	 * Busca una reserva temporal según profesor, recurso, día, tramo horario y

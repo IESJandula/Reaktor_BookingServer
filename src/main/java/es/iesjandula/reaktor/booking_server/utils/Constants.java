@@ -2,7 +2,8 @@ package es.iesjandula.reaktor.booking_server.utils;
 
 import java.io.File;
 
-public class Constants {
+public class Constants
+{
 	/*********************************************************/
 	/*********************** Errores *************************/
 	/*********************************************************/

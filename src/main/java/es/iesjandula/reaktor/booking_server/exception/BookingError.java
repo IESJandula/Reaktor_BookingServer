@@ -29,7 +29,8 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class BookingError extends Exception {
+public class BookingError extends Exception
+{
 
 	/**
 	 * Identificador único de la versión serializada.
@@ -52,7 +53,8 @@ public class BookingError extends Exception {
 	 * @param message   mensaje descriptivo
 	 * @param exception excepción original que causó el error
 	 */
-	public BookingError(int id, String message, Exception exception) {
+	public BookingError(int id, String message, Exception exception)
+	{
 		super();
 		this.id = id;
 		this.message = message;
@@ -65,7 +67,8 @@ public class BookingError extends Exception {
 	 * @param id      código del error
 	 * @param message mensaje descriptivo
 	 */
-	public BookingError(int id, String message) {
+	public BookingError(int id, String message)
+	{
 		super();
 		this.id = id;
 		this.message = message;
@@ -81,13 +84,15 @@ public class BookingError extends Exception {
 	 * 
 	 * @return mapa con detalles del error para facilitar su tratamiento o registro
 	 */
-	public Map<String, String> getMapError() {
+	public Map<String, String> getMapError()
+	{
 		Map<String, String> mapError = new HashMap<String, String>();
 
 		mapError.put("id", "" + id);
 		mapError.put("message", this.message);
 
-		if (this.exception != null) {
+		if (this.exception != null)
+		{
 			String stacktrace = ExceptionUtils.getStackTrace(this.exception);
 			mapError.put("exception", stacktrace);
 		}

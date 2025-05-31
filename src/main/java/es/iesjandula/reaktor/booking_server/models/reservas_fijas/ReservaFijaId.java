@@ -25,7 +25,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class ReservaFijaId implements Serializable {
+public class ReservaFijaId implements Serializable
+{
 	private static final long serialVersionUID = 4705657948307458266L;
 
 	/** Profesor asociado a la reserva */

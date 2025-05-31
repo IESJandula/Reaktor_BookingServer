@@ -27,7 +27,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservasPuntualesDto {
+public class ReservasPuntualesDto
+{
 
 	/** Día de la semana asociado a la reserva (por ejemplo, 1 = lunes) */
 	private Long diaSemana;
@@ -69,7 +70,8 @@ public class ReservasPuntualesDto {
 	 * @param diaSemana    día de la semana
 	 * @param tramoHorario tramo horario
 	 */
-	public ReservasPuntualesDto(Long diaSemana, Long tramoHorario) {
+	public ReservasPuntualesDto(Long diaSemana, Long tramoHorario)
+	{
 		super();
 		this.diaSemana = diaSemana;
 		this.tramoHorario = tramoHorario;

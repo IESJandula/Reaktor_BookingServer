@@ -21,7 +21,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
  * @author Miguel Ríos
  * @author Enrique Contreras
  */
-public class ReservaException extends Exception {
+public class ReservaException extends Exception
+{
 
 	/** Serial Version UID para serialización */
 	private static final long serialVersionUID = 4514190388643824325L;
@@ -41,7 +42,8 @@ public class ReservaException extends Exception {
 	 * @param code    código del error
 	 * @param message mensaje descriptivo del error
 	 */
-	public ReservaException(int code, String message) {
+	public ReservaException(int code, String message)
+	{
 		super(message);
 		this.code = code;
 		this.message = message;
@@ -54,7 +56,8 @@ public class ReservaException extends Exception {
 	 * @param message   mensaje descriptivo del error
 	 * @param exception excepción original que causó el error
 	 */
-	public ReservaException(int code, String message, Exception exception) {
+	public ReservaException(int code, String message, Exception exception)
+	{
 		super(message, exception);
 		this.code = code;
 		this.message = message;
@@ -72,13 +75,15 @@ public class ReservaException extends Exception {
 	 * 
 	 * @return mapa con detalles del error
 	 */
-	public Map<String, String> getBodyMesagge() {
+	public Map<String, String> getBodyMesagge()
+	{
 		Map<String, String> getBodyMesagge = new HashMap<>();
 
 		getBodyMesagge.put("code", String.valueOf(code));
 		getBodyMesagge.put("message", message);
 
-		if (this.exception != null) {
+		if (this.exception != null)
+		{
 			String stackTrace = ExceptionUtils.getStackTrace(this.exception);
 			getBodyMesagge.put("stackTrace", stackTrace);
 		}

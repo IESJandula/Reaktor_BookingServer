@@ -21,7 +21,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Profesor {
+public class Profesor
+{
 
 	/** Email único del profesor, que actúa como identificador */
 	@Id

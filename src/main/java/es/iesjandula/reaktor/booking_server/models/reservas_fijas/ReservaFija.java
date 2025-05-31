@@ -20,7 +20,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-public class ReservaFija {
+public class ReservaFija
+{
 
 	/** Identificador compuesto de la reserva fija */
 	@EmbeddedId

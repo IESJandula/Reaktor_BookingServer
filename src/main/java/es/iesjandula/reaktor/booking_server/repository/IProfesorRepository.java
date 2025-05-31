@@ -14,7 +14,8 @@ import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesor;
  * @author Miguel Ríos
  * @author Enrique Contreras
  */
-public interface IProfesorRepository extends JpaRepository<Profesor, String> {
+public interface IProfesorRepository extends JpaRepository<Profesor, String>
+{
 
 	/**
 	 * Método que devuelve el nombre completo del profesor según su email.

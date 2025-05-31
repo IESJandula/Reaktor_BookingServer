@@ -26,7 +26,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 @EnableWebMvc
-public class CORSConfig implements WebMvcConfigurer {
+public class CORSConfig implements WebMvcConfigurer
+{
 
 	/** Lista de URLs permitidas para realizar peticiones al backend. */
 	@Value("${reaktor.urlCors}")
@@ -39,7 +40,8 @@ public class CORSConfig implements WebMvcConfigurer {
 	 * @param registry Objeto utilizado para registrar las configuraciones de CORS.
 	 */
 	@Override
-	public void addCorsMappings(CorsRegistry registry) {
+	public void addCorsMappings(CorsRegistry registry)
+	{
 		registry.addMapping("/**").allowedOrigins(urlCors).allowedMethods("GET", "POST", "PUT", "DELETE")
 				.allowedHeaders("*");
 	}

@@ -22,7 +22,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Recurso {
+public class Recurso
+{
 
 	/** Identificador único del recurso */
 	@Id

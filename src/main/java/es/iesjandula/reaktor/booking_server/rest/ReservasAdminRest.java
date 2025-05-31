@@ -30,14 +30,15 @@ import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IRese
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 import lombok.extern.log4j.Log4j2;
 
-
 /**
  * Controlador REST para operaciones administrativas relacionadas con la gestión
  * de recursos y reservas en el sistema de reservas.
  * 
- * <p>Permite a usuarios con roles de administrador o dirección realizar acciones
+ * <p>
+ * Permite a usuarios con roles de administrador o dirección realizar acciones
  * como crear, eliminar o modificar recursos, obtener estadísticas de uso,
- * revisar logs de reservas, entre otros.</p>
+ * revisar logs de reservas, entre otros.
+ * </p>
  * 
  * @author Luis David Castillo
  * @author Miguel Ríos
@@ -50,25 +51,25 @@ public class ReservasAdminRest
 {
 	@Autowired
 	private IRecursoRepository recursoRepository;
-	
+
 	@Autowired
 	private IReservaTemporalRepository reservaTemporalRepository;
-	
+
 	@Autowired
 	private LogReservasRepository logReservasRepository;
-	
+
 	@Autowired
 	private IReservaRepository reservaRepository;
-	
+
 	/**
-	 * Endpoint para crear o actualizar un recurso.
-	 * Si el recurso ya existe con la misma cantidad y configuración de compartibilidad, se lanza una excepción.
-	 * Si el recurso existe pero con diferentes parámetros, se actualiza.
+	 * Endpoint para crear o actualizar un recurso. Si el recurso ya existe con la
+	 * misma cantidad y configuración de compartibilidad, se lanza una excepción. Si
+	 * el recurso existe pero con diferentes parámetros, se actualiza.
 	 * 
-	 * @param usuario Usuario autenticado que realiza la operación
+	 * @param usuario       Usuario autenticado que realiza la operación
 	 * @param esCompartible Indica si el recurso puede ser compartido
-	 * @param recurso Nombre del recurso
-	 * @param cantidad Cantidad del recurso
+	 * @param recurso       Nombre del recurso
+	 * @param cantidad      Cantidad del recurso
 	 * @return ResponseEntity con el recurso creado o actualizado
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
@@ -80,13 +81,13 @@ public class ReservasAdminRest
 	{
 		try
 		{
-			Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible,false);
+			Recurso recursoFinal = new Recurso(recurso, cantidad, esCompartible, false);
 
 			if (this.recursoRepository.encontrarRecurso(recurso).isPresent())
 			{
 				Optional<Recurso> recursoOptional = this.recursoRepository.encontrarRecurso(recurso);
 				Recurso recursoAntiguo = recursoOptional.get();
-				
+
 				if (recursoAntiguo.getCantidad() == recursoFinal.getCantidad())
 				{
 					if (recursoAntiguo.isEsCompartible() == recursoFinal.isEsCompartible())
@@ -97,11 +98,11 @@ public class ReservasAdminRest
 					}
 				}
 
-				recursoFinal = new Recurso(recursoAntiguo.getId(), cantidad, esCompartible,false);
+				recursoFinal = new Recurso(recursoAntiguo.getId(), cantidad, esCompartible, false);
 			}
 			else
 			{
-				recursoFinal = new Recurso(recurso, cantidad, esCompartible,false);
+				recursoFinal = new Recurso(recurso, cantidad, esCompartible, false);
 			}
 
 			this.recursoRepository.saveAndFlush(recursoFinal);
@@ -132,7 +133,8 @@ public class ReservasAdminRest
 	 * 
 	 * @param usuario Usuario autenticado que realiza la operación
 	 * @param recurso Nombre del recurso a eliminar
-	 * @return ResponseEntity con estado OK si se elimina correctamente, o error si no existe
+	 * @return ResponseEntity con estado OK si se elimina correctamente, o error si
+	 *         no existe
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/resources")
@@ -149,7 +151,7 @@ public class ReservasAdminRest
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERROR_ELIMINANDO_RECURSO, mensajeError);
 			}
-			
+
 			// Si el recurso existe en la base de datos, se borrará
 			this.recursoRepository.deleteById(recurso);
 
@@ -171,13 +173,14 @@ public class ReservasAdminRest
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	/**
 	 * Verifica si un recurso tiene reservas asociadas antes de intentar eliminarlo.
 	 * 
 	 * @param usuario Usuario autenticado
 	 * @param recurso Nombre del recurso a comprobar
-	 * @return ResponseEntity con un booleano indicando si el recurso puede ser eliminado
+	 * @return ResponseEntity con un booleano indicando si el recurso puede ser
+	 *         eliminado
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/checkDelete")
@@ -187,31 +190,34 @@ public class ReservasAdminRest
 		try
 		{
 			boolean borrado = true;
-			
+
 			List<String> lista = this.recursoRepository.encontrarReservasPorRecurso(recurso);
-			
+
 			if (!lista.isEmpty())
 			{
 				borrado = false;
 				String mensajeError = "El recurso que quiere borrar tiene reservas: " + recurso;
 				log.error(mensajeError);
 			}
-			
+
 			return ResponseEntity.ok().body(borrado);
 		}
 		catch (Exception exception)
 		{
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, "Error inesperado al comprobar el borrado de recurso", exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
+					"Error inesperado al comprobar el borrado de recurso", exception);
 			log.error("Error inesperado al comprobar el borrado de recurso: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	/**
-	 * Obtiene la cantidad máxima reservada para cada recurso combinando reservas fijas y temporales.
+	 * Obtiene la cantidad máxima reservada para cada recurso combinando reservas
+	 * fijas y temporales.
 	 * 
 	 * @param usuario Usuario autenticado
-	 * @return ResponseEntity con un mapa de recurso y su cantidad máxima total reservada
+	 * @return ResponseEntity con un mapa de recurso y su cantidad máxima total
+	 *         reservada
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/resources/cantMax")
@@ -221,39 +227,40 @@ public class ReservasAdminRest
 		{
 			List<Object[]> reservaFijaMax = this.reservaRepository.reservaFijaMax();
 			List<Object[]> reservaTemporalMax = this.reservaTemporalRepository.reservaTemporalMax();
-			
+
 			List<RecursoCantMaxDto> listaRecursoFija = new ArrayList<RecursoCantMaxDto>();
 			List<RecursoCantMaxDto> listaRecursoPuntuales = new ArrayList<RecursoCantMaxDto>();
-			
+
 			List<RecursoCantMaxDto> listaFinal = new ArrayList<RecursoCantMaxDto>();
-			
+
 			for (Object[] reservaTemporal : reservaTemporalMax)
 			{
 				RecursoCantMaxDto cantMaxDto = new RecursoCantMaxDto();
-				cantMaxDto.setRecurso((String)reservaTemporal[0]);
+				cantMaxDto.setRecurso((String) reservaTemporal[0]);
 				cantMaxDto.setCantMax((BigDecimal) reservaTemporal[1]);
 				listaRecursoPuntuales.add(cantMaxDto);
 			}
-			
+
 			for (Object[] reservaFija : reservaFijaMax)
 			{
 				RecursoCantMaxDto cantMaxDto = new RecursoCantMaxDto();
-				cantMaxDto.setRecurso((String)reservaFija[0]);
+				cantMaxDto.setRecurso((String) reservaFija[0]);
 				cantMaxDto.setCantMax((BigDecimal) reservaFija[1]);
 				listaRecursoFija.add(cantMaxDto);
 			}
-			
-			if(!listaRecursoPuntuales.isEmpty() && !listaRecursoFija.isEmpty()) {
+
+			if (!listaRecursoPuntuales.isEmpty() && !listaRecursoFija.isEmpty())
+			{
 				for (RecursoCantMaxDto puntual : listaRecursoPuntuales)
 				{
-					for (RecursoCantMaxDto fija: listaRecursoFija)
+					for (RecursoCantMaxDto fija : listaRecursoFija)
 					{
-						if(fija.getRecurso().equals(puntual.getRecurso()))
+						if (fija.getRecurso().equals(puntual.getRecurso()))
 						{
 							Integer cantidadPuntual = puntual.getCantMax().intValue();
 							Integer cantidadFija = fija.getCantMax().intValue();
 							BigDecimal suma;
-							if(cantidadPuntual > cantidadFija)
+							if (cantidadPuntual > cantidadFija)
 							{
 								suma = puntual.getCantMax().add(fija.getCantMax());
 								puntual.setCantMax(suma);
@@ -266,7 +273,7 @@ public class ReservasAdminRest
 								listaFinal.add(fija);
 							}
 						}
-						else if(listaRecursoFija.contains(puntual) && !listaRecursoPuntuales.contains(puntual))
+						else if (listaRecursoFija.contains(puntual) && !listaRecursoPuntuales.contains(puntual))
 						{
 							listaFinal.add(puntual);
 						}
@@ -276,29 +283,33 @@ public class ReservasAdminRest
 						}
 					}
 				}
-			}else {
-				
-				if(listaRecursoPuntuales.isEmpty()) {
-					for (RecursoCantMaxDto fija: listaRecursoFija)
+			}
+			else
+			{
+
+				if (listaRecursoPuntuales.isEmpty())
+				{
+					for (RecursoCantMaxDto fija : listaRecursoFija)
 					{
-							listaFinal.add(fija);
+						listaFinal.add(fija);
 					}
 				}
-				
-				if(listaRecursoFija.isEmpty()) {
-					for (RecursoCantMaxDto puntual: listaRecursoPuntuales)
+
+				if (listaRecursoFija.isEmpty())
+				{
+					for (RecursoCantMaxDto puntual : listaRecursoPuntuales)
 					{
-							listaFinal.add(puntual);
+						listaFinal.add(puntual);
 					}
 				}
 			}
-			
+
 			HashMap<String, BigDecimal> mapaFinal = new HashMap<>();
 			for (RecursoCantMaxDto recursoFinal : listaFinal)
 			{
 				mapaFinal.put(recursoFinal.getRecurso(), recursoFinal.getCantMax());
 			}
-			
+
 			return ResponseEntity.ok().body(mapaFinal);
 		}
 		catch (Exception exception)
@@ -310,13 +321,15 @@ public class ReservasAdminRest
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	/**
-	 * Elimina todas las reservas (fijas y temporales) asociadas a un recurso específico.
+	 * Elimina todas las reservas (fijas y temporales) asociadas a un recurso
+	 * específico.
 	 * 
 	 * @param usuario Usuario autenticado
 	 * @param recurso Nombre del recurso del cual se eliminarán todas las reservas
-	 * @return ResponseEntity con estado OK si las reservas son eliminadas exitosamente
+	 * @return ResponseEntity con estado OK si las reservas son eliminadas
+	 *         exitosamente
 	 */
 	@Modifying
 	@Transactional
@@ -329,7 +342,7 @@ public class ReservasAdminRest
 		{
 			this.reservaRepository.deleteReservas(recurso);
 			this.reservaTemporalRepository.deleteReservas(recurso);
-			
+
 			log.info("Las reservas del recurso se han borrado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
 
@@ -343,14 +356,16 @@ public class ReservasAdminRest
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	/**
-	 * Modifica el estado de bloqueo de un recurso (habilitado o deshabilitado para reservas).
+	 * Modifica el estado de bloqueo de un recurso (habilitado o deshabilitado para
+	 * reservas).
 	 * 
-	 * @param usuario Usuario autenticado
+	 * @param usuario   Usuario autenticado
 	 * @param bloqueado Nuevo estado de bloqueo del recurso
-	 * @param recurso Nombre del recurso a modificar
-	 * @return ResponseEntity con estado OK si el recurso fue modificado correctamente
+	 * @param recurso   Nombre del recurso a modificar
+	 * @return ResponseEntity con estado OK si el recurso fue modificado
+	 *         correctamente
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.PUT, value = "/resources")
@@ -390,13 +405,13 @@ public class ReservasAdminRest
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
-	
+
 	/**
-	 * Obtiene logs paginados del sistema de reservas.
-	 * Cada página contiene un conjunto de logs a partir del número de página indicado.
+	 * Obtiene logs paginados del sistema de reservas. Cada página contiene un
+	 * conjunto de logs a partir del número de página indicado.
 	 * 
 	 * @param usuario Usuario autenticado
-	 * @param pagina Número de página a recuperar (debe ser mayor o igual a 0)
+	 * @param pagina  Número de página a recuperar (debe ser mayor o igual a 0)
 	 * @return ResponseEntity con la lista de logs o error si no existen registros
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
@@ -412,9 +427,9 @@ public class ReservasAdminRest
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
 			}
-			
+
 			String paginacion = pagina.toString() + "0";
-			
+
 			List<LogReservas> listaLogs = this.logReservasRepository.getPaginacionLogs(Integer.parseInt(paginacion));
 
 			if (listaLogs.isEmpty())
@@ -423,7 +438,7 @@ public class ReservasAdminRest
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
 			}
-			
+
 			return ResponseEntity.ok().body(listaLogs);
 
 		}

@@ -30,7 +30,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class ReservaTemporalId implements Serializable {
+public class ReservaTemporalId implements Serializable
+{
 	private static final long serialVersionUID = -7779056094326676793L;
 
 	@ManyToOne

@@ -19,7 +19,8 @@ import es.iesjandula.reaktor.booking_server.models.Constantes;
  * @author Enrique Contreras
  */
 @Repository
-public interface ConstantesRepository extends JpaRepository<Constantes, String> {
+public interface ConstantesRepository extends JpaRepository<Constantes, String>
+{
 
 	/**
 	 * Busca una constante según su clave.

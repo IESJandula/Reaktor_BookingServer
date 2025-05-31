@@ -17,7 +17,8 @@ import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Recurso;
  * @author Miguel Ríos
  * @author Enrique Contreras
  */
-public interface IRecursoRepository extends JpaRepository<Recurso, String> {
+public interface IRecursoRepository extends JpaRepository<Recurso, String>
+{
 
 	/**
 	 * Encuentra un recurso por su id.
