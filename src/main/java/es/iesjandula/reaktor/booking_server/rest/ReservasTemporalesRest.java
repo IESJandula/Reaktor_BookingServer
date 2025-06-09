@@ -1,8 +1,5 @@
 package es.iesjandula.reaktor.booking_server.rest;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
@@ -14,10 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import es.iesjandula.reaktor.base.security.models.DtoUsuarioBase;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
-import es.iesjandula.reaktor.base.utils.HttpClientUtils;
 import es.iesjandula.reaktor.booking_server.dto.ReservasPuntualesDto;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
-import es.iesjandula.reaktor.booking_server.models.Constantes;
 import es.iesjandula.reaktor.booking_server.models.LogReservas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiaSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesor;
@@ -44,7 +32,6 @@ import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramoHorario;
 import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTemporal;
 import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTemporalId;
-import es.iesjandula.reaktor.booking_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.booking_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.booking_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
@@ -52,6 +39,7 @@ import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
+import es.iesjandula.reaktor.booking_server.utils.Utilities;
 import lombok.extern.log4j.Log4j2;
 
 @RequestMapping(value = "/bookings/temporary")
@@ -67,9 +55,6 @@ public class ReservasTemporalesRest
 
 	@Autowired
 	private IReservaTemporalRepository reservaTemporalRepository;
-
-	@Autowired
-	private ConstantesRepository constanteRepository;
 
 	@Autowired
 	private IDiaSemanaRepository diasSemanaRepository;
@@ -88,6 +73,9 @@ public class ReservasTemporalesRest
 
 	@Value("${reaktor.http_connection_timeout}")
 	private int httpConnectionTimeout;
+
+	@Autowired
+	private Utilities utilities;
 
 	/**
 	 * Endpoint de tipo GET que devuelve una lista de reservas puntuales organizadas
@@ -114,9 +102,6 @@ public class ReservasTemporalesRest
 	{
 		try
 		{
-			// Creacion de una lista para almacenar los recursos
-			List<ReservasPuntualesDto> listaReservas = new ArrayList<ReservasPuntualesDto>();
-
 			// Comprueba si la base de datos tiene registros de los recurso
 			if (this.recursoRepository.count() == 0)
 			{
@@ -131,92 +116,8 @@ public class ReservasTemporalesRest
 			@SuppressWarnings("deprecation")
 			Recurso recursoSeleccionado = this.recursoRepository.getById(recurso);
 
-			Long diaSemana = 0l;
-			Long tramoHorario = 0l;
-			List<String> emails = new ArrayList<String>();
-			List<Integer> nAlumnosLista = new ArrayList<Integer>();
-			List<String> nombresYApellidos = new ArrayList<String>();
-			ReservasPuntualesDto reserva = new ReservasPuntualesDto();
-			Integer plazasRestantes = recursoSeleccionado.getCantidad();
-			List<Long> esFijaLista = new ArrayList<Long>();
-			List<String> motivoCursoLista = new ArrayList<String>();
-			List<Long> esSemanalLista = new ArrayList<Long>();
-
-			for (Object[] row : resultados)
-			{
-
-				if (diaSemana == (Long) row[0] && tramoHorario == (Long) row[1])
-				{
-
-					ReservasPuntualesDto reservaAntigua = reserva;
-
-					emails = reserva.getEmail();
-					nombresYApellidos = reserva.getNombreYapellidos();
-					nAlumnosLista = reserva.getNAlumnos();
-					plazasRestantes = reserva.getPlazasRestantes();
-					esFijaLista = reserva.getEsfija();
-					esSemanalLista = reserva.getEsSemanal();
-
-					emails.add((String) row[3]);
-					nombresYApellidos.add((String) row[4]);
-					nAlumnosLista.add((row[2] != null) ? (Integer) row[2] : 0);
-					plazasRestantes = plazasRestantes - ((row[2] != null) ? (Integer) row[2] : 0);
-					esFijaLista.add((Long) row[6]);
-					motivoCursoLista.add((String) row[7]);
-					BigDecimal esSemanalBD = (BigDecimal) row[8];
-					Long esSemanal = esSemanalBD != null ? esSemanalBD.longValue() : null;
-					esSemanalLista.add(esSemanal);
-
-					reserva.setEmail(emails);
-					reserva.setNombreYapellidos(nombresYApellidos);
-					reserva.setNAlumnos(nAlumnosLista);
-					reserva.setPlazasRestantes(plazasRestantes);
-					reserva.setEsfija(esFijaLista);
-					reserva.setMotivoCurso(motivoCursoLista);
-					reserva.setEsSemanal(esSemanalLista);
-
-					listaReservas.remove(reservaAntigua);
-
-					listaReservas.add(reserva);
-				}
-				else
-				{
-					plazasRestantes = recursoSeleccionado.getCantidad();
-					diaSemana = (Long) row[0];
-					tramoHorario = (Long) row[1];
-					Integer nAlumnos = (row[2] != null) ? (Integer) row[2] : 0;
-					String email = (String) row[3];
-					String nombreYapellidos = (String) row[4];
-					String recursos = (String) row[5];
-					Long esFija = (Long) row[6];
-					String motivoCurso = (String) row[7];
-					plazasRestantes = plazasRestantes - nAlumnos;
-					BigDecimal esSemanalBD = (BigDecimal) row[8];
-					Long esSemanal = esSemanalBD != null ? esSemanalBD.longValue() : null;
-
-					emails = new ArrayList<String>();
-					emails.add(email);
-					nombresYApellidos = new ArrayList<String>();
-					nombresYApellidos.add(nombreYapellidos);
-					nAlumnosLista = new ArrayList<Integer>();
-					nAlumnosLista.add(nAlumnos);
-					esFijaLista = new ArrayList<Long>();
-					esFijaLista.add(esFija);
-					motivoCursoLista = new ArrayList<String>();
-					motivoCursoLista.add(motivoCurso);
-					esSemanalLista = new ArrayList<Long>();
-					esSemanalLista.add(esSemanal);
-
-					reserva = new ReservasPuntualesDto(diaSemana, tramoHorario, nAlumnosLista, emails,
-							nombresYApellidos, recursos, plazasRestantes, esFijaLista, motivoCursoLista,
-							esSemanalLista);
-					// Mapeo a ReservaDto
-					listaReservas.add(reserva);
-				}
-
-			}
-			// Encontramos todos los recursos y los introducimos en una lista para
-			// mostrarlos más adelante
+			List<ReservasPuntualesDto> listaReservas = this.utilities.procesarResultadosReservas(resultados,
+					recursoSeleccionado);
 
 			return ResponseEntity.ok(listaReservas);
 		}
@@ -229,9 +130,9 @@ public class ReservasTemporalesRest
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
-					"Error al acceder a la bade de datos", exception);
+					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -433,20 +334,12 @@ public class ReservasTemporalesRest
 			Long diaSemana, Long tramoHorario, int nAlumnos, Integer numSemana, Boolean esSemanal)
 			throws ReservaException
 	{
-		Recurso recurso = new Recurso();
-
-		recurso.setId(recursoString);
-
-		DiaSemana diasSemana = new DiaSemana();
-		diasSemana.setId(diaSemana);
-
-		TramoHorario tramos = new TramoHorario();
-		tramos.setId(tramoHorario);
-
+		Recurso recurso = this.utilities.crearInstanciaRecurso(recursoString);
+		DiaSemana diasSemana = this.utilities.crearInstanciaDiaSemana(diaSemana);
+		TramoHorario tramos = this.utilities.crearInstanciaTramoHorario(tramoHorario);
 		Profesor profesor = this.buscarProfesor(usuario, email);
 
 		ReservaTemporalId reservaId = new ReservaTemporalId();
-
 		reservaId.setProfesor(profesor);
 		reservaId.setRecurso(recurso);
 		reservaId.setDiaSemana(diasSemana);
@@ -454,7 +347,6 @@ public class ReservasTemporalesRest
 		reservaId.setNumSemana(numSemana);
 
 		ReservaTemporal reservaTemporal = new ReservaTemporal();
-
 		reservaTemporal.setReservaTemporalId(reservaId);
 		reservaTemporal.setNAlumnos(nAlumnos);
 		reservaTemporal.setEsSemanal(esSemanal);
@@ -484,162 +376,41 @@ public class ReservasTemporalesRest
 	{
 		Profesor profesor = null;
 
-		// Si el role es administrador o dirección ...
 		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR)
 				|| usuario.getRoles().contains(BaseConstants.ROLE_DIRECCION))
 		{
-			// Primero buscamos si ya tenemos a ese profesor en nuestra BBDD
 			Optional<Profesor> optionalProfesor = this.profesoresRepository.findById(email);
 
-			// Si lo encontramos ...
-			if (!optionalProfesor.isEmpty())
+			if (optionalProfesor.isPresent())
 			{
-				// Lo cogemos del optional
 				profesor = optionalProfesor.get();
 			}
 			else
 			{
-				// Si no lo encontramos, le pedimos a Firebase que nos lo dé
-				profesor = this.buscarProfesorEnFirebase(usuario.getJwt(), email);
+				profesor = this.utilities.buscarProfesorEnFirebase(usuario.getJwt(), email, this.firebaseServerUrl,
+						this.httpConnectionTimeout);
 			}
 		}
 		else
 		{
-			// Si el usuario no es administrador o dirección, cogemos la información del
-			// usuario
-			profesor = new Profesor(usuario.getEmail(), usuario.getNombre(), usuario.getApellidos());
+			Optional<Profesor> optionalProfesor = this.profesoresRepository.findById(usuario.getEmail());
 
-			// Lo almacenamos en BBDD en caso de que no exista
-			this.profesoresRepository.saveAndFlush(profesor);
+			if (optionalProfesor.isPresent())
+			{
+				profesor = optionalProfesor.get();
+			}
+			else
+			{
+				profesor = new Profesor();
+				profesor.setNombre(usuario.getNombre());
+				profesor.setApellidos(usuario.getApellidos());
+				profesor.setEmail(usuario.getEmail());
+
+				this.profesoresRepository.saveAndFlush(profesor);
+			}
 		}
 
 		return profesor;
-	}
-
-	/**
-	 * Realiza una consulta a Firebase para recuperar los datos de un profesor
-	 * mediante su email.
-	 * <p>
-	 * Utiliza el JWT del usuario administrador para autenticar la petición HTTP
-	 * hacia el servidor de Firebase. Si el profesor es encontrado, se construye un
-	 * objeto {@link Profesor} a partir de los datos devueltos por Firebase y se
-	 * persiste en la base de datos local.
-	 *
-	 * @param jwtAdmin JWT del usuario con permisos de administrador, utilizado para
-	 *                 autenticar la petición a Firebase.
-	 * @param email    Email del profesor que se desea buscar.
-	 * @return El objeto {@link Profesor} correspondiente al email indicado,
-	 *         obtenido desde Firebase.
-	 * @throws ReservaException Si se produce un error en la conexión, un timeout o
-	 *                          si el profesor no se encuentra.
-	 */
-	private Profesor buscarProfesorEnFirebase(String jwtAdmin, String email) throws ReservaException
-	{
-		Profesor profesor = null;
-
-		// Creamos un HTTP Client con Timeout
-		CloseableHttpClient closeableHttpClient = HttpClientUtils.crearHttpClientConTimeout(this.httpConnectionTimeout);
-
-		CloseableHttpResponse closeableHttpResponse = null;
-
-		try
-		{
-			HttpGet httpGet = new HttpGet(this.firebaseServerUrl + "/firebase/queries/user");
-
-			// Añadimos el jwt y el email a la llamada
-			httpGet.addHeader("Authorization", "Bearer " + jwtAdmin);
-			httpGet.addHeader("email", email);
-
-			// Hacemos la peticion
-			closeableHttpResponse = closeableHttpClient.execute(httpGet);
-
-			// Comprobamos si viene la cabecera. En caso afirmativo, es porque trae un
-			// profesor
-			if (closeableHttpResponse.getEntity() == null)
-			{
-				String mensajeError = "Profesor no encontrado en BBDD Global";
-
-				log.error(mensajeError);
-				throw new ReservaException(Constants.PROFESOR_NO_ENCONTRADO, mensajeError);
-			}
-
-			// Convertimos la respuesta en un objeto DtoInfoUsuario
-			ObjectMapper objectMapper = new ObjectMapper();
-
-			// Obtenemos la respuesta de Firebase
-			DtoUsuarioBase dtoUsuarioBase = objectMapper.readValue(closeableHttpResponse.getEntity().getContent(),
-					DtoUsuarioBase.class);
-
-			// Creamos una instancia de profesor con la respuesta de Firebase
-			profesor = new Profesor();
-			profesor.setNombre(dtoUsuarioBase.getNombre());
-			profesor.setApellidos(dtoUsuarioBase.getApellidos());
-			profesor.setEmail(dtoUsuarioBase.getEmail());
-
-			// Almacenamos al profesor en nuestra BBDD
-			this.profesoresRepository.saveAndFlush(profesor);
-		}
-		catch (SocketTimeoutException socketTimeoutException)
-		{
-			String errorString = "SocketTimeoutException de lectura o escritura al comunicarse con el servidor (búsqueda del profesor asociado a la reserva)";
-
-			log.error(errorString, socketTimeoutException);
-			throw new ReservaException(Constants.ERROR_CONEXION_FIREBASE, errorString, socketTimeoutException);
-		}
-		catch (ConnectTimeoutException connectTimeoutException)
-		{
-			String errorString = "ConnectTimeoutException al intentar conectar con el servidor (búsqueda del profesor asociado a la reserva)";
-
-			log.error(errorString, connectTimeoutException);
-			throw new ReservaException(Constants.TIMEOUT_CONEXION_FIREBASE, errorString, connectTimeoutException);
-		}
-		catch (IOException ioException)
-		{
-			String errorString = "IOException mientras se buscaba el profesor asociado a la reserva";
-
-			log.error(errorString, ioException);
-			throw new ReservaException(Constants.IO_EXCEPTION_FIREBASE, errorString, ioException);
-		}
-		finally
-		{
-			// Cierre de flujos
-			this.buscarProfesorEnFirebaseCierreFlujos(closeableHttpResponse);
-		}
-
-		return profesor;
-	}
-
-	/**
-	 * Cierra de forma segura el flujo {@link CloseableHttpResponse} utilizado en la
-	 * petición HTTP a Firebase.
-	 * <p>
-	 * Este método debe ser llamado en el bloque {@code finally} para garantizar el
-	 * cierre del recurso y evitar fugas de memoria o conexiones abiertas. En caso
-	 * de producirse una excepción durante el cierre, se lanza una
-	 * {@link ReservaException} específica con información del error.
-	 *
-	 * @param closeableHttpResponse Respuesta HTTP que debe cerrarse tras la
-	 *                              consulta a Firebase.
-	 * @throws ReservaException Si ocurre una {@link IOException} al intentar cerrar
-	 *                          el flujo.
-	 */
-	private void buscarProfesorEnFirebaseCierreFlujos(CloseableHttpResponse closeableHttpResponse)
-			throws ReservaException
-	{
-		if (closeableHttpResponse != null)
-		{
-			try
-			{
-				closeableHttpResponse.close();
-			}
-			catch (IOException ioException)
-			{
-				String errorString = "IOException mientras se cerraba el closeableHttpResponse en el método que busca al profesor de la reserva";
-
-				log.error(errorString, ioException);
-				throw new ReservaException(Constants.IO_EXCEPTION_FIREBASE, errorString, ioException);
-			}
-		}
 	}
 
 	/**
@@ -894,31 +665,7 @@ public class ReservasTemporalesRest
 	 */
 	private void validacionesGlobalesPreviasReservaTemporal(DtoUsuarioExtended usuario) throws ReservaException
 	{
-		if (!usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR)
-				&& !usuario.getRoles().contains(BaseConstants.ROLE_DIRECCION))
-		{
-			// Vemos si la reserva está deshabilitada
-			Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository
-					.findByClave(Constants.TABLA_CONST_RESERVAS_TEMPORALES);
-
-			if (!optionalAppDeshabilitada.isPresent())
-			{
-				String errorString = "Error obteniendo parametros";
-
-				log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_TEMPORALES);
-				throw new ReservaException(Constants.ERROR_OBTENIENDO_PARAMETROS, errorString);
-			}
-
-			if (!optionalAppDeshabilitada.get().getValor().isEmpty())
-			{
-				String infoAppDeshabilitada = optionalAppDeshabilitada.get().getValor();
-				if (infoAppDeshabilitada != null)
-				{
-					log.error(infoAppDeshabilitada);
-					throw new ReservaException(Constants.ERROR_APP_DESHABILITADA, infoAppDeshabilitada);
-				}
-			}
-		}
+		this.utilities.validacionesGlobalesPreviasReserva(usuario, "TEMPORALES");
 	}
 
 	/**
@@ -995,9 +742,9 @@ public class ReservasTemporalesRest
 		{
 			// Captura los errores relacionados con la base de datos, devolverá un 500
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
-					"Error al acceder a la bade de datos", exception);
+					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
