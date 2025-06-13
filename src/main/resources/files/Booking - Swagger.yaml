@@ -1,0 +1,638 @@
+openapi: 3.0.3
+info:
+  title: API de Reservas de Reaktor
+  description: API para la gestión de reservas de recursos educativos
+  version: "2.0"
+  contact:
+    name: Equipo Booking
+    email: booking@reaktor.es
+  license:
+    name: Licencia Privada
+    url: https://somosjnadula.reaktor.booking.es/license
+
+servers:
+  - url: /
+    description: Servidor Local
+
+tags:
+  - name: Constantes
+    description: API para la gestión de constantes del sistema
+  - name: Administración de Reservas
+    description: API para la gestión administrativa de reservas y recursos
+  - name: Reservas Fijas
+    description: API para la gestión de reservas fijas de recursos
+  - name: Reservas Temporales
+    description: API para la gestión de reservas temporales de recursos
+
+paths:
+  /bookings/constants:
+    get:
+      tags:
+        - Constantes
+      summary: Obtener todas las constantes
+      description: Retorna la lista de todas las constantes del sistema
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Constantes encontradas exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DtoConstantes"
+        "500":
+          description: Error interno del servidor
+    post:
+      tags:
+        - Constantes
+      summary: Actualizar constantes
+      description: Actualiza o inserta nuevas constantes en el sistema
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/DtoConstantes"
+      responses:
+        "200":
+          description: Constantes actualizadas exitosamente
+        "500":
+          description: Error interno del servidor
+
+  /bookings/admin/resources:
+    post:
+      tags:
+        - Administración de Reservas
+      summary: Crear o actualizar recurso
+      description: Crea un nuevo recurso o actualiza uno existente
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: esCompartible
+          in: header
+          required: true
+          schema:
+            type: boolean
+          description: Indica si el recurso es compartible
+        - name: recurso
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Nombre del recurso
+        - name: cantidad
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: Cantidad disponible del recurso
+      responses:
+        "200":
+          description: Recurso creado/actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recurso"
+        "409":
+          description: Conflicto - El recurso ya existe con los mismos datos
+        "500":
+          description: Error interno del servidor
+    delete:
+      tags:
+        - Administración de Reservas
+      summary: Eliminar recurso
+      description: Elimina un recurso existente
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recurso
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Nombre del recurso a eliminar
+      responses:
+        "200":
+          description: Recurso eliminado exitosamente
+        "404":
+          description: Recurso no encontrado
+        "500":
+          description: Error interno del servidor
+    put:
+      tags:
+        - Administración de Reservas
+      summary: Modificar bloqueo de recurso
+      description: Modifica el estado de bloqueo de un recurso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bloqueado
+          in: header
+          required: true
+          schema:
+            type: boolean
+          description: Nuevo estado de bloqueo
+        - name: recurso
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Nombre del recurso
+      responses:
+        "200":
+          description: Estado de bloqueo modificado exitosamente
+        "404":
+          description: Recurso no encontrado
+        "500":
+          description: Error interno del servidor
+
+  /bookings/admin/checkDelete:
+    get:
+      tags:
+        - Administración de Reservas
+      summary: Verificar eliminación de recurso
+      description: Verifica si un recurso puede ser eliminado
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recurso
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Nombre del recurso a verificar
+      responses:
+        "200":
+          description: Verificación completada
+          content:
+            application/json:
+              schema:
+                type: boolean
+        "500":
+          description: Error interno del servidor
+
+  /bookings/admin/resources/cantMax:
+    get:
+      tags:
+        - Administración de Reservas
+      summary: Obtener cantidad máxima de recursos
+      description: Obtiene la cantidad máxima reservada para cada recurso
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Cantidades máximas obtenidas exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecursoCantMaxDto"
+        "500":
+          description: Error interno del servidor
+
+  /bookings/admin/resources/bookings:
+    delete:
+      tags:
+        - Administración de Reservas
+      summary: Eliminar reservas de recurso
+      description: Elimina todas las reservas asociadas a un recurso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recurso
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Nombre del recurso
+      responses:
+        "200":
+          description: Reservas eliminadas exitosamente
+        "500":
+          description: Error interno del servidor
+
+  /bookings/admin/logs:
+    get:
+      tags:
+        - Administración de Reservas
+      summary: Obtener logs paginados
+      description: Obtiene los logs del sistema de reservas paginados
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: pagina
+          in: header
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+          description: Número de página (debe ser >= 0)
+      responses:
+        "200":
+          description: Logs obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogReservas"
+        "404":
+          description: No se encontraron logs
+        "500":
+          description: Error interno del servidor
+
+  /bookings/fixed/resourcesCompartible:
+    get:
+      tags:
+        - Reservas Fijas
+      summary: Obtener recursos compartibles
+      description: Obtiene la lista de recursos filtrados por compartibilidad
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: esCompartible
+          in: header
+          required: true
+          schema:
+            type: boolean
+          description: Indica si se deben incluir únicamente los recursos compartibles
+      responses:
+        "200":
+          description: Recursos encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recurso"
+        "500":
+          description: Error interno del servidor
+
+  /bookings/fixed/resources:
+    get:
+      tags:
+        - Reservas Fijas
+      summary: Obtener todos los recursos
+      description: Obtiene la lista completa de recursos disponibles
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Recursos encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recurso"
+        "404":
+          description: No se encontraron recursos
+        "500":
+          description: Error interno del servidor
+
+  /bookings/fixed/timeslots:
+    get:
+      tags:
+        - Reservas Fijas
+      summary: Obtener tramos horarios
+      description: Obtiene la lista de tramos horarios disponibles
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Tramos horarios encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TramoHorario"
+        "404":
+          description: No se encontraron tramos horarios
+        "500":
+          description: Error interno del servidor
+
+  /bookings/fixed/days_week:
+    get:
+      tags:
+        - Reservas Fijas
+      summary: Obtener días de la semana
+      description: Obtiene la lista de días de la semana disponibles
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Días de la semana encontrados exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DiaSemana"
+        "404":
+          description: No se encontraron días de la semana
+        "500":
+          description: Error interno del servidor
+
+  /bookings/fixed/bookings:
+    get:
+      tags:
+        - Reservas Fijas
+      summary: Obtener reservas de un recurso
+      description: Obtiene las reservas fijas de un recurso específico
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: aulaYCarritos
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Nombre del recurso para el cual se desean obtener las reservas
+      responses:
+        "200":
+          description: Reservas encontradas exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReservasFijasDto"
+        "404":
+          description: No se encontraron reservas o el recurso no existe
+        "500":
+          description: Error interno del servidor
+
+  /bookings/temporary/bookings:
+    get:
+      tags:
+        - Reservas Temporales
+      summary: Obtener reservas temporales
+      description: Obtiene las reservas temporales de un recurso para una semana específica
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: aulaYCarritos
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Nombre del recurso
+        - name: numSemana
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: Número de semana
+      responses:
+        "200":
+          description: Reservas encontradas exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReservasPuntualesDto"
+        "404":
+          description: No se encontraron reservas o el recurso no existe
+        "500":
+          description: Error interno del servidor
+    post:
+      tags:
+        - Reservas Temporales
+      summary: Crear reserva temporal
+      description: Crea una nueva reserva temporal de un recurso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: email
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Email del profesor
+        - name: recurso
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Nombre del recurso
+        - name: diaDeLaSemana
+          in: header
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID del día de la semana
+        - name: tramosHorarios
+          in: header
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID del tramo horario
+        - name: nAlumnos
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: Número de alumnos
+        - name: esSemanal
+          in: header
+          required: true
+          schema:
+            type: boolean
+          description: Indica si la reserva es semanal
+        - name: motivoCurso
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Motivo de la reserva
+        - name: numSemana
+          in: header
+          required: true
+          schema:
+            type: integer
+          description: Número de semana
+      responses:
+        "200":
+          description: Reserva creada exitosamente
+        "400":
+          description: Datos de la reserva inválidos
+        "404":
+          description: Recurso no encontrado
+        "409":
+          description: Conflicto - Ya existe una reserva con los mismos datos
+        "500":
+          description: Error interno del servidor
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    DtoConstantes:
+      type: object
+      properties:
+        clave:
+          type: string
+          description: Clave de la constante
+        valor:
+          type: string
+          description: Valor de la constante
+
+    Recurso:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identificador del recurso
+        cantidad:
+          type: integer
+          description: Cantidad disponible del recurso
+        esCompartible:
+          type: boolean
+          description: Indica si el recurso puede ser compartido
+        bloqueado:
+          type: boolean
+          description: Indica si el recurso está bloqueado
+
+    RecursoCantMaxDto:
+      type: object
+      properties:
+        recurso:
+          type: string
+          description: Nombre del recurso
+        cantMax:
+          type: number
+          format: double
+          description: Cantidad máxima reservada
+
+    LogReservas:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identificador del log
+        fecha:
+          type: string
+          format: date-time
+          description: Fecha y hora del log
+        mensaje:
+          type: string
+          description: Mensaje del log
+        tipo:
+          type: string
+          description: Tipo de log
+
+    TramoHorario:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identificador del tramo horario
+        horaInicio:
+          type: string
+          format: time
+          description: Hora de inicio del tramo
+        horaFin:
+          type: string
+          format: time
+          description: Hora de fin del tramo
+
+    DiaSemana:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identificador del día de la semana
+        nombre:
+          type: string
+          description: Nombre del día de la semana
+
+    ReservasFijasDto:
+      type: object
+      properties:
+        diaSemana:
+          type: integer
+          format: int64
+          description: ID del día de la semana
+        tramoHorario:
+          type: integer
+          format: int64
+          description: ID del tramo horario
+        emails:
+          type: array
+          items:
+            type: string
+          description: Lista de emails de los profesores
+        nAlumnos:
+          type: array
+          items:
+            type: integer
+          description: Lista de número de alumnos por reserva
+        nombresYApellidos:
+          type: array
+          items:
+            type: string
+          description: Lista de nombres y apellidos de los profesores
+        motivoCurso:
+          type: array
+          items:
+            type: string
+          description: Lista de motivos de las reservas
+        plazasRestantes:
+          type: integer
+          description: Plazas restantes en el recurso
+
+    ReservasPuntualesDto:
+      type: object
+      properties:
+        diaSemana:
+          type: integer
+          format: int64
+          description: ID del día de la semana
+        tramoHorario:
+          type: integer
+          format: int64
+          description: ID del tramo horario
+        emails:
+          type: array
+          items:
+            type: string
+          description: Lista de emails de los profesores
+        nAlumnos:
+          type: array
+          items:
+            type: integer
+          description: Lista de número de alumnos por reserva
+        nombresYApellidos:
+          type: array
+          items:
+            type: string
+          description: Lista de nombres y apellidos de los profesores
+        motivoCurso:
+          type: array
+          items:
+            type: string
+          description: Lista de motivos de las reservas
+        plazasRestantes:
+          type: integer
+          description: Plazas restantes en el recurso
+        numSemana:
+          type: integer
+          description: Número de semana de la reserva
