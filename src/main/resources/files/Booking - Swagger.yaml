@@ -8,7 +8,7 @@ info:
     email: booking@reaktor.es
   license:
     name: Licencia Privada
-    url: https://somosjnadula.reaktor.booking.es/license
+    url: https://somosjandula.reaktor.booking.es/license
 
 servers:
   - url: /
