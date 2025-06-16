@@ -1,18 +1,10 @@
 package es.iesjandula.reaktor.booking_server.rest;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import es.iesjandula.reaktor.base.security.models.DtoUsuarioBase;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
-import es.iesjandula.reaktor.base.utils.HttpClientUtils;
 import es.iesjandula.reaktor.booking_server.dto.ReservasFijasDto;
 import es.iesjandula.reaktor.booking_server.exception.ReservaException;
-import es.iesjandula.reaktor.booking_server.models.Constantes;
 import es.iesjandula.reaktor.booking_server.models.LogReservas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiaSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesor;
@@ -39,7 +26,6 @@ import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFijaId;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramoHorario;
-import es.iesjandula.reaktor.booking_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.booking_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.booking_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
@@ -47,6 +33,7 @@ import es.iesjandula.reaktor.booking_server.repository.IReservaRepository;
 import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
+import es.iesjandula.reaktor.booking_server.utils.Utilities;
 import lombok.extern.log4j.Log4j2;
 
 @RequestMapping(value = "/bookings/fixed")
@@ -70,10 +57,10 @@ public class ReservasFijasRest
 	private ITramoHorarioRepository tramosHorariosRepository;
 
 	@Autowired
-	private ConstantesRepository constanteRepository;
+	private LogReservasRepository logReservasRepository;
 
 	@Autowired
-	private LogReservasRepository logReservasRepository;
+	private Utilities utilities;
 
 	@Value("${reaktor.firebase_server_url}")
 	private String firebaseServerUrl;
@@ -113,7 +100,7 @@ public class ReservasFijasRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -159,7 +146,7 @@ public class ReservasFijasRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -203,7 +190,7 @@ public class ReservasFijasRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -246,7 +233,7 @@ public class ReservasFijasRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -559,27 +546,18 @@ public class ReservasFijasRest
 	private ReservaFija crearInstanciaDeReserva(DtoUsuarioExtended usuario, String email, String recursoString,
 			Long diaSemana, Long tramoHorario, int nAlumnos) throws ReservaException
 	{
-		Recurso recurso = new Recurso();
-
-		recurso.setId(recursoString);
-
-		DiaSemana diasSemana = new DiaSemana();
-		diasSemana.setId(diaSemana);
-
-		TramoHorario tramos = new TramoHorario();
-		tramos.setId(tramoHorario);
-
+		Recurso recurso = this.utilities.crearInstanciaRecurso(recursoString);
+		DiaSemana diasSemana = this.utilities.crearInstanciaDiaSemana(diaSemana);
+		TramoHorario tramos = this.utilities.crearInstanciaTramoHorario(tramoHorario);
 		Profesor profesor = this.buscarProfesor(usuario, email);
 
 		ReservaFijaId reservaId = new ReservaFijaId();
-
 		reservaId.setProfesor(profesor);
 		reservaId.setRecurso(recurso);
 		reservaId.setDiaSemana(diasSemana);
 		reservaId.setTramoHorario(tramos);
 
 		ReservaFija reservaFija = new ReservaFija();
-
 		reservaFija.setReservaFijaId(reservaId);
 		reservaFija.setNAlumnos(nAlumnos);
 
@@ -610,158 +588,41 @@ public class ReservasFijasRest
 	{
 		Profesor profesor = null;
 
-		// Si el role es administrador o dirección ...
 		if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR)
 				|| usuario.getRoles().contains(BaseConstants.ROLE_DIRECCION))
 		{
-			// Primero buscamos si ya tenemos a ese profesor en nuestra BBDD
 			Optional<Profesor> optionalProfesor = this.profesoresRepository.findById(email);
 
-			// Si lo encontramos ...
-			if (!optionalProfesor.isEmpty())
+			if (optionalProfesor.isPresent())
 			{
-				// Lo cogemos del optional
 				profesor = optionalProfesor.get();
 			}
 			else
 			{
-				// Si no lo encontramos, le pedimos a Firebase que nos lo dé
-				profesor = this.buscarProfesorEnFirebase(usuario.getJwt(), email);
+				profesor = this.utilities.buscarProfesorEnFirebase(usuario.getJwt(), email, this.firebaseServerUrl,
+						this.httpConnectionTimeout);
 			}
 		}
 		else
 		{
-			// Si el usuario no es administrador o dirección, cogemos la información del
-			// usuario
-			profesor = new Profesor(usuario.getEmail(), usuario.getNombre(), usuario.getApellidos());
+			Optional<Profesor> optionalProfesor = this.profesoresRepository.findById(usuario.getEmail());
 
-			// Lo almacenamos en BBDD en caso de que no exista
-			this.profesoresRepository.saveAndFlush(profesor);
+			if (optionalProfesor.isPresent())
+			{
+				profesor = optionalProfesor.get();
+			}
+			else
+			{
+				profesor = new Profesor();
+				profesor.setNombre(usuario.getNombre());
+				profesor.setApellidos(usuario.getApellidos());
+				profesor.setEmail(usuario.getEmail());
+
+				this.profesoresRepository.saveAndFlush(profesor);
+			}
 		}
 
 		return profesor;
-	}
-
-	/**
-	 * Realiza una consulta al servidor externo (Firebase) para obtener los datos de
-	 * un profesor a partir de su correo electrónico, utilizando un JWT de un
-	 * administrador como autenticación.
-	 * <p>
-	 * Si la respuesta es válida, se convierte en un objeto {@code Profesor} y se
-	 * guarda en la base de datos. Maneja excepciones relacionadas con tiempos de
-	 * espera y errores de entrada/salida durante la comunicación.
-	 * 
-	 * @param jwtAdmin JWT del usuario administrador que autoriza la solicitud al
-	 *                 servidor externo.
-	 * @param email    Correo electrónico del profesor que se desea buscar.
-	 * @return Objeto {@code Profesor} con los datos obtenidos de Firebase.
-	 * @throws ReservaException Si ocurre un error durante la comunicación con
-	 *                          Firebase o al procesar la respuesta.
-	 */
-	private Profesor buscarProfesorEnFirebase(String jwtAdmin, String email) throws ReservaException
-	{
-		Profesor profesor = null;
-
-		// Creamos un HTTP Client con Timeout
-		CloseableHttpClient closeableHttpClient = HttpClientUtils.crearHttpClientConTimeout(this.httpConnectionTimeout);
-
-		CloseableHttpResponse closeableHttpResponse = null;
-
-		try
-		{
-			HttpGet httpGet = new HttpGet(this.firebaseServerUrl + "/firebase/queries/user");
-
-			// Añadimos el jwt y el email a la llamada
-			httpGet.addHeader("Authorization", "Bearer " + jwtAdmin);
-			httpGet.addHeader("email", email);
-
-			// Hacemos la peticion
-			closeableHttpResponse = closeableHttpClient.execute(httpGet);
-
-			// Comprobamos si viene la cabecera. En caso afirmativo, es porque trae un
-			// profesor
-			if (closeableHttpResponse.getEntity() == null)
-			{
-				String mensajeError = "Profesor no encontrado en BBDD Global";
-
-				log.error(mensajeError);
-				throw new ReservaException(Constants.PROFESOR_NO_ENCONTRADO, mensajeError);
-			}
-
-			// Convertimos la respuesta en un objeto DtoInfoUsuario
-			ObjectMapper objectMapper = new ObjectMapper();
-
-			// Obtengo la respuesta completa como String
-			String responseContent = EntityUtils.toString(closeableHttpResponse.getEntity(), StandardCharsets.UTF_8);
-
-			// Y parseo el DTO
-			DtoUsuarioBase dtoUsuarioBase = objectMapper.readValue(responseContent, DtoUsuarioBase.class);
-
-			// Creamos una instancia de profesor con la respuesta de Firebase
-			profesor = new Profesor();
-			profesor.setNombre(dtoUsuarioBase.getNombre());
-			profesor.setApellidos(dtoUsuarioBase.getApellidos());
-			profesor.setEmail(dtoUsuarioBase.getEmail());
-
-			// Almacenamos al profesor en nuestra BBDD
-			this.profesoresRepository.saveAndFlush(profesor);
-		}
-		catch (SocketTimeoutException socketTimeoutException)
-		{
-			String errorString = "SocketTimeoutException de lectura o escritura al comunicarse con el servidor (búsqueda del profesor asociado a la reserva)";
-
-			log.error(errorString, socketTimeoutException);
-			throw new ReservaException(Constants.ERROR_CONEXION_FIREBASE, errorString, socketTimeoutException);
-		}
-		catch (ConnectTimeoutException connectTimeoutException)
-		{
-			String errorString = "ConnectTimeoutException al intentar conectar con el servidor (búsqueda del profesor asociado a la reserva)";
-
-			log.error(errorString, connectTimeoutException);
-			throw new ReservaException(Constants.TIMEOUT_CONEXION_FIREBASE, errorString, connectTimeoutException);
-		}
-		catch (IOException ioException)
-		{
-			String errorString = "IOException mientras se buscaba el profesor asociado a la reserva";
-
-			log.error(errorString, ioException);
-			throw new ReservaException(Constants.IO_EXCEPTION_FIREBASE, errorString, ioException);
-		}
-		finally
-		{
-			// Cierre de flujos
-			this.buscarProfesorEnFirebaseCierreFlujos(closeableHttpResponse);
-		}
-
-		return profesor;
-	}
-
-	/**
-	 * Cierra de forma segura la respuesta HTTP recibida tras consultar a Firebase.
-	 * <p>
-	 * Si ocurre un error al cerrar el flujo, se lanza una excepción personalizada.
-	 * 
-	 * @param closeableHttpResponse Objeto de respuesta HTTP que se desea cerrar.
-	 * @throws ReservaException Si ocurre un error de entrada/salida al cerrar el
-	 *                          flujo de respuesta.
-	 */
-	private void buscarProfesorEnFirebaseCierreFlujos(CloseableHttpResponse closeableHttpResponse)
-			throws ReservaException
-	{
-		if (closeableHttpResponse != null)
-		{
-			try
-			{
-				closeableHttpResponse.close();
-			}
-			catch (IOException ioException)
-			{
-				String errorString = "IOException mientras se cerraba el closeableHttpResponse en el método que busca al profesor de la reserva";
-
-				log.error(errorString, ioException);
-				throw new ReservaException(Constants.IO_EXCEPTION_FIREBASE, errorString, ioException);
-			}
-		}
 	}
 
 	/**
@@ -933,30 +794,6 @@ public class ReservasFijasRest
 	 */
 	private void validacionesGlobalesPreviasReservaFija(DtoUsuarioExtended usuario) throws ReservaException
 	{
-		if (!usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR)
-				&& !usuario.getRoles().contains(BaseConstants.ROLE_DIRECCION))
-		{
-			// Vemos si la reserva está deshabilitada
-			Optional<Constantes> optionalAppDeshabilitada = this.constanteRepository
-					.findByClave(Constants.TABLA_CONST_RESERVAS_FIJAS);
-
-			if (!optionalAppDeshabilitada.isPresent())
-			{
-				String errorString = "Error obteniendo parametros";
-
-				log.error(errorString + ". " + Constants.TABLA_CONST_RESERVAS_FIJAS);
-				throw new ReservaException(Constants.ERROR_OBTENIENDO_PARAMETROS, errorString);
-			}
-
-			if (!optionalAppDeshabilitada.get().getValor().isEmpty())
-			{
-				String infoAppDeshabilitada = optionalAppDeshabilitada.get().getValor();
-				if (infoAppDeshabilitada != null)
-				{
-					log.error(infoAppDeshabilitada);
-					throw new ReservaException(Constants.ERROR_APP_DESHABILITADA, infoAppDeshabilitada);
-				}
-			}
-		}
+		this.utilities.validacionesGlobalesPreviasReserva(usuario, "FIJAS");
 	}
 }

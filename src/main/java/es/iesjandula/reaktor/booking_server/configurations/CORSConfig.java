@@ -2,6 +2,7 @@ package es.iesjandula.reaktor.booking_server.configurations;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -40,7 +41,7 @@ public class CORSConfig implements WebMvcConfigurer
 	 * @param registry Objeto utilizado para registrar las configuraciones de CORS.
 	 */
 	@Override
-	public void addCorsMappings(CorsRegistry registry)
+	public void addCorsMappings(@NonNull CorsRegistry registry)
 	{
 		registry.addMapping("/**").allowedOrigins(urlCors).allowedMethods("GET", "POST", "PUT", "DELETE")
 				.allowedHeaders("*");
