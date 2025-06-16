@@ -51,6 +51,7 @@ public class Constants
 	public final static int ERROR_CREANDO_RESERVA = 34;
 	public final static int ERROR_OBTENIENDO_RESERVAS = 35;
 	public final static int ERROR_CANCELANDO_RESERVA = 36;
+	public final static int ERROR_RECURSO_BLOQUEADO = 37;
 
 	// Usuarios/Profesores
 	public final static int PROFESOR_NO_ENCONTRADO = 40;
@@ -121,4 +122,6 @@ public class Constants
 	public static final String PARAM_YAML_RESERVAS_TEMPORALES = "reaktor.constantes.reservasTemporales";
 
 	public static final String PARAM_YAML_MAX_CALENDARIO = "reaktor.constantes.maxDiasCalendario";
+
+    
 }

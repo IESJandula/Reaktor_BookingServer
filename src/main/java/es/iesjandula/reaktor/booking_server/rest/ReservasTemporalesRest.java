@@ -338,6 +338,14 @@ public class ReservasTemporalesRest
 				throw new ReservaException(Constants.NUMERO_ALUMNOS_NO_VALIDO, mensajeError);
 			}
 
+			if (optinalRecurso.get().isBloqueado())
+			{
+				String mensajeError = "El recurso esta bloqueado";
+
+				log.error(mensajeError);
+				throw new ReservaException(Constants.ERROR_RECURSO_BLOQUEADO, mensajeError);
+			}
+
 			// Creamos la instancia de reserva
 			ReservaTemporal reserva = this.crearInstanciaDeReserva(usuario, email, recurso, diaDeLaSemana,
 					tramosHorarios, nAlumnos, numSemana, esSemanal);
