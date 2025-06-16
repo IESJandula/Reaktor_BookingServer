@@ -6,6 +6,17 @@ import jakarta.persistence.Entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Clase que representa una reserva temporal en el sistema.
+ * <p>
+ * Contiene la clave compuesta para identificar la reserva, el número de
+ * alumnos, el motivo del curso y si la reserva es semanal.
+ * </p>
+ * 
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
+ */
 @Data
 @NoArgsConstructor
 @Entity
@@ -16,7 +27,10 @@ public class ReservaTemporal
 
 	@Column(nullable = false)
 	private int nAlumnos;
-	
+
 	@Column(nullable = false)
-	private Boolean esSemanal;
+	private String motivoCurso;
+
+	@Column(nullable = false)
+	private boolean esSemanal;
 }

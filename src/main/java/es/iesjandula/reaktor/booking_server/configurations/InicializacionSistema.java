@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,62 +30,97 @@ import es.iesjandula.reaktor.booking_server.utils.Constants;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Clase que gestiona la inicialización del sistema al iniciar la aplicación. Se
+ * encarga de copiar archivos de configuración, cargar datos desde archivos CSV
+ * y establecer valores predeterminados en la base de datos, en caso de ser
+ * necesario.
+ *
+ * Funcionalidades principales:
+ * <ul>
+ * <li>Copia la estructura de carpetas de configuración al entorno de
+ * ejecución.</li>
+ * <li>Reinicia los parámetros del sistema si está activado en el archivo de
+ * configuración YAML.</li>
+ * <li>Carga los tramos horarios desde un archivo CSV y los guarda en la base de
+ * datos.</li>
+ * <li>Carga los días de la semana desde un archivo CSV y los guarda en la base
+ * de datos.</li>
+ * <li>Inicializa las constantes del sistema desde las propiedades
+ * definidas.</li>
+ * </ul>
+ *
+ * Esta clase utiliza la anotación {@code @PostConstruct}, lo que significa que
+ * su método principal se ejecuta automáticamente una vez que se ha construido
+ * el contexto de Spring.
+ *
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
+ */
 @Log4j2
 @Service
 public class InicializacionSistema
 {
 	@Autowired
-	private ITramoHorarioRepository tramosHorariosRepository ;
-	
-	@Autowired
-	private IDiaSemanaRepository diaSemanaRepository ;
+	private ITramoHorarioRepository tramosHorariosRepository;
 
 	@Autowired
-	private ConstantesRepository constantesRepository ;
+	private IDiaSemanaRepository diaSemanaRepository;
 
-	@Value("${spring.jpa.hibernate.ddl-auto}")
-	private String modoDdl;
+	@Autowired
+	private ConstantesRepository constantesRepository;
+
+	@Value("${reaktor.reiniciarParametros}")
+	private boolean reiniciarParametros;
 
 	@Value("${" + Constants.PARAM_YAML_RESERVAS_FIJAS + "}")
-	private String reservasFijas ;
+	private String reservasFijas;
 
 	@Value("${" + Constants.PARAM_YAML_RESERVAS_TEMPORALES + "}")
-	private String reservasTemporales ;
+	private String reservasTemporales;
+
+	@Value("${" + Constants.PARAM_YAML_MAX_CALENDARIO + "}")
+	private String maxDiasCalendario;
 
 	/**
 	 * Este método se encarga de inicializar el sistema ya sea en el entorno de
 	 * desarrollo o ejecutando JAR
+	 * 
 	 * @throws BaseException con un error
-	 * @throws BookingError con un error
+	 * @throws BookingError  con un error
 	 */
 	@PostConstruct
 	public void inicializarSistema() throws BaseException, BookingError
 	{
 		// Esta es la carpeta con las subcarpetas y configuraciones
-	    ResourcesHandler bookingServerConfig = this.getResourcesHandler(Constants.BOOKING_SERVER_CONFIG);
-	    
-	    if (bookingServerConfig != null)
-	    {
-	    	// Nombre de la carpeta destino
-	    	File bookingServerConfigExec = new File(Constants.BOOKING_SERVER_CONFIG_EXEC) ;
-	    	
-	    	// Copiamos las plantillas (origen) al destino
-	    	bookingServerConfig.copyToDirectory(bookingServerConfigExec) ;
-	    }
-		
-		if (Constants.MODO_DDL_CREATE.equalsIgnoreCase(this.modoDdl))
-		{
-			// Parseamos los tramos horarios
-			this.cargarTramosHorariosDesdeCSVInternal() ;
+		ResourcesHandler bookingServerConfig = this.getResourcesHandler(Constants.BOOKING_SERVER_CONFIG);
 
-			// Parseamos los días de la semana
-			this.cargarDiasSemanaDesdeCSVInternal() ;
+		if (bookingServerConfig != null)
+		{
+			// Nombre de la carpeta destino
+			File bookingServerConfigExec = new File(Constants.BOOKING_SERVER_CONFIG_EXEC);
+
+			// Copiamos las plantillas (origen) al destino
+			bookingServerConfig.copyToDirectory(bookingServerConfigExec);
+		}
+
+		if (this.reiniciarParametros)
+		{
+			if (!(tramosHorariosRepository.count() > 0 || diaSemanaRepository.count() > 0))
+			{
+				// Parseamos los tramos horarios
+				this.cargarTramosHorariosDesdeCSVInternal();
+
+				// Parseamos los días de la semana
+				this.cargarDiasSemanaDesdeCSVInternal();
+			}
 
 			// Inicializamos el sistema con las constantes
 			this.inicializarSistemaConConstantes();
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param resourceFilePath con la carpeta origen que tiene las plantillas
@@ -106,122 +142,160 @@ public class InicializacionSistema
 				outcome = new ResourcesHandlerJar(baseDirSubfolderUrl);
 			}
 		}
-		
+
 		return outcome;
 	}
-	
-    /**
-     * Carga tramos horarios desde CSV - Internal
-     * @throws BookingError excepción mientras se leían los tramos horarios
-     */
+
+	/**
+	 * Carga tramos horarios desde CSV - Internal
+	 * 
+	 * @throws BookingError excepción mientras se leían los tramos horarios
+	 */
 	private void cargarTramosHorariosDesdeCSVInternal() throws BookingError
 	{
-    	// Inicializamos la lista de tramos horarios
-        List<TramoHorario> tramosHorarios = new ArrayList<TramoHorario>() ;
-        
-        BufferedReader reader = null ;
+		// Inicializamos la lista de tramos horarios
+		List<TramoHorario> tramosHorarios = new ArrayList<TramoHorario>();
 
-        try
-        {
-            // Leer el archivo CSV desde la carpeta de recursos
-            reader = new BufferedReader(new FileReader(ResourceUtils.getFile(Constants.FICHERO_TRAMOS_HORARIOS))) ;
-            
-            // Nos saltamos la primera línea
-            reader.readLine() ;
+		BufferedReader reader = null;
 
-            // Leemos la segunda línea que ya tiene datos
-            String linea = reader.readLine() ;
-            
-            while (linea != null)
-            {
-            	// Leemos la línea y la spliteamos
-                String[] valores = linea.split(",") ;
+		try
+		{
+			// Leer el archivo CSV desde la carpeta de recursos
+			reader = new BufferedReader(
+					new FileReader(ResourceUtils.getFile(Constants.FICHERO_TRAMOS_HORARIOS), Charset.forName("UTF-8")));
 
-    			TramoHorario tramos = new TramoHorario();
-    			tramos.setTramoHorario(valores[0]);
-    			
-    			// Añadimos a la lista
-    			tramosHorarios.add(tramos) ;
-                
-                // Leemos la siguiente línea
-                linea = reader.readLine() ;
-            }
-        }
-        catch (IOException ioException)
-        {
-			String errorString = "IOException mientras se leía línea de tramo horario" ;
-			
-			log.error(errorString, ioException) ;
-			throw new BookingError(Constants.ERR_CODE_PROCESANDO_TRAMO_HORARIO, errorString, ioException) ;
-        }
-        finally
-        {
-        	this.cerrarFlujo(reader) ;
-        }
+			// Nos saltamos la primera línea
+			reader.readLine();
 
-        // Guardamos los tramos horarios en la base de datos
-        if (!tramosHorarios.isEmpty())
-        {
-            this.tramosHorariosRepository.saveAllAndFlush(tramosHorarios) ;
-        }
+			// Leemos la segunda línea que ya tiene datos
+			String linea = reader.readLine();
+
+			while (linea != null)
+			{
+				// Leemos la línea y la spliteamos
+				String[] valores = linea.split(",");
+
+				TramoHorario tramos = new TramoHorario();
+				tramos.setTramoHorario(valores[0]);
+
+				// Añadimos a la lista
+				tramosHorarios.add(tramos);
+
+				// Leemos la siguiente línea
+				linea = reader.readLine();
+			}
+		}
+		catch (IOException ioException)
+		{
+			String errorString = "IOException mientras se leía línea de tramo horario";
+
+			log.error(errorString, ioException);
+			throw new BookingError(Constants.ERR_CODE_PROCESANDO_TRAMO_HORARIO, errorString, ioException);
+		}
+		finally
+		{
+			this.cerrarFlujo(reader);
+		}
+
+		// Guardamos los tramos horarios en la base de datos
+		if (!tramosHorarios.isEmpty())
+		{
+			this.insertaTramosHorariosSiNoExiste(tramosHorarios);
+		}
 	}
-	
-    /**
-     * Carga días semana desde CSV - Internal
-     * @throws BookingError excepción mientras se leían los días de la semana
-     */
+
+	/**
+	 * Inserta los tramos horarios en la base de datos si no existen
+	 * 
+	 * @param tramosHorarios lista de tramos horarios
+	 */
+	private void insertaTramosHorariosSiNoExiste(List<TramoHorario> tramosHorarios)
+	{
+		for (TramoHorario tramoHorario : tramosHorarios)
+		{
+			Optional<TramoHorario> tramoHorarioOptional = this.tramosHorariosRepository.findByTramoHorario(tramoHorario.getTramoHorario());
+			if (tramoHorarioOptional.isEmpty())
+			{
+				this.tramosHorariosRepository.saveAndFlush(tramoHorario);
+			}
+		}
+	}
+
+	/**
+	 * Carga días semana desde CSV - Internal
+	 * 
+	 * @throws BookingError excepción mientras se leían los días de la semana
+	 */
 	private void cargarDiasSemanaDesdeCSVInternal() throws BookingError
 	{
-    	// Inicializamos la lista de días de la semana
-        List<DiaSemana> diasSemana = new ArrayList<DiaSemana>() ;
-        
-        BufferedReader reader = null ;
+		// Inicializamos la lista de días de la semana
+		List<DiaSemana> diasSemana = new ArrayList<DiaSemana>();
 
-        try
-        {
-            // Leer el archivo CSV desde la carpeta de recursos
-            reader = new BufferedReader(new FileReader(ResourceUtils.getFile(Constants.FICHERO_DIAS_SEMANAS))) ;
-            
-            // Nos saltamos la primera línea
-            reader.readLine() ;
+		BufferedReader reader = null;
 
-            // Leemos la segunda línea que ya tiene datos
-            String linea = reader.readLine() ;
-            
-            while (linea != null)
-            {
-            	// Leemos la línea y la spliteamos
-                String[] valores = linea.split(",") ;
+		try
+		{
+			// Leer el archivo CSV desde la carpeta de recursos
+			reader = new BufferedReader(
+					new FileReader(ResourceUtils.getFile(Constants.FICHERO_DIAS_SEMANAS), Charset.forName("UTF-8")));
 
-    			DiaSemana diaSemana = new DiaSemana();
-    			diaSemana.setDiaSemana(valores[0]);
-    			
-    			// Añadimos a la lista
-    			diasSemana.add(diaSemana) ;
-                
-                // Leemos la siguiente línea
-                linea = reader.readLine() ;
-            }
-        }
-        catch (IOException ioException)
-        {
-			String errorString = "IOException mientras se leía línea de dia de la semana" ;
-			
-			log.error(errorString, ioException) ;
-			throw new BookingError(Constants.ERR_CODE_PROCESANDO_DIA_SEMANA, errorString, ioException) ;
-        }
-        finally
-        {
-        	this.cerrarFlujo(reader) ;
-        }
+			// Nos saltamos la primera línea
+			reader.readLine();
 
-        // Guardamos los días de la semana en la base de datos
-        if (!diasSemana.isEmpty())
-        {
-            this.diaSemanaRepository.saveAllAndFlush(diasSemana) ;
-        }
+			// Leemos la segunda línea que ya tiene datos
+			String linea = reader.readLine();
+
+			while (linea != null)
+			{
+				// Leemos la línea y la spliteamos
+				String[] valores = linea.split(",");
+
+				DiaSemana diaSemana = new DiaSemana();
+				diaSemana.setDiaSemana(valores[0]);
+
+				// Añadimos a la lista
+				diasSemana.add(diaSemana);
+
+				// Leemos la siguiente línea
+				linea = reader.readLine();
+			}
+		}
+		catch (IOException ioException)
+		{
+			String errorString = "IOException mientras se leía línea de dia de la semana";
+
+			log.error(errorString, ioException);
+			throw new BookingError(Constants.ERR_CODE_PROCESANDO_DIA_SEMANA, errorString, ioException);
+		}
+		finally
+		{
+			this.cerrarFlujo(reader);
+		}
+
+		// Guardamos los días de la semana en la base de datos
+		if (!diasSemana.isEmpty())
+		{
+			this.insertaDiasSemanaSiNoExiste(diasSemana);
+		}
 	}
-	
+
+	/**
+	 * Inserta los días de la semana en la base de datos si no existen
+	 * 
+	 * @param diasSemana lista de días de la semana
+	 */
+	private void insertaDiasSemanaSiNoExiste(List<DiaSemana> diasSemana)
+	{
+		for (DiaSemana diaSemana : diasSemana)
+		{
+			Optional<DiaSemana> diaSemanaOptional = this.diaSemanaRepository.findByDiaSemana(diaSemana.getDiaSemana());
+			if (diaSemanaOptional.isEmpty())
+			{
+				this.diaSemanaRepository.saveAndFlush(diaSemana);
+			}
+		}
+	}
+
 	/**
 	 * @param reader reader
 	 * @throws BookingError excepción mientras se cerraba el reader
@@ -230,21 +304,21 @@ public class InicializacionSistema
 	{
 		if (reader != null)
 		{
-		    try
-		    {
-		    	// Cierre del reader
-				reader.close() ;
+			try
+			{
+				// Cierre del reader
+				reader.close();
 			}
-		    catch (IOException ioException)
-		    {
-				String errorString = "IOException mientras se cerraba el reader" ;
-				
-				log.error(errorString, ioException) ;
-				throw new BookingError(Constants.ERR_CODE_CIERRE_READER, errorString, ioException) ;
-			}	
+			catch (IOException ioException)
+			{
+				String errorString = "IOException mientras se cerraba el reader";
+
+				log.error(errorString, ioException);
+				throw new BookingError(Constants.ERR_CODE_CIERRE_READER, errorString, ioException);
+			}
 		}
 	}
-	
+
 	/**
 	 * Este método se encarga de inicializar el sistema con las constantes siempre
 	 * que estemos creando la base de datos ya sea en el entorno de desarrollo o
@@ -252,12 +326,17 @@ public class InicializacionSistema
 	 */
 	private void inicializarSistemaConConstantes()
 	{
+		// Borramos las constantes
+		this.constantesRepository.deleteAll();
+
+		// Cargamos las constantes
 		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_FIJAS, this.reservasFijas);
 		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_TEMPORALES, this.reservasTemporales);
+		this.cargarPropiedad(Constants.TABLA_CONST_MAX_VISTA_CAL_DIAS, this.maxDiasCalendario);
 	}
 
 	/**
-	 * @param key clave
+	 * @param key   clave
 	 * @param value valor
 	 */
 	private void cargarPropiedad(String key, String value)

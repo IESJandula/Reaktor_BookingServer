@@ -8,6 +8,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad que representa una constante del sistema almacenada en la base de
+ * datos.
+ * <p>
+ * Cada constante se identifica por una clave única y tiene un valor asociado.
+ * </p>
+ * 
+ * @author Luis David Castillo
+ * @author Miguel Ríos
+ * @author Enrique Contreras
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,9 +27,11 @@ import lombok.NoArgsConstructor;
 public class Constantes
 {
 
+	/** Clave única que identifica la constante */
 	@Id
 	private String clave;
 
+	/** Valor asociado a la constante */
 	@Column
 	private String valor;
 

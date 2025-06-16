@@ -35,10 +35,10 @@ public class Constants
 	// Días de la Semana
 	public final static int DIA_SEMANA_NO_ENCONTRADO = 20;
 	public final static int ERROR_OBTENIENDO_DIAS_SEMANA = 21;
-	
-	//Numero de Alumnos 
+
+	// Numero de Alumnos
 	public final static int NUMERO_ALUMNOS_NO_VALIDO = 13;
-	
+
 	// Códigos de error para validaciones globales previas a la reserva fija
 	public static final int ERROR_OBTENIENDO_PARAMETROS = 23;
 	public static final int ERROR_APP_DESHABILITADA = 24;
@@ -66,27 +66,31 @@ public class Constants
 	public final static int ERROR_CONEXION_FIREBASE = 101;
 	public final static int TIMEOUT_CONEXION_FIREBASE = 102;
 	public final static int IO_EXCEPTION_FIREBASE = 103;
-	
+
 	// Carga de datos
 	public static final int ERR_CODE_PROCESANDO_TRAMO_HORARIO = 200;
 	public static final int ERR_CODE_PROCESANDO_DIA_SEMANA = 201;
 	public static final int ERR_CODE_CIERRE_READER = 202;
 
+	// Log Reservas
+	public static final int ERR_CODE_LOG_RESERVA = 203;
+
 	/*********************************************************/
 	/******************* Ficheros y carpetas *****************/
 	/*********************************************************/
-	
+
 	/** Nombre de la carpeta de configuracion */
-	public static final String BOOKING_SERVER_CONFIG      = "booking_server_config" ;
-	
+	public static final String BOOKING_SERVER_CONFIG = "booking_server_config";
+
 	/** Nombre de la carpeta de configuracion al ejecutarse */
-	public static final String BOOKING_SERVER_CONFIG_EXEC = "booking_server_config_exec" ;
+	public static final String BOOKING_SERVER_CONFIG_EXEC = "booking_server_config_exec";
 
 	/** Fichero con los tramos horarios */
-	public static final String FICHERO_TRAMOS_HORARIOS 	  = BOOKING_SERVER_CONFIG_EXEC + File.separator + "tramosHorarios.csv";
+	public static final String FICHERO_TRAMOS_HORARIOS = BOOKING_SERVER_CONFIG_EXEC + File.separator
+			+ "tramosHorarios.csv";
 
 	/** Fichero con los días de la semana */
-	public static final String FICHERO_DIAS_SEMANAS       = BOOKING_SERVER_CONFIG_EXEC + File.separator + "diasSemana.csv";
+	public static final String FICHERO_DIAS_SEMANAS = BOOKING_SERVER_CONFIG_EXEC + File.separator + "diasSemana.csv";
 
 	/*********************************************************/
 	/****************** Modo DDL - Create ********************/
@@ -99,18 +103,22 @@ public class Constants
 	/*********************************************************/
 
 	/** Constante - Reservas fijas */
-	public static final String TABLA_CONST_RESERVAS_FIJAS 	   = "Reservas fijas";
+	public static final String TABLA_CONST_RESERVAS_FIJAS = "Reservas fijas";
 
 	/** Constante - Reservas temporales */
 	public static final String TABLA_CONST_RESERVAS_TEMPORALES = "Reservas temporales";
+
+	public static final String TABLA_CONST_MAX_VISTA_CAL_DIAS = "Máximo vista calendario en días";
 
 	/*********************************************************/
 	/******************* Parámetros YAML *********************/
 	/*********************************************************/
 
 	/** Constante - Parámetros YAML - Reservas fijas */
-	public static final String PARAM_YAML_RESERVAS_FIJAS 	  = "reaktor.constantes.reservasFijas";
+	public static final String PARAM_YAML_RESERVAS_FIJAS = "reaktor.constantes.reservasFijas";
 
 	/** Constante - Parámetros YAML - Reservas temporales */
 	public static final String PARAM_YAML_RESERVAS_TEMPORALES = "reaktor.constantes.reservasTemporales";
+
+	public static final String PARAM_YAML_MAX_CALENDARIO = "reaktor.constantes.maxDiasCalendario";
 }
