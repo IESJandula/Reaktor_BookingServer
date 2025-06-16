@@ -10,6 +10,7 @@ import java.time.temporal.IsoFields;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,6 +42,7 @@ import es.iesjandula.reaktor.booking_server.models.LogReservas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.DiaSemana;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Profesor;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Recurso;
+import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.TramoHorario;
 import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTemporal;
 import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTemporalId;
@@ -48,6 +50,7 @@ import es.iesjandula.reaktor.booking_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.booking_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.booking_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
+import es.iesjandula.reaktor.booking_server.repository.IReservaRepository;
 import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IReservaTemporalRepository;
@@ -64,6 +67,9 @@ public class ReservasTemporalesRest
 
 	@Autowired
 	private IProfesorRepository profesoresRepository;
+	
+	@Autowired
+	private IReservaRepository reservaFijaRepository;
 
 	@Autowired
 	private IReservaTemporalRepository reservaTemporalRepository;
@@ -388,7 +394,7 @@ public class ReservasTemporalesRest
 
 			this.logReservasRepository.saveAndFlush(log);
 
-			return ResponseEntity.ok().body("Reserva realizada correctamente");
+			return ResponseEntity.ok().build();
 
 		}
 		catch (ReservaException reservaException)
@@ -971,43 +977,58 @@ public class ReservasTemporalesRest
 	{
 		try
 		{
-			Boolean disponible = false;
+			Boolean disponible = true;
 			if (!semanas.isEmpty())
 			{
-				Recurso recursoInstancia = this.recursoRepository.findById(recurso).get();
-
 				Set<Integer> sinRepetir = new HashSet<>();
 
 				// Eliminar elementos duplicados
 				semanas.removeIf(num -> !sinRepetir.add(num));
-
-				boolean presente = false;
-
-				for (Integer semana : semanas)
+				
+				Optional<List<ReservaFija>> optionalListFijas = this.reservaFijaRepository.encontrarReservasFijasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario);
+				
+				int contadorReservaFija = 0;
+				
+				Recurso recursoInstancia = this.recursoRepository.findById(recurso).get();
+				
+				if(optionalListFijas.isPresent())
 				{
-					disponible = false;
-					presente = false;
-
-					presente = this.reservaTemporalRepository
-							.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).isPresent();
-					if (presente)
+					disponible = recursoInstancia.isEsCompartible();
+					if(disponible)
 					{
-						if ((recursoInstancia.getCantidad()) - (this.reservaTemporalRepository
-								.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, semana).get()
-								.getNAlumnos() + numAlumnos) >= 0 && recursoInstancia.isEsCompartible())
+						List<ReservaFija> listReservaFija = optionalListFijas.get();
+						
+						for (ReservaFija reservaFija : listReservaFija)
 						{
-							disponible = true;
+							contadorReservaFija = contadorReservaFija + reservaFija.getNAlumnos();
 						}
 					}
-					else
-					{
-						disponible = true;
-					}
+				}
+				
+				Iterator<Integer> iterator = semanas.iterator();
+				
+				while (iterator.hasNext() && disponible)
+				{
+					int contadorActualReserva = contadorReservaFija;
+					
+					Optional<List<ReservaTemporal>> optionalListTemporales = this.reservaTemporalRepository
+							.encontrarReservasPorDiaTramo(recurso, diaDeLaSemana, tramoHorario, iterator.next());
 
-					if (!disponible)
+					if (optionalListTemporales.isPresent())
 					{
-						break;
+						disponible = recursoInstancia.isEsCompartible();
+						if(disponible)
+						{
+							List<ReservaTemporal> listReservaTemporales = optionalListTemporales.get();
+							
+							for (ReservaTemporal reservaTemporal : listReservaTemporales)
+							{
+								contadorActualReserva = contadorActualReserva + reservaTemporal.getNAlumnos();
+							}
+						}
 					}
+					
+					disponible = (recursoInstancia.getCantidad()) - (contadorActualReserva + numAlumnos) >= 0;
 				}
 			}
 			return ResponseEntity.ok(disponible);

@@ -59,7 +59,7 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recurso AND "
 			+ "r.reservaTemporalId.diaSemana.id = :diaSemana AND "
 			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorario AND " + "r.reservaTemporalId.numSemana = :numSemana")
-	Optional<ReservaTemporal> encontrarReservasPorDiaTramo(@Param("recurso") String recurso,
+	Optional <List<ReservaTemporal>> encontrarReservasPorDiaTramo(@Param("recurso") String recurso,
 			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario,
 			@Param("numSemana") Integer numSemana);
 

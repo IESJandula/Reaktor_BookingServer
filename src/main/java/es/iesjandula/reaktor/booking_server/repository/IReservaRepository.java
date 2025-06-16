@@ -57,6 +57,16 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 			+ "FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_fija GROUP BY recurso_id, dia_semana_id, tramo_horario_id) AS Fija "
 			+ "GROUP BY recurso_id", nativeQuery = true)
 	List<Object[]> reservaFijaMax();
+	
+	
+	/*
+	 * Se obtiene la suma del número de alumnos para calcular la reserva máxima
+	 */
+	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recurso AND "
+			+ "r.reservaFijaId.diaSemana.id = :diaSemana AND "
+			+ "r.reservaFijaId.tramoHorario.id = :tramoHorario")
+	Optional <List<ReservaFija>> encontrarReservasFijasPorDiaTramo(@Param("recurso") String recurso,
+			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario);
 
 	/**
 	 * Borra todas las reservas asociadas a un recurso dado.

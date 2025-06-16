@@ -509,7 +509,7 @@ public class ReservasFijasRest
 
 			this.logReservasRepository.saveAndFlush(log);
 
-			return ResponseEntity.ok().body("Reserva realizada correctamente");
+			return ResponseEntity.ok().build();
 
 		}
 		catch (ReservaException reservaException)
