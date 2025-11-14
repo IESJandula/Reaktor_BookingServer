@@ -78,9 +78,6 @@ public class ReservasFijasRest
 	@Value("${reaktor.firebase_server_url}")
 	private String firebaseServerUrl;
 
-	@Value("${reaktor.users_timeout}")
-	private long usersTimeout;
-
 	@Value("${reaktor.http_connection_timeout}")
 	private int httpConnectionTimeout;
 

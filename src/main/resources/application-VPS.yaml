@@ -26,11 +26,10 @@ logging:
 reaktor:
   publicKeyFile: ${PUBLIC_KEY_FILE}
   urlCors: https://somos.iesjandula.es
+  firebase_server_url: https://api.iesjandula.es/
   clientId: bookings
   constantes:
     reservasFijas: ""
     reservasTemporales: ""
-  firebase_server_url: https://api.iesjandula.es/
-  users_timeout: 30000
   http_connection_timeout: 30000
   reiniciarParametros: true
