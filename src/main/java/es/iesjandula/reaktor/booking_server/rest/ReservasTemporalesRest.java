@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -55,13 +58,16 @@ import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
-import lombok.extern.log4j.Log4j2;
 
 @RequestMapping(value = "/bookings/temporary")
 @RestController
-@Log4j2
 public class ReservasTemporalesRest
 {
+	/**
+	 * Logger of the class
+	 */
+	private static final Logger log = LoggerFactory.getLogger(ReservasTemporalesRest.class);
+
 	@Autowired
 	private IRecursoRepository recursoRepository;
 

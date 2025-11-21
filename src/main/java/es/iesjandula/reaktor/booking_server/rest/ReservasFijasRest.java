@@ -13,6 +13,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -47,13 +50,16 @@ import es.iesjandula.reaktor.booking_server.repository.IReservaRepository;
 import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
-import lombok.extern.log4j.Log4j2;
 
 @RequestMapping(value = "/bookings/fixed")
 @RestController
-@Log4j2
 public class ReservasFijasRest
 {
+	/**
+	 * Logger of the class
+	 */
+	private static final Logger log = LoggerFactory.getLogger(ReservasFijasRest.class);
+
 	@Autowired
 	private IRecursoRepository recursoRepository;
 

@@ -2,6 +2,9 @@ package es.iesjandula.reaktor.booking_server.rest;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +19,6 @@ import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.models.Constantes;
 import es.iesjandula.reaktor.booking_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Controlador REST para gestionar las constantes del sistema. Permite obtener y
@@ -46,9 +48,13 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping(value = "/bookings/constants", produces =
 { "application/json" })
 @RestController
-@Log4j2
 public class ConstantesController
 {
+	/**
+	 * Logger of the class
+	 */
+	private static final Logger log = LoggerFactory.getLogger(ConstantesController.class);
+
 	@Autowired
 	private ConstantesRepository constanteRepository;
 

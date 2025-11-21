@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,7 +31,6 @@ import es.iesjandula.reaktor.booking_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 import jakarta.annotation.PostConstruct;
-import lombok.extern.log4j.Log4j2;
 
 /**
  * Clase que gestiona la inicialización del sistema al iniciar la aplicación. Se
@@ -58,10 +60,14 @@ import lombok.extern.log4j.Log4j2;
  * @author Miguel Ríos
  * @author Enrique Contreras
  */
-@Log4j2
 @Service
 public class InicializacionSistema
 {
+	/**
+	 * Logger of the class
+	 */
+	private static final Logger log = LoggerFactory.getLogger(InicializacionSistema.class);
+
 	@Autowired
 	private ITramoHorarioRepository tramosHorariosRepository;
 
