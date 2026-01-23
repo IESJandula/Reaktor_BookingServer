@@ -67,6 +67,7 @@ public class Constants
 	public final static int ERROR_CONEXION_FIREBASE = 101;
 	public final static int TIMEOUT_CONEXION_FIREBASE = 102;
 	public final static int IO_EXCEPTION_FIREBASE = 103;
+	public final static int ERROR_ESTADISTICAS = 104;
 
 	// Carga de datos
 	public static final int ERR_CODE_PROCESANDO_TRAMO_HORARIO = 200;

@@ -66,6 +66,12 @@ public class LogReservas
 	@Column
 	private Long countMax;
 
+	@Column(name = "dia_semana")
+	private String diaSemana;
+
+	@Column(name = "tramo_horario")
+	private String tramoHorario;
+
 	/**
 	 * Constructor simplificado sin los campos numRegistro y countMax.
 	 * 

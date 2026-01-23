@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaTramoMasReservadoDto;
+import es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto;
 import es.iesjandula.reaktor.booking_server.models.LogReservas;
 
 /**
@@ -35,4 +37,18 @@ public interface LogReservasRepository extends JpaRepository<LogReservas, Date>
 			+ "FROM log_reservas " + "ORDER BY fecha DESC " + "LIMIT 10 OFFSET :inicio", nativeQuery = true)
 	List<LogReservas> getPaginacionLogs(@Param("inicio") Integer inicio);
 
+	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto(l.recurso, COUNT(*)) " +
+		       "FROM LogReservas l " +
+		       "WHERE l.recurso IS NOT NULL AND l.recurso <> '' " +
+		       "GROUP BY l.recurso " +
+		       "ORDER BY COUNT(*) DESC")
+		List<EstadisticaRecursoMasReservadoDto> obtenerRecursoMasReservado();
+
+		@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaTramoMasReservadoDto(l.diaSemana, l.tramoHorario, COUNT(*)) " +
+		       "FROM LogReservas l " +
+		       "WHERE l.diaSemana IS NOT NULL AND l.diaSemana <> '' " +
+		       "AND l.tramoHorario IS NOT NULL AND l.tramoHorario <> '' " +
+		       "GROUP BY l.diaSemana, l.tramoHorario " +
+		       "ORDER BY COUNT(*) DESC")
+		List<EstadisticaDiaTramoMasReservadoDto> obtenerDiaTramoMasReservado();
 }

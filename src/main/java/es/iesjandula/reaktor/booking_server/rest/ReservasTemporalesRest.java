@@ -394,6 +394,9 @@ public class ReservasTemporalesRest
 					new Date(), profesor, "Crear", "Temporal", recurso, fechaFormateada + " | "
 							+ diaString.get().getDiaSemana() + " - " + tramoHorarioString.get().getTramoHorario(),
 					usuarioRealizaAccion);
+			
+			log.setDiaSemana(diaString.get().getDiaSemana());
+			log.setTramoHorario(tramoHorarioString.get().getTramoHorario());
 
 			this.logReservasRepository.saveAndFlush(log);
 
@@ -829,6 +832,9 @@ public class ReservasTemporalesRest
 					new Date(), profesor, "Borrar", "Temporal", aulaYCarritos, fechaFormateada + " | "
 							+ diaString.get().getDiaSemana() + " - " + tramoHorarioString.get().getTramoHorario(),
 					usuarioRealizaAccion);
+			
+			logBorrado.setDiaSemana(diaString.get().getDiaSemana());
+			logBorrado.setTramoHorario(tramoHorarioString.get().getTramoHorario());
 
 			this.logReservasRepository.saveAndFlush(logBorrado);
 
