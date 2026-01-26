@@ -126,10 +126,9 @@ public class ReservasAdminRest
 		}
 		catch (Exception exception)
 		{
-			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al crear el recurso",
-					exception);
-			log.error("Error inesperado al crear el recurso: ", exception);
+			String mensajeError = "Error inesperado al crear el recurso";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(100, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -172,10 +171,9 @@ public class ReservasAdminRest
 		}
 		catch (Exception exception)
 		{
-			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
-					"Error inesperado al borrar el recurso", exception);
-			log.error("Error inesperado al borrar el recurso: ", exception);
+			String mensajeError = "Error inesperado al borrar el recurso";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -210,9 +208,9 @@ public class ReservasAdminRest
 		}
 		catch (Exception exception)
 		{
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
-					"Error inesperado al comprobar el borrado de recurso", exception);
-			log.error("Error inesperado al comprobar el borrado de recurso: ", exception);
+			String mensajeError = "Error inesperado al comprobar el borrado de recurso";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -320,10 +318,9 @@ public class ReservasAdminRest
 		}
 		catch (Exception exception)
 		{
-			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(100, "Error inesperado al crear el recurso",
-					exception);
-			log.error("Error inesperado al crear el recurso: ", exception);
+			String mensajeError = "Error inesperado al crear el recurso";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(100, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -355,10 +352,9 @@ public class ReservasAdminRest
 		}
 		catch (Exception exception)
 		{
-			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
-					"Error inesperado al borrar el recurso", exception);
-			log.error("Error inesperado al borrar el recurso: ", exception);
+			String mensajeError = "Error inesperado al borrar el recurso";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -404,10 +400,9 @@ public class ReservasAdminRest
 		}
 		catch (Exception exception)
 		{
-			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
-					"Error inesperado al borrar el recurso", exception);
-			log.error("Error inesperado al borrar el recurso: ", exception);
+			String mensajeError = "Error inesperado al modificar el bloqueo del recurso";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -455,10 +450,9 @@ public class ReservasAdminRest
 		}
 		catch (Exception exception)
 		{
-			// Para cualquier error inesperado, devolverá un 500
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
-					"Error inesperado al borrar el recurso", exception);
-			log.error("Error inesperado al borrar el recurso: ", exception);
+			String mensajeError = "Error inesperado al obtener los logs";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
