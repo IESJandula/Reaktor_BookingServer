@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -417,21 +419,18 @@ public class ReservasAdminRest
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/logs")
-	public ResponseEntity<?> getPaginatedLogs(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestHeader(value = "pagina", required = true) Integer pagina)
+	public ResponseEntity<?> getPaginatedLogs(@AuthenticationPrincipal DtoUsuarioExtended usuario, Pageable pageable)
 	{
 		try
 		{
-			if (pagina < 0)
+			if (pageable.getPageNumber() < 0)
 			{
 				String mensajeError = "No existen logs";
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
 			}
 
-			String paginacion = pagina.toString() + "0";
-
-			List<LogReservas> listaLogs = this.logReservasRepository.getPaginacionLogs(Integer.parseInt(paginacion));
+			Page<LogReservas> listaLogs = this.logReservasRepository.getPaginacionLogs(pageable);
 
 			if (listaLogs.isEmpty())
 			{

@@ -3,6 +3,8 @@ package es.iesjandula.reaktor.booking_server.repository;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,10 +34,13 @@ public interface LogReservasRepository extends JpaRepository<LogReservas, Date>
 	 * @param inicio índice desde el que empezar a recuperar los logs (offset)
 	 * @return lista con los logs de reservas paginados
 	 */
-	@Query(value = "SELECT " + "  ROW_NUMBER() OVER (ORDER BY fecha_reserva DESC) AS num_registro, "
-			+ "  fecha_reserva, usuario, accion, tipo, recurso, loc_reserva, super_usuario, " + "  COUNT(*) OVER() AS count_max "
-			+ "FROM log_reservas " + "ORDER BY fecha_reserva DESC " + "LIMIT 10 OFFSET :inicio", nativeQuery = true)
-	List<LogReservas> getPaginacionLogs(@Param("inicio") Integer inicio);
+
+	
+	@Query(value = 
+		"SELECT new es.iesjandula.reaktor.booking_server.models.LogReservas(l.id, l.usuario, l.accion, l.tipo, l.recurso, l.fechaReserva, l.diaSemana, l.tramoHorario, l.superUsuario) " +
+		"FROM log_reservas l " + 
+		"ORDER BY l.fechaReserva DESC")
+	Page<LogReservas> getPaginacionLogs(Pageable pageable);
 
 	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto(l.recurso, COUNT(*)) " +
 		       "FROM LogReservas l " +
