@@ -53,10 +53,10 @@ import es.iesjandula.reaktor.booking_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.booking_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.booking_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
-import es.iesjandula.reaktor.booking_server.repository.IReservaRepository;
+import es.iesjandula.reaktor.booking_server.repository.IReservaFijaRepository;
+import es.iesjandula.reaktor.booking_server.repository.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
-import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 
 @RequestMapping(value = "/bookings/temporary")
@@ -75,7 +75,7 @@ public class ReservasTemporalesRest
 	private IProfesorRepository profesoresRepository;
 	
 	@Autowired
-	private IReservaRepository reservaFijaRepository;
+	private IReservaFijaRepository reservaFijaRepository;
 
 	@Autowired
 	private IReservaTemporalRepository reservaTemporalRepository;
@@ -385,20 +385,24 @@ public class ReservasTemporalesRest
 				usuarioRealizaAccion = usuario.getNombre() + " " + usuario.getApellidos();
 			}
 
-			LocalDate fecha = LocalDate.now().with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, numSemana)
-					.with(ChronoField.DAY_OF_WEEK, diaDeLaSemana);
-			DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-			String fechaFormateada = fecha.format(formato);
+			// Creamos una instancia de LogReservas para la creación de la reserva
+			LogReservas logReservasCreacion = new LogReservas();
 
-			LogReservas log = new LogReservas(
-					new Date(), profesor, "Crear", "Temporal", recurso, fechaFormateada + " | "
-							+ diaString.get().getDiaSemana() + " - " + tramoHorarioString.get().getTramoHorario(),
-					usuarioRealizaAccion);
+			// Añadimos los datos de la reserva al LogReservas
+			logReservasCreacion.setUsuario(profesor);
+			logReservasCreacion.setAccion("Crear");
+			logReservasCreacion.setTipo("Temporal");
+			logReservasCreacion.setRecurso(recurso);
+			logReservasCreacion.setFechaReserva(new Date());
+			logReservasCreacion.setDiaSemana(diaString.get().getDiaSemana());
+			logReservasCreacion.setTramoHorario(tramoHorarioString.get().getTramoHorario());
+			logReservasCreacion.setSuperUsuario(usuarioRealizaAccion);
 			
-			log.setDiaSemana(diaString.get().getDiaSemana());
-			log.setTramoHorario(tramoHorarioString.get().getTramoHorario());
+			// Guardamos la reserva en la base de datos
+			this.logReservasRepository.saveAndFlush(logReservasCreacion);
 
-			this.logReservasRepository.saveAndFlush(log);
+			// Logueamos
+			log.info("La reserva temporal se ha creado correctamente");
 
 			return ResponseEntity.ok().build();
 
@@ -677,7 +681,7 @@ public class ReservasTemporalesRest
 	 *
 	 * @param usuario       Usuario autenticado que realiza la petición.
 	 * @param email         Email del profesor cuya reserva se desea cancelar.
-	 * @param aulaYCarritos Identificador del recurso reservado.
+	 * @param recurso Identificador del recurso reservado.
 	 * @param diaDeLaSemana Día de la semana en que se hizo la reserva.
 	 * @param tramoHorario  Tramo horario de la reserva.
 	 * @param numSemana     Número de semana correspondiente a la reserva.
@@ -690,7 +694,7 @@ public class ReservasTemporalesRest
 	@RequestMapping(method = RequestMethod.DELETE, value = "/bookings")
 	public ResponseEntity<?> borrarReserva(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "email", required = true) String email,
-			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
+			@RequestHeader(value = "recurso", required = true) String recurso,
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramoHorario", required = true) Long tramoHorario,
 			@RequestHeader(value = "numSemana", required = true) Integer numSemana,
@@ -723,7 +727,7 @@ public class ReservasTemporalesRest
 			// Antes de borrar la reserva verifica si existe una reserva con los mismos
 			// datos
 			Optional<ReservaTemporal> optinalReserva = this.reservaTemporalRepository.encontrarReserva(email,
-					aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
+					recurso, diaDeLaSemana, tramoHorario, numSemana);
 
 			if (!optinalReserva.isPresent())
 			{
@@ -733,7 +737,7 @@ public class ReservasTemporalesRest
 			}
 
 			// Creamos instancia de ReservaId para luego borrar por este id
-			ReservaTemporalId reservaId = this.crearInstanciaDeReservaId(usuario, email, aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
+			ReservaTemporalId reservaId = this.crearInstanciaDeReservaId(usuario, email, recurso, diaDeLaSemana, tramoHorario, numSemana);
 
 			Integer semanaInicial = numSemana;
 			ReservaTemporal reservaIterable = new ReservaTemporal();
@@ -744,7 +748,7 @@ public class ReservasTemporalesRest
 				do
 				{
 					Optional<ReservaTemporal> optinalReservaIterable = this.reservaTemporalRepository
-							.encontrarReserva(email, aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
+							.encontrarReserva(email, recurso, diaDeLaSemana, tramoHorario, numSemana);
 
 					if (optinalReservaIterable.isEmpty())
 					{
@@ -761,7 +765,7 @@ public class ReservasTemporalesRest
 				{
 					numSemana++;
 					Optional<ReservaTemporal> optinalReservaIterable = this.reservaTemporalRepository
-							.encontrarReserva(email, aulaYCarritos, diaDeLaSemana, tramoHorario, numSemana);
+							.encontrarReserva(email, recurso, diaDeLaSemana, tramoHorario, numSemana);
 					if (optinalReservaIterable.isEmpty())
 					{
 						break;
@@ -828,15 +832,24 @@ public class ReservasTemporalesRest
 			DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 			String fechaFormateada = fecha.format(formato);
 
-			LogReservas logBorrado = new LogReservas(
-					new Date(), profesor, "Borrar", "Temporal", aulaYCarritos, fechaFormateada + " | "
-							+ diaString.get().getDiaSemana() + " - " + tramoHorarioString.get().getTramoHorario(),
-					usuarioRealizaAccion);
-			
+			// Creamos una instancia de LogReservas
+			LogReservas logBorrado = new LogReservas();
+
+			// Añadimos los datos de la reserva al LogReservas
+			logBorrado.setUsuario(profesor);
+			logBorrado.setAccion("Borrar");
+			logBorrado.setTipo("Temporal");
+			logBorrado.setRecurso(recurso);
+			logBorrado.setFechaReserva(new Date());
 			logBorrado.setDiaSemana(diaString.get().getDiaSemana());
 			logBorrado.setTramoHorario(tramoHorarioString.get().getTramoHorario());
+			logBorrado.setSuperUsuario(usuarioRealizaAccion);
 
+			// Guardamos la reserva en la base de datos
 			this.logReservasRepository.saveAndFlush(logBorrado);
+
+			// Logueamos
+			log.info("La reserva temporal se ha borrado correctamente");
 
 			return ResponseEntity.ok().build();
 

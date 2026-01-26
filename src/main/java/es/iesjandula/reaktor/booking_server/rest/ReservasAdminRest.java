@@ -27,9 +27,9 @@ import es.iesjandula.reaktor.booking_server.exception.ReservaException;
 import es.iesjandula.reaktor.booking_server.models.LogReservas;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.Recurso;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
-import es.iesjandula.reaktor.booking_server.repository.IReservaRepository;
+import es.iesjandula.reaktor.booking_server.repository.IReservaFijaRepository;
+import es.iesjandula.reaktor.booking_server.repository.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
-import es.iesjandula.reaktor.booking_server.repository.reservas_temporales.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 
 /**
@@ -65,7 +65,7 @@ public class ReservasAdminRest
 	private LogReservasRepository logReservasRepository;
 
 	@Autowired
-	private IReservaRepository reservaRepository;
+	private IReservaFijaRepository reservaFijaRepository;
 
 	/**
 	 * Endpoint para crear o actualizar un recurso. Si el recurso ya existe con la
@@ -229,7 +229,7 @@ public class ReservasAdminRest
 	{
 		try
 		{
-			List<Object[]> reservaFijaMax = this.reservaRepository.reservaFijaMax();
+			List<Object[]> reservaFijaMax = this.reservaFijaRepository.reservaFijaMax();
 			List<Object[]> reservaTemporalMax = this.reservaTemporalRepository.reservaTemporalMax();
 
 			List<RecursoCantMaxDto> listaRecursoFija = new ArrayList<RecursoCantMaxDto>();
@@ -343,7 +343,7 @@ public class ReservasAdminRest
 	{
 		try
 		{
-			this.reservaRepository.deleteReservas(recurso);
+			this.reservaFijaRepository.deleteReservas(recurso);
 			this.reservaTemporalRepository.deleteReservas(recurso);
 
 			log.info("Las reservas del recurso se han borrado correctamente: " + recurso);

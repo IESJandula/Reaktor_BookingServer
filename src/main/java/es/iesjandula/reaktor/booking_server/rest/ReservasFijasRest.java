@@ -46,7 +46,7 @@ import es.iesjandula.reaktor.booking_server.repository.ConstantesRepository;
 import es.iesjandula.reaktor.booking_server.repository.IDiaSemanaRepository;
 import es.iesjandula.reaktor.booking_server.repository.IProfesorRepository;
 import es.iesjandula.reaktor.booking_server.repository.IRecursoRepository;
-import es.iesjandula.reaktor.booking_server.repository.IReservaRepository;
+import es.iesjandula.reaktor.booking_server.repository.IReservaFijaRepository;
 import es.iesjandula.reaktor.booking_server.repository.ITramoHorarioRepository;
 import es.iesjandula.reaktor.booking_server.repository.LogReservasRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
@@ -67,7 +67,7 @@ public class ReservasFijasRest
 	private IProfesorRepository profesoresRepository;
 
 	@Autowired
-	private IReservaRepository reservasRepository;
+	private IReservaFijaRepository reservaFijaRepository;
 
 	@Autowired
 	private IDiaSemanaRepository diasSemanaRepository;
@@ -277,7 +277,7 @@ public class ReservasFijasRest
 			}
 
 			// Buscamos las reservas por el recurso
-			List<Object[]> resultados = this.reservasRepository.encontrarReservaPorRecurso(recurso);
+			List<Object[]> resultados = this.reservaFijaRepository.encontrarReservaPorRecurso(recurso);
 
 			@SuppressWarnings("deprecation")
 			Recurso recursoSeleccionado = this.recursoRepository.getById(recurso);
@@ -430,7 +430,7 @@ public class ReservasFijasRest
 			// Enviando excepción si no es correcto
 
 			// Verifica si ya existe una reserva con los mismos datos
-			Optional<ReservaFija> optionalReserva = this.reservasRepository.encontrarReserva(email, recurso,
+			Optional<ReservaFija> optionalReserva = this.reservaFijaRepository.encontrarReserva(email, recurso,
 					diaDeLaSemana, tramosHorarios);
 
 			if (optionalReserva.isPresent())
@@ -475,7 +475,7 @@ public class ReservasFijasRest
 
 			// Si no existe una reserva previa, se guarda la nueva reserva en la base de
 			// datos
-			this.reservasRepository.saveAndFlush(reserva);
+			this.reservaFijaRepository.saveAndFlush(reserva);
 
 			log.info("Se ha reservado correctamente");
 
@@ -496,14 +496,24 @@ public class ReservasFijasRest
 				usuarioRealizaAccion = usuario.getNombre() + " " + usuario.getApellidos();
 			}
 
-			LogReservas log = new LogReservas(new Date(), profesor, "Crear", "Fija", recurso,
-					diaString.get().getDiaSemana() + " - " + tramoHorarioString.get().getTramoHorario(),
-					usuarioRealizaAccion);
+			// Creamos una instancia de LogReservas para la creación de la reserva
+			LogReservas logReservasCreacion = new LogReservas();
 
-			log.setDiaSemana(diaString.get().getDiaSemana());
-			log.setTramoHorario(tramoHorarioString.get().getTramoHorario());
+			// Añadimos los datos de la reserva al LogReservas
+			logReservasCreacion.setUsuario(profesor);
+			logReservasCreacion.setAccion("Crear");
+			logReservasCreacion.setTipo("Fija");
+			logReservasCreacion.setRecurso(recurso);
+			logReservasCreacion.setFechaReserva(new Date());
+			logReservasCreacion.setDiaSemana(diaString.get().getDiaSemana());
+			logReservasCreacion.setTramoHorario(tramoHorarioString.get().getTramoHorario());
+			logReservasCreacion.setSuperUsuario(usuarioRealizaAccion);
 
-			this.logReservasRepository.saveAndFlush(log);
+			// Guardamos la reserva en la base de datos
+			this.logReservasRepository.saveAndFlush(logReservasCreacion);
+
+			// Logueamos
+			log.info("La reserva fija se ha creado correctamente");
 
 			return ResponseEntity.ok().build();
 
@@ -771,7 +781,7 @@ public class ReservasFijasRest
 	@RequestMapping(method = RequestMethod.DELETE, value = "/bookings")
 	public ResponseEntity<?> cancelarRecurso(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 			@RequestHeader(value = "email", required = true) String email,
-			@RequestHeader(value = "recurso", required = true) String aulaYCarritos,
+			@RequestHeader(value = "recurso", required = true) String recurso,
 			@RequestHeader(value = "diaDeLaSemana", required = true) Long diaDeLaSemana,
 			@RequestHeader(value = "tramoHorario", required = true) Long tramoHorario)
 	{
@@ -790,8 +800,7 @@ public class ReservasFijasRest
 
 			// Antes de borrar la reserva verifica si existe una reserva con los mismos
 			// datos
-			Optional<ReservaFija> optinalReserva = this.reservasRepository.encontrarReserva(email, aulaYCarritos,
-					diaDeLaSemana, tramoHorario);
+			Optional<ReservaFija> optinalReserva = this.reservaFijaRepository.encontrarReserva(email, recurso, diaDeLaSemana, tramoHorario);
 
 			if (!optinalReserva.isPresent())
 			{
@@ -801,11 +810,10 @@ public class ReservasFijasRest
 			}
 
 			// Creamos instancia de ReservaId para luego borrar por este id
-			ReservaFijaId reservaId = this.crearInstanciaDeReservaId(usuario, email, aulaYCarritos, diaDeLaSemana,
-					tramoHorario);
+			ReservaFijaId reservaId = this.crearInstanciaDeReservaId(usuario, email, recurso, diaDeLaSemana, tramoHorario);
 
 			// Si la reserva existe en la base de datos, se borrará
-			this.reservasRepository.deleteById(reservaId);
+			this.reservaFijaRepository.deleteById(reservaId);
 
 			Optional<DiaSemana> diaString = this.diasSemanaRepository.findById(diaDeLaSemana.toString());
 			Optional<TramoHorario> tramoHorarioString = this.tramosHorariosRepository.findById(tramoHorario.toString());
@@ -823,16 +831,25 @@ public class ReservasFijasRest
 				usuarioRealizaAccion = usuario.getNombre() + " " + usuario.getApellidos();
 			}
 
-			LogReservas logBorrado = new LogReservas(new Date(), profesor, "Borrar", "Fija", aulaYCarritos,
-					diaString.get().getDiaSemana() + " - " + tramoHorarioString.get().getTramoHorario(),
-					usuarioRealizaAccion);
+			// Creamos la instancia de LogReservas para el borrado de la reserva
+			LogReservas logReservasBorrado = new LogReservas();
 
-			logBorrado.setDiaSemana(diaString.get().getDiaSemana());
-			logBorrado.setTramoHorario(tramoHorarioString.get().getTramoHorario());
+			// Añadimos los datos de la reserva al LogReservas
+			logReservasBorrado.setUsuario(profesor);
+			logReservasBorrado.setAccion("Borrar");
+			logReservasBorrado.setTipo("Fija");
+			logReservasBorrado.setRecurso(recurso);
+			logReservasBorrado.setFechaReserva(new Date());
+			logReservasBorrado.setDiaSemana(diaString.get().getDiaSemana());
+			logReservasBorrado.setTramoHorario(tramoHorarioString.get().getTramoHorario());
+			logReservasBorrado.setSuperUsuario(usuarioRealizaAccion);
 
-			this.logReservasRepository.saveAndFlush(logBorrado);
+			// Guardamos la reserva en la base de datos
+			this.logReservasRepository.saveAndFlush(logReservasBorrado);
 
-			log.info("La reserva se ha borrado correctamente");
+			// Logueamos
+			log.info("La reserva fija se ha borrado correctamente");
+
 			return ResponseEntity.ok().build();
 
 		} catch (ReservaException reservaException)
@@ -862,16 +879,16 @@ public class ReservasFijasRest
 	 * @param usuario       Usuario autenticado (DTO extendido con roles y JWT).
 	 * @param email         Email del profesor asociado a la reserva (solo usado si
 	 *                      el usuario es admin o dirección).
-	 * @param aulaYCarritos Identificador del recurso reservado.
+	 * @param recursoId Identificador del recurso reservado.
 	 * @param diaDeLaSemana Día de la semana en que se realiza la reserva (ID).
 	 * @param tramoHorario  Tramo horario en el que se realiza la reserva (ID).
 	 * @return Objeto {@link ReservaFijaId} construido con los datos indicados.
 	 */
-	private ReservaFijaId crearInstanciaDeReservaId(DtoUsuarioExtended usuario, String email, String aulaYCarritos,
+	private ReservaFijaId crearInstanciaDeReservaId(DtoUsuarioExtended usuario, String email, String recursoId,
 			Long diaDeLaSemana, Long tramoHorario)
 	{
 		Recurso recurso = new Recurso();
-		recurso.setId(aulaYCarritos);
+		recurso.setId(recursoId);
 
 		DiaSemana diasSemana = new DiaSemana();
 		diasSemana.setId(diaDeLaSemana);

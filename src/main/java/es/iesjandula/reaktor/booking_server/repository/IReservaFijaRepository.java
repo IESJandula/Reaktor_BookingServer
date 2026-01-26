@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFijaId;
 
-public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFijaId>
+public interface IReservaFijaRepository extends JpaRepository<ReservaFija, ReservaFijaId>
 {
 
 	/**
@@ -20,16 +20,16 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 	 * horario.
 	 * 
 	 * @param email        correo del profesor
-	 * @param recurso      id del recurso
-	 * @param diaSemana    id del día de la semana
-	 * @param tramoHorario id del tramo horario
+	 * @param recursoId    id del recurso
+	 * @param diaSemanaId    id del día de la semana
+	 * @param tramoHorarioId id del tramo horario
 	 * @return Optional con la reserva encontrada o vacío si no existe
 	 */
-	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recurso AND "
-			+ "r.reservaFijaId.diaSemana.id = :diaSemana AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorario AND "
+	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recursoId AND "
+			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorarioId AND "
 			+ "r.reservaFijaId.profesor.email = :email")
-	Optional<ReservaFija> encontrarReserva(@Param("email") String email, @Param("recurso") String recurso,
-			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario);
+	Optional<ReservaFija> encontrarReserva(@Param("email") String email, @Param("recursoId") String recursoId,
+			                               @Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
 
 	/**
 	 * Obtiene una lista con la información de reservas de un recurso específico,
@@ -62,19 +62,19 @@ public interface IReservaRepository extends JpaRepository<ReservaFija, ReservaFi
 	/*
 	 * Se obtiene la suma del número de alumnos para calcular la reserva máxima
 	 */
-	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recurso AND "
-			+ "r.reservaFijaId.diaSemana.id = :diaSemana AND "
-			+ "r.reservaFijaId.tramoHorario.id = :tramoHorario")
-	Optional <List<ReservaFija>> encontrarReservasFijasPorDiaTramo(@Param("recurso") String recurso,
-			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario);
+	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recursoId AND "
+			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND "
+			+ "r.reservaFijaId.tramoHorario.id = :tramoHorarioId")
+	Optional <List<ReservaFija>> encontrarReservasFijasPorDiaTramo(@Param("recursoId") String recursoId,
+			                                                       @Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
 
 	/**
 	 * Borra todas las reservas asociadas a un recurso dado.
 	 * 
-	 * @param recurso id del recurso del que borrar reservas
+	 * @param recursoId id del recurso del que borrar reservas
 	 */
 	@Modifying
 	@Transactional
-	@Query(value = "DELETE FROM ReservaFija rt WHERE rt.reservaFijaId.recurso.id = :recurso")
-	void deleteReservas(@Param("recurso") String recurso);
+	@Query(value = "DELETE FROM ReservaFija rt WHERE rt.reservaFijaId.recurso.id = :recursoId")
+	void deleteReservas(@Param("recursoId") String recursoId);
 }

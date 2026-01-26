@@ -4,9 +4,10 @@ import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,75 +25,62 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "log_reservas")
 public class LogReservas
 {
-
-	/** Fecha y hora en la que se realizó la acción */
+	/**
+	 * Número identificador del registro
+	 */
 	@Id
-	private Date fecha;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-	/** Usuario que realizó la acción */
+	/**
+	 * Usuario que realizó la acción
+	 */
 	@Column
 	private String usuario;
 
-	/** Acción realizada sobre la reserva */
+	/**
+	 * Acción realizada sobre la reserva
+	 */
 	@Column
 	private String accion;
 
-	/** Tipo de la acción */
+	/**
+	 * Tipo de la acción
+	 */
 	@Column
 	private String tipo;
 
-	/** Recurso afectado por la acción */
+	/**
+	 * Recurso afectado por la acción
+	 */
 	@Column
 	private String recurso;
 
-	/** Localización o descripción de la reserva */
+	/**
+	 * Fecha de la reserva
+	 */
 	@Column
-	private String locReserva;
+	private Date fechaReserva;
 
-	/** Usuario con privilegios de superusuario que realizó la acción */
+	/**
+	 * Día de la semana de la reserva
+	 */
 	@Column
-	private String superusuario;
-
-	/** Número identificador del registro */
-	@Column
-	private Long numRegistro;
-
-	/** Número máximo relacionado con la acción (contexto variable) */
-	@Column
-	private Long countMax;
-
-	@Column(name = "dia_semana")
 	private String diaSemana;
 
-	@Column(name = "tramo_horario")
+	/**
+	 * Tramo horario de la reserva
+	 */
+	@Column
 	private String tramoHorario;
 
 	/**
-	 * Constructor simplificado sin los campos numRegistro y countMax.
-	 * 
-	 * @param fecha        Fecha y hora de la acción
-	 * @param usuario      Usuario que realizó la acción
-	 * @param accion       Acción realizada
-	 * @param tipo         Tipo de acción
-	 * @param recurso      Recurso afectado
-	 * @param locReserva   Localización o descripción de la reserva
-	 * @param superusuario Usuario con privilegios de superusuario
+	 * Usuario con privilegios de superusuario que realizó la acción
 	 */
-	public LogReservas(Date fecha, String usuario, String accion, String tipo, String recurso, String locReserva,
-			String superusuario)
-	{
-		super();
-		this.fecha = fecha;
-		this.usuario = usuario;
-		this.accion = accion;
-		this.tipo = tipo;
-		this.recurso = recurso;
-		this.locReserva = locReserva;
-		this.superusuario = superusuario;
-	}
+	@Column
+	private String superUsuario;
 }

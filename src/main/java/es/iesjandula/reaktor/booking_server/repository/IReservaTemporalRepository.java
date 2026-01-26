@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor.booking_server.repository.reservas_temporales;
+package es.iesjandula.reaktor.booking_server.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,52 +32,52 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * número de semana.
 	 * 
 	 * @param email        email del profesor
-	 * @param recurso      id del recurso
-	 * @param diaSemana    id del día de la semana
-	 * @param tramoHorario id del tramo horario
+	 * @param recursoId    id del recurso
+	 * @param diaSemanaId    id del día de la semana
+	 * @param tramoHorarioId id del tramo horario
 	 * @param numSemana    número de la semana
 	 * @return Optional con la reserva temporal si existe
 	 */
-	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recurso AND "
-			+ "r.reservaTemporalId.diaSemana.id = :diaSemana AND "
-			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorario AND "
+	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
+			+ "r.reservaTemporalId.diaSemana.id = :diaSemanaId AND "
+			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND "
 			+ "r.reservaTemporalId.profesor.email = :email AND " + "r.reservaTemporalId.numSemana = :numSemana")
-	Optional<ReservaTemporal> encontrarReserva(@Param("email") String email, @Param("recurso") String recurso,
-			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario,
+	Optional<ReservaTemporal> encontrarReserva(@Param("email") String email, @Param("recursoId") String recursoId,
+			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId,
 			@Param("numSemana") Integer numSemana);
 
 	/**
 	 * Busca reservas temporales por recurso, día, tramo horario y número de semana,
 	 * sin filtrar por profesor.
 	 * 
-	 * @param recurso      id del recurso
-	 * @param diaSemana    id del día de la semana
-	 * @param tramoHorario id del tramo horario
+	 * @param recursoId    id del recurso
+	 * @param diaSemanaId    id del día de la semana
+	 * @param tramoHorarioId id del tramo horario
 	 * @param numSemana    número de la semana
 	 * @return Optional con la reserva temporal si existe
 	 */
-	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recurso AND "
-			+ "r.reservaTemporalId.diaSemana.id = :diaSemana AND "
-			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorario AND " + "r.reservaTemporalId.numSemana = :numSemana")
-	Optional <List<ReservaTemporal>> encontrarReservasPorDiaTramo(@Param("recurso") String recurso,
-			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario,
+	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
+			+ "r.reservaTemporalId.diaSemana.id = :diaSemanaId AND "
+			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND " + "r.reservaTemporalId.numSemana = :numSemana")
+	Optional <List<ReservaTemporal>> encontrarReservasPorDiaTramo(@Param("recursoId") String recursoId,
+			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId,
 			@Param("numSemana") Integer numSemana);
 
 	/**
 	 * Busca reservas temporales no compartibles según recurso, día, tramo horario y
 	 * número de semana.
 	 * 
-	 * @param recurso      id del recurso
-	 * @param diaSemana    id del día de la semana
-	 * @param tramoHorario id del tramo horario
+	 * @param recursoId    id del recurso
+	 * @param diaSemanaId    id del día de la semana
+	 * @param tramoHorarioId id del tramo horario
 	 * @param numSemana    número de la semana
 	 * @return Optional con la reserva temporal si existe
 	 */
-	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recurso AND "
-			+ "r.reservaTemporalId.diaSemana.id = :diaSemana AND "
-			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorario AND " + "r.reservaTemporalId.numSemana = :numSemana")
-	Optional<ReservaTemporal> encontrarReservaNoCompartible(@Param("recurso") String recurso,
-			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario,
+	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
+			+ "r.reservaTemporalId.diaSemana.id = :diaSemanaId AND "
+			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND " + "r.reservaTemporalId.numSemana = :numSemana")
+	Optional<ReservaTemporal> encontrarReservaNoCompartible(@Param("recursoId") String recursoId,
+			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId,
 			@Param("numSemana") Integer numSemana);
 
 	/**
@@ -140,7 +140,7 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 */
 	@Modifying
 	@Transactional
-	@Query(value = "Delete from ReservaTemporal rt where rt.reservaTemporalId.recurso.id = :recurso")
-	void deleteReservas(@Param("recurso") String recurso);
+	@Query(value = "Delete from ReservaTemporal rt where rt.reservaTemporalId.recurso.id = :recursoId")
+	void deleteReservas(@Param("recursoId") String recursoId);
 
 }
