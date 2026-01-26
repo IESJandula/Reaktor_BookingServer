@@ -32,9 +32,9 @@ public interface LogReservasRepository extends JpaRepository<LogReservas, Date>
 	 * @param inicio índice desde el que empezar a recuperar los logs (offset)
 	 * @return lista con los logs de reservas paginados
 	 */
-	@Query(value = "SELECT " + "  ROW_NUMBER() OVER (ORDER BY fecha DESC) AS num_registro, "
-			+ "  fecha, usuario, accion, tipo, recurso, loc_reserva, superusuario, " + "  COUNT(*) OVER() AS count_max "
-			+ "FROM log_reservas " + "ORDER BY fecha DESC " + "LIMIT 10 OFFSET :inicio", nativeQuery = true)
+	@Query(value = "SELECT " + "  ROW_NUMBER() OVER (ORDER BY fecha_reserva DESC) AS num_registro, "
+			+ "  fecha_reserva, usuario, accion, tipo, recurso, loc_reserva, super_usuario, " + "  COUNT(*) OVER() AS count_max "
+			+ "FROM log_reservas " + "ORDER BY fecha_reserva DESC " + "LIMIT 10 OFFSET :inicio", nativeQuery = true)
 	List<LogReservas> getPaginacionLogs(@Param("inicio") Integer inicio);
 
 	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto(l.recurso, COUNT(*)) " +
