@@ -38,7 +38,7 @@ public interface LogReservasRepository extends JpaRepository<LogReservas, Date>
 	
 	@Query(value = 
 		"SELECT new es.iesjandula.reaktor.booking_server.models.LogReservas(l.id, l.usuario, l.accion, l.tipo, l.recurso, l.fechaReserva, l.diaSemana, l.tramoHorario, l.superUsuario) " +
-		"FROM log_reservas l " + 
+		"FROM logReservas l " + 
 		"ORDER BY l.fechaReserva DESC")
 	Page<LogReservas> getPaginacionLogs(Pageable pageable);
 
