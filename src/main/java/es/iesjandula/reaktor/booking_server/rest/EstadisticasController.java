@@ -23,54 +23,64 @@ import es.iesjandula.reaktor.booking_server.utils.Constants;
  */
 @RequestMapping("/bookings/estadisticas")
 @RestController
-public class EstadisticasController {
+public class EstadisticasController
+{
 
-    private static final Logger log = LoggerFactory.getLogger(EstadisticasController.class);
+	private static final Logger log = LoggerFactory.getLogger(EstadisticasController.class);
 
-    @Autowired
-    private LogReservasRepository logReservasRepository;
+	@Autowired
+	private LogReservasRepository logReservasRepository;
 
-    /**
-     * Devuelve el recurso más reservado (suma de fijas y temporales).
-     * 
-     * @return Lista de {@link EstadisticaRecursoMasReservadoDto} con el recurso y total de reservas.
-     */
-    @PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
-    @GetMapping("/recurso-mas-reservado")
-    public ResponseEntity<?> obtenerRecursoMasReservado() {
-        try {
-            List<EstadisticaRecursoMasReservadoDto> estadisticas = logReservasRepository.obtenerRecursoMasReservado();
-            return ResponseEntity.ok(estadisticas);
-        } catch (Exception ex) {
-            ReservaException e = new ReservaException(
-                Constants.ERROR_ESTADISTICAS,
-                "Error al obtener el recurso más reservado",
-                ex
-            );
-            log.error("Error en /estadisticas/recurso-mas-reservado", e);
-            return ResponseEntity.status(500).body(e.getBodyMesagge());
-        }
-    }
+	/**
+	 * Devuelve el recurso más reservado (suma de fijas y temporales).
+	 * 
+	 * @return Lista de {@link EstadisticaRecursoMasReservadoDto} con el recurso y
+	 *         total de reservas.
+	 */
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@GetMapping("/recurso-mas-reservado")
+	public ResponseEntity<?> obtenerRecursoMasReservado()
+	{
+		try
+		{
+			List<EstadisticaRecursoMasReservadoDto> estadisticas = logReservasRepository.obtenerRecursoMasReservado();
+			
+			return ResponseEntity.ok(estadisticas);
+			
+		} 
+		catch (Exception exception)		
+		{
+			ReservaException e = new ReservaException(Constants.ERROR_ESTADISTICAS,
+					"Error al obtener el recurso más reservado", exception);
+			
+			log.error("Error en /estadisticas/recurso-mas-reservado", e);
+			return ResponseEntity.status(500).body(e.getBodyMesagge());
+		}
+	}
 
-    /**
-     * Devuelve el día de la semana y tramo horario más reservado.
-     * 
-     * @return Lista de {@link EstadisticaDiaTramoMasReservadoDto} con día, tramo y total de reservas.
-     */
-    @PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
-    @GetMapping("/dia-tramo-mas-reservado")
-    public ResponseEntity<?> obtenerDiaTramoMasReservado() {
-        try {
-            List<EstadisticaDiaTramoMasReservadoDto> estadisticas = logReservasRepository.obtenerDiaTramoMasReservado();
-            return ResponseEntity.ok(estadisticas);
-        } catch (Exception ex) {
-            ReservaException e = new ReservaException(
-                Constants.ERROR_ESTADISTICAS,
-                "Error al obtener el día y tramo más reservado",
-                ex
-            );
-            log.error("Error en /estadisticas/dia-tramo-mas-reservado", e);
-            return ResponseEntity.status(500).body(e.getBodyMesagge());
-        }
-    }
+	/**
+	 * Devuelve el día de la semana y tramo horario más reservado.
+	 * 
+	 * @return Lista de {@link EstadisticaDiaTramoMasReservadoDto} con día, tramo y
+	 *         total de reservas.
+	 */
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@GetMapping("/dia-tramo-mas-reservado")
+	public ResponseEntity<?> obtenerDiaTramoMasReservado()
+	{
+		try
+		{
+			List<EstadisticaDiaTramoMasReservadoDto> estadisticas = logReservasRepository.obtenerDiaTramoMasReservado();
+			return ResponseEntity.ok(estadisticas);
+			
+		} 
+		catch (Exception exception)
+		{
+			ReservaException e = new ReservaException(Constants.ERROR_ESTADISTICAS,
+					"Error al obtener el día y tramo más reservado", exception);
+			
+			log.error("Error en /estadisticas/dia-tramo-mas-reservado", e);
+			return ResponseEntity.status(500).body(e.getBodyMesagge());
+		}
+	}
 }
