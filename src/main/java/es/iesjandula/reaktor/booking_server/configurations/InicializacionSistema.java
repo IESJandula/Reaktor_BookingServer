@@ -332,9 +332,6 @@ public class InicializacionSistema
 	 */
 	private void inicializarSistemaConConstantes()
 	{
-		// Borramos las constantes
-		this.constantesRepository.deleteAll();
-
 		// Cargamos las constantes
 		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_FIJAS, this.reservasFijas);
 		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_TEMPORALES, this.reservasTemporales);
