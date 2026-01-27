@@ -410,12 +410,12 @@ public class ReservasAdminRest
 	}
 
 	/**
-	 * Obtiene logs paginados del sistema de reservas. Cada página contiene un
-	 * conjunto de logs a partir del número de página indicado.
+	 * Obtiene logs paginados del sistema de reservas.
 	 * 
-	 * @param usuario Usuario autenticado
-	 * @param pagina  Número de página a recuperar (debe ser mayor o igual a 0)
-	 * @return ResponseEntity con la lista de logs o error si no existen registros
+	 * @param usuario  Usuario autenticado
+	 * @param pageable Objeto con parámetros de paginación (page, size, sort)
+	 * @return ResponseEntity con la página de logs o error si no existen registros
+	 *
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/logs")
@@ -423,35 +423,48 @@ public class ReservasAdminRest
 	{
 		try
 		{
+			// Validar que el número de página sea válido
 			if (pageable.getPageNumber() < 0)
 			{
-				String mensajeError = "No existen logs";
+				String mensajeError = "El número de página no puede ser negativo";
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
 			}
 
-			Page<LogReservas> listaLogs = this.logReservasRepository.getPaginacionLogs(pageable);
-
-			if (listaLogs.isEmpty())
+			// Validar tamaño de página
+			if (pageable.getPageSize() > 100)
 			{
-				String mensajeError = "No existen logs";
+				String mensajeError = "El tamaño de página no puede ser mayor que 100";
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
 			}
+
+			// Obtener los logs paginados
+			Page<LogReservas> listaLogs = this.logReservasRepository.findAllByOrderByFechaReservaDesc(pageable);
+
+			// Si la página está vacía pero no es la primera página, devolver 404
+			if (listaLogs.isEmpty() && pageable.getPageNumber() > 0)
+			{
+				String mensajeError = "No existen logs en la página solicitada";
+				log.error(mensajeError);
+				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
+			}
+
+			// Loguear información de paginación para debugging
+			log.info("Logs recuperados - Página: {}/{}, Total: {}, Elementos: {}", listaLogs.getNumber() + 1,
+					listaLogs.getTotalPages(), listaLogs.getTotalElements(), listaLogs.getNumberOfElements());
 
 			return ResponseEntity.ok().body(listaLogs);
 
-		}
-		catch (ReservaException reservaException)
+		} catch (ReservaException reservaException)
 		{
-			// Si la reserva no existe, devolverá un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		}
-		catch (Exception exception)
+		} catch (Exception exception)
 		{
 			String mensajeError = "Error inesperado al obtener los logs";
 			log.error(mensajeError, exception);
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError,
+					exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
