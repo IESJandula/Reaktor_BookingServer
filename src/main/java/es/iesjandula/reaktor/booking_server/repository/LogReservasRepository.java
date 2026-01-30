@@ -1,13 +1,11 @@
 package es.iesjandula.reaktor.booking_server.repository;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaTramoMasReservadoDto;
@@ -23,24 +21,17 @@ import es.iesjandula.reaktor.booking_server.models.LogReservas;
  * @author Enrique Contreras
  */
 @Repository
-public interface LogReservasRepository extends JpaRepository<LogReservas, Date>
+public interface LogReservasRepository extends JpaRepository<LogReservas, Long>
 {
 
 	/**
-	 * Obtiene una lista paginada de logs de reservas ordenados por fecha
-	 * descendente. Devuelve un máximo de 10 registros empezando desde el índice
-	 * indicado.
-	 * 
-	 * @param inicio índice desde el que empezar a recuperar los logs (offset)
-	 * @return lista con los logs de reservas paginados
-	 */
+     * Obtiene una lista paginada de logs de reservas ordenados por fecha descendente.
+     * 
+     * @param pageable Objeto con información de paginación (página, tamaño, orden)
+     * @return Página con los logs de reservas
+     */
 
-	
-	@Query(value = 
-		"SELECT new es.iesjandula.reaktor.booking_server.models.LogReservas(l.id, l.usuario, l.accion, l.tipo, l.recurso, l.fechaReserva, l.diaSemana, l.tramoHorario, l.superUsuario) " +
-		"FROM LogReservas l " + 
-		"ORDER BY l.fechaReserva DESC")
-	Page<LogReservas> getPaginacionLogs(Pageable pageable);
+	Page<LogReservas> findAllByOrderByFechaReservaDesc(Pageable pageable);	
 
 	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto(l.recurso, COUNT(*)) " +
 		       "FROM LogReservas l " +

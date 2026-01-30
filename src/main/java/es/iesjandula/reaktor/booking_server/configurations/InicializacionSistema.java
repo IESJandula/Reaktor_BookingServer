@@ -334,11 +334,11 @@ public class InicializacionSistema
 	{
 		// Borramos las constantes
 		this.constantesRepository.deleteAll();
-
+		
 		// Cargamos las constantes
 		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_FIJAS, this.reservasFijas);
 		this.cargarPropiedad(Constants.TABLA_CONST_RESERVAS_TEMPORALES, this.reservasTemporales);
-		this.cargarPropiedad(Constants.TABLA_CONST_MAX_VISTA_CAL_DIAS, this.maxDiasCalendario);
+		this.cargarPropiedad(Constants.TABLA_CONST_MAX_VISTA_CAL_DIAS, this.maxDiasCalendario);		
 	}
 
 	/**
