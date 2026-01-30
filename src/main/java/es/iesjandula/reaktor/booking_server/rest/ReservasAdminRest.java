@@ -107,8 +107,7 @@ public class ReservasAdminRest
 				}
 
 				recursoFinal = new Recurso(recursoAntiguo.getId(), cantidad, esCompartible, false);
-			}
-			else
+			} else
 			{
 				recursoFinal = new Recurso(recurso, cantidad, esCompartible, false);
 			}
@@ -118,15 +117,13 @@ public class ReservasAdminRest
 			log.info("El recurso se ha creado correctamente: " + recurso);
 
 			return ResponseEntity.ok().body(recursoFinal);
-		}
-		catch (ReservaException reservaException)
+		} catch (ReservaException reservaException)
 		{
 			// Captura la excepcion personalizada y retorna un 409 ya que existe un
 			// conflicto,
 			// que existe un recurso con los mismos datos
 			return ResponseEntity.status(409).body(reservaException.getBodyMesagge());
-		}
-		catch (Exception exception)
+		} catch (Exception exception)
 		{
 			String mensajeError = "Error inesperado al crear el recurso";
 			log.error(mensajeError, exception);
@@ -165,17 +162,16 @@ public class ReservasAdminRest
 			log.info("El recurso se ha borrado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
 
-		}
-		catch (ReservaException reservaException)
+		} catch (ReservaException reservaException)
 		{
 			// Si la reserva no existe, devolverá un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		}
-		catch (Exception exception)
+		} catch (Exception exception)
 		{
 			String mensajeError = "Error inesperado al borrar el recurso";
 			log.error(mensajeError, exception);
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError,
+					exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -207,12 +203,12 @@ public class ReservasAdminRest
 			}
 
 			return ResponseEntity.ok().body(borrado);
-		}
-		catch (Exception exception)
+		} catch (Exception exception)
 		{
 			String mensajeError = "Error inesperado al comprobar el borrado de recurso";
 			log.error(mensajeError, exception);
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError,
+					exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -271,26 +267,22 @@ public class ReservasAdminRest
 								suma = puntual.getCantMax().add(fija.getCantMax());
 								puntual.setCantMax(suma);
 								listaFinal.add(puntual);
-							}
-							else
+							} else
 							{
 								suma = puntual.getCantMax().add(fija.getCantMax());
 								fija.setCantMax(suma);
 								listaFinal.add(fija);
 							}
-						}
-						else if (listaRecursoFija.contains(puntual) && !listaRecursoPuntuales.contains(puntual))
+						} else if (listaRecursoFija.contains(puntual) && !listaRecursoPuntuales.contains(puntual))
 						{
 							listaFinal.add(puntual);
-						}
-						else
+						} else
 						{
 							listaFinal.add(fija);
 						}
 					}
 				}
-			}
-			else
+			} else
 			{
 
 				if (listaRecursoPuntuales.isEmpty())
@@ -317,8 +309,7 @@ public class ReservasAdminRest
 			}
 
 			return ResponseEntity.ok().body(mapaFinal);
-		}
-		catch (Exception exception)
+		} catch (Exception exception)
 		{
 			String mensajeError = "Error inesperado al crear el recurso";
 			log.error(mensajeError, exception);
@@ -351,12 +342,12 @@ public class ReservasAdminRest
 			log.info("Las reservas del recurso se han borrado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
 
-		}
-		catch (Exception exception)
+		} catch (Exception exception)
 		{
 			String mensajeError = "Error inesperado al borrar el recurso";
 			log.error(mensajeError, exception);
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError,
+					exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -394,17 +385,16 @@ public class ReservasAdminRest
 			log.info("El recurso se ha modificado correctamente: " + recurso);
 			return ResponseEntity.ok().build();
 
-		}
-		catch (ReservaException reservaException)
+		} catch (ReservaException reservaException)
 		{
 			// Si la reserva no existe, devolverá un 404
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		}
-		catch (Exception exception)
+		} catch (Exception exception)
 		{
 			String mensajeError = "Error inesperado al modificar el bloqueo del recurso";
 			log.error(mensajeError, exception);
-			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO, mensajeError,
+					exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -427,14 +417,6 @@ public class ReservasAdminRest
 			if (pageable.getPageNumber() < 0)
 			{
 				String mensajeError = "El número de página no puede ser negativo";
-				log.error(mensajeError);
-				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
-			}
-
-			// Validar tamaño de página
-			if (pageable.getPageSize() > 100)
-			{
-				String mensajeError = "El tamaño de página no puede ser mayor que 100";
 				log.error(mensajeError);
 				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
 			}

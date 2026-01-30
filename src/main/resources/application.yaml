@@ -34,4 +34,4 @@ reaktor:
     reservasTemporales: ""
     maxDiasCalendario: 60
   http_connection_timeout: 30000
-  reiniciarParametros: true
+  reiniciarParametros: false
