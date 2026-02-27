@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaTramoMasReservadoDto;
+import es.iesjandula.reaktor.booking_server.dto.EstadisticaTramoMasReservadoDto;
 import es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto;
 import es.iesjandula.reaktor.booking_server.models.LogReservas;
 
@@ -25,26 +25,32 @@ public interface LogReservasRepository extends JpaRepository<LogReservas, Long>
 {
 
 	/**
-     * Obtiene una lista paginada de logs de reservas ordenados por fecha descendente.
-     * 
-     * @param pageable Objeto con información de paginación (página, tamaño, orden)
-     * @return Página con los logs de reservas
-     */
+	 * Obtiene una lista paginada de logs de reservas ordenados por fecha
+	 * descendente.
+	 * 
+	 * @param pageable Objeto con información de paginación (página, tamaño, orden)
+	 * @return Página con los logs de reservas
+	 */
+	Page<LogReservas> findAllByOrderByFechaReservaDesc(Pageable pageable);
 
-	Page<LogReservas> findAllByOrderByFechaReservaDesc(Pageable pageable);	
+	/**
+	 * Obtiene el recurso más reservado desde los logs.
+	 * 
+	 * @return Lista de recursos con su total de reservas
+	 */
+	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto(l.recurso, COUNT(*)) "
+			+ "FROM LogReservas l " + "WHERE l.recurso IS NOT NULL AND l.recurso <> '' " + "GROUP BY l.recurso "
+			+ "ORDER BY COUNT(*) DESC")
+	List<EstadisticaRecursoMasReservadoDto> obtenerRecursoMasReservado();
 
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto(l.recurso, COUNT(*)) " +
-		       "FROM LogReservas l " +
-		       "WHERE l.recurso IS NOT NULL AND l.recurso <> '' " +
-		       "GROUP BY l.recurso " +
-		       "ORDER BY COUNT(*) DESC")
-		List<EstadisticaRecursoMasReservadoDto> obtenerRecursoMasReservado();
-
-		@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaTramoMasReservadoDto(l.diaSemana, l.tramoHorario, COUNT(*)) " +
-		       "FROM LogReservas l " +
-		       "WHERE l.diaSemana IS NOT NULL AND l.diaSemana <> '' " +
-		       "AND l.tramoHorario IS NOT NULL AND l.tramoHorario <> '' " +
-		       "GROUP BY l.diaSemana, l.tramoHorario " +
-		       "ORDER BY COUNT(*) DESC")
-		List<EstadisticaDiaTramoMasReservadoDto> obtenerDiaTramoMasReservado();
+	/**
+	 * Obtiene el tramo horario más reservado desde los logs.
+	 * 
+	 * @return Lista de tramos con su total de reservas
+	 */
+	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaTramoMasReservadoDto(l.diaSemana, l.tramoHorario, COUNT(*)) "
+			+ "FROM LogReservas l " + "WHERE l.diaSemana IS NOT NULL AND l.diaSemana <> '' "
+			+ "AND l.tramoHorario IS NOT NULL AND l.tramoHorario <> '' " + "GROUP BY l.diaSemana, l.tramoHorario "
+			+ "ORDER BY COUNT(*) DESC")
+	List<EstadisticaTramoMasReservadoDto> obtenerDiaTramoMasReservado();
 }
