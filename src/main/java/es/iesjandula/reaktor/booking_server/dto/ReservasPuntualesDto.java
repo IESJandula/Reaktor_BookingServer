@@ -63,6 +63,9 @@ public class ReservasPuntualesDto
 	/** Lista de identificadores que indican si la reserva es semanal */
 	private List<Long> esSemanal;
 
+	/** Número de semana de la reserva temporal */
+	private Integer numSemana;
+
 	/**
 	 * Constructor parcial que permite instanciar una reserva puntual con solo el
 	 * día de la semana y el tramo horario.

@@ -57,7 +57,7 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * @param diaSemanaId    id del día de la semana
 	 * @param tramoHorarioId id del tramo horario
 	 * @param numSemana      número de la semana
-	 * @return Optional con la reserva temporal si existe
+	 * @return Optional con la lista de reservas temporales si existen
 	 */
 	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
 			+ "r.reservaTemporalId.diaSemana.id = :diaSemanaId AND "
@@ -68,7 +68,7 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 			@Param("numSemana") Integer numSemana);
 
 	/**
-	 * Busca reservas temporales no compartibles según recurso, día, tramo horario y
+	 * Busca una reserva temporal no compartible según recurso, día, tramo horario y
 	 * número de semana.
 	 * 
 	 * @param recursoId      id del recurso
@@ -94,19 +94,20 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * @param numSemana número de la semana
 	 * @return lista de objetos con datos de reservas y días/tramos sin reserva
 	 */
-	@Query(value = "SELECT d.id, t.id, NULL, NULL, NULL, NULL, NULL, NULL, " + "       CASE "
-			+ "           WHEN (d.id, t.id) NOT IN ( "
-			+ "               SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_fija r " + "               UNION "
-			+ "               SELECT rt.dia_semana_id, rt.tramo_horario_id FROM reserva_temporal rt WHERE rt.num_semana = :numSemana "
-			+ "           ) THEN NULL " + "           ELSE TRUE " + "       END AS es_reserva_fija "
-			+ "FROM dia_semana d, tramo_horario t " + "WHERE ((d.id, t.id) NOT IN ( "
-			+ "    SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_fija r " + "    UNION "
+	@Query(value = "SELECT d.id, t.id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL "
+			+ "FROM dia_semana d, tramo_horario t "
+			+ "WHERE ((d.id, t.id) NOT IN ( "
+			+ "    SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_fija r "
+			+ "    UNION "
 			+ "    SELECT rt.dia_semana_id, rt.tramo_horario_id FROM reserva_temporal rt WHERE rt.num_semana = :numSemana )) "
-			+ "UNION " + "SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, "
-			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id, TRUE, r2.motivo_curso, FALSE "
-			+ "FROM reserva_fija r2, profesor p " + "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso "
-			+ "UNION " + "SELECT rt2.dia_semana_id, rt2.tramo_horario_id, rt2.n_alumnos, rt2.profesor_email, "
-			+ "CONCAT(p.nombre, ' ', p.apellidos), rt2.recurso_id, NULL, rt2.motivo_curso, rt2.es_semanal "
+			+ "UNION "
+			+ "SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, "
+			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id, 1, r2.motivo_curso, 0, NULL "
+			+ "FROM reserva_fija r2, profesor p "
+			+ "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso "
+			+ "UNION "
+			+ "SELECT rt2.dia_semana_id, rt2.tramo_horario_id, rt2.n_alumnos, rt2.profesor_email, "
+			+ "CONCAT(p.nombre, ' ', p.apellidos), rt2.recurso_id, NULL, rt2.motivo_curso, rt2.es_semanal, rt2.num_semana "
 			+ "FROM reserva_temporal rt2, profesor p "
 			+ "WHERE rt2.profesor_email = p.email AND rt2.recurso_id = :recurso AND rt2.num_semana = :numSemana "
 			+ "ORDER BY 1, 2", nativeQuery = true)
@@ -145,7 +146,7 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 */
 	@Modifying
 	@Transactional
-	@Query(value = "Delete from ReservaTemporal rt where rt.reservaTemporalId.recurso.id = :recursoId")
+	@Query(value = "DELETE FROM ReservaTemporal rt WHERE rt.reservaTemporalId.recurso.id = :recursoId")
 	void deleteReservas(@Param("recursoId") String recursoId);
 
 	/**
