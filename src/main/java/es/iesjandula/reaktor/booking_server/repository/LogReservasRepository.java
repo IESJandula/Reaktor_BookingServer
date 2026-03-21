@@ -25,12 +25,4 @@ public interface LogReservasRepository extends JpaRepository<LogReservas, Long>
 	 */
 	@Query("SELECT l FROM LogReservas l ORDER BY l.fechaReserva DESC")
 	Page<LogReservas> getPaginacionLogs(Pageable pageable);
-
-	/**
-	 * Obtiene el recurso más reservado desde los logs.
-	 */
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto(" + "  l.recurso, "
-			+ "  COUNT(*) " + ") " + "FROM LogReservas l " + "WHERE l.recurso IS NOT NULL AND l.recurso <> '' "
-			+ "GROUP BY l.recurso " + "ORDER BY COUNT(*) DESC")
-	List<EstadisticaRecursoMasReservadoDto> obtenerRecursoMasReservado();
 }
