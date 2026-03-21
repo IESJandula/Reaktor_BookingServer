@@ -18,7 +18,6 @@ import es.iesjandula.reaktor.booking_server.models.LogReservas;
 @Repository
 public interface LogReservasRepository extends JpaRepository<LogReservas, Long>
 {
-
 	/**
 	 * Obtiene una lista paginada de logs de reservas ordenados por fecha
 	 * descendente. Devuelve la entidad LogReservas directamente (NO DTO).

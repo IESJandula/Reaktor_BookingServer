@@ -94,22 +94,35 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * @param numSemana número de la semana
 	 * @return lista de objetos con datos de reservas y días/tramos sin reserva
 	 */
-	@Query(value = "SELECT d.id, t.id, NULL, NULL, NULL, NULL, NULL, NULL, " + "       CASE "
-			+ "           WHEN (d.id, t.id) NOT IN ( "
-			+ "               SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_fija r " + "               UNION "
-			+ "               SELECT rt.dia_semana_id, rt.tramo_horario_id FROM reserva_temporal rt WHERE rt.num_semana = :numSemana "
-			+ "           ) THEN NULL " + "           ELSE TRUE " + "       END AS es_reserva_fija "
-			+ "FROM dia_semana d, tramo_horario t " + "WHERE ((d.id, t.id) NOT IN ( "
-			+ "    SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_fija r " + "    UNION "
-			+ "    SELECT rt.dia_semana_id, rt.tramo_horario_id FROM reserva_temporal rt WHERE rt.num_semana = :numSemana )) "
-			+ "UNION " + "SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, "
-			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id, TRUE, r2.motivo_curso, FALSE "
-			+ "FROM reserva_fija r2, profesor p " + "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso "
-			+ "UNION " + "SELECT rt2.dia_semana_id, rt2.tramo_horario_id, rt2.n_alumnos, rt2.profesor_email, "
-			+ "CONCAT(p.nombre, ' ', p.apellidos), rt2.recurso_id, NULL, rt2.motivo_curso, rt2.es_semanal "
-			+ "FROM reserva_temporal rt2, profesor p "
-			+ "WHERE rt2.profesor_email = p.email AND rt2.recurso_id = :recurso AND rt2.num_semana = :numSemana "
-			+ "ORDER BY 1, 2", nativeQuery = true)
+	@Query(value = """
+		    # ID Día, ID Tramo, N Alumnos, Email Profesor, Nombre Profesor, ID Recurso, Es Reserva Fija, Motivo Curso, Es Semanal
+		    SELECT d.id, t.id, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+			FROM dia_semana d, tramo_horario t 
+			WHERE ((d.id, t.id) NOT IN
+					( 
+			         SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_fija r
+					 UNION 
+			         SELECT rt.dia_semana_id, rt.tramo_horario_id FROM reserva_temporal rt WHERE rt.num_semana = :numSemana
+					)
+				   )
+			
+			UNION
+		    
+			# ID Día, ID Tramo, N Alumnos, Email Profesor, Nombre Profesor, ID Recurso, Es Reserva Fija, Motivo Curso, Es Semanal
+			SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, 
+				   CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id, 1, r2.motivo_curso, 0 
+			FROM reserva_fija r2, profesor p
+			WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso
+			
+			UNION
+				
+			# ID Día, ID Tramo, N Alumnos, Email, NombreApellidos, ID Recurso, Es Reserva Fija, Motivo, Es Semanal
+			SELECT rt2.dia_semana_id, rt2.tramo_horario_id, rt2.n_alumnos, rt2.profesor_email,
+			       CONCAT(p.nombre, ' ', p.apellidos), rt2.recurso_id, 0, rt2.motivo_curso, rt2.es_semanal
+			FROM reserva_temporal rt2, profesor p
+			WHERE rt2.profesor_email = p.email AND rt2.recurso_id = :recurso AND rt2.num_semana = :numSemana
+			ORDER BY 1, 2
+			""", nativeQuery = true)
 	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso, @Param("numSemana") Integer numSemana);
 
 	/**
@@ -119,12 +132,19 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * @param recurso id del recurso
 	 * @return lista de objetos con datos de reservas y días/tramos sin reserva
 	 */
-	@Query(value = "SELECT d.id, t.id, NULL, NULL, NULL, NULL "
-			+ "FROM dia_semana d, tramo_horario t, reserva_temporal r, profesor p "
-			+ "WHERE ((d.id, t.id) NOT IN (SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_temporal r)) "
-			+ "UNION " + "SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email, "
-			+ "CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id " + "FROM reserva_temporal r2, profesor p "
-			+ "WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso " + "ORDER BY 1, 2", nativeQuery = true)
+	@Query(value = """
+		   SELECT d.id, t.id, NULL, NULL, NULL, NULL
+		   FROM dia_semana d, tramo_horario t, reserva_temporal r, profesor p
+		   WHERE ((d.id, t.id) NOT IN (SELECT r.dia_semana_id, r.tramo_horario_id FROM reserva_temporal r))
+		
+		   UNION
+
+		   # ID Día, ID Tramo, N Alumnos, Email Profesor, Nombre Profesor, ID Recurso
+		   SELECT r2.dia_semana_id, r2.tramo_horario_id, r2.n_alumnos, r2.profesor_email,
+			      CONCAT(p.nombre, ' ', p.apellidos), r2.recurso_id
+		   FROM reserva_temporal r2, profesor p
+		   WHERE r2.profesor_email = p.email AND r2.recurso_id = :recurso
+		   ORDER BY 1, 2""", nativeQuery = true)
 	List<Object[]> encontrarReservaPorRecurso(@Param("recurso") String recurso);
 
 	/**

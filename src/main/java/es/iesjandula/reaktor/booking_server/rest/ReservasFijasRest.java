@@ -804,7 +804,7 @@ public class ReservasFijasRest
 
 			if (!optinalReserva.isPresent())
 			{
-				String mensajeError = "La reserva que quiere borrar no existe";
+				String mensajeError = "La reserva fija que quiere borrar no existe";
 				log.error(mensajeError);
 				throw new ReservaException(Constants.RESERVA_NO_ENCONTRADA, mensajeError);
 			}
