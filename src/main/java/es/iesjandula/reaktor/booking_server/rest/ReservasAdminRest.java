@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
@@ -409,18 +412,12 @@ public class ReservasAdminRest
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/logs")
-	public ResponseEntity<?> getPaginatedLogs(@AuthenticationPrincipal DtoUsuarioExtended usuario, Pageable pageable)
+	public ResponseEntity<?> getPaginatedLogs(@AuthenticationPrincipal DtoUsuarioExtended usuario,
+			@RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "size", defaultValue = "20") int size)
 	{
 		try
 		{
-			// Validar que el número de página sea válido
-			if (pageable.getPageNumber() < 0)
-			{
-				String mensajeError = "El número de página no puede ser negativo";
-				log.error(mensajeError);
-				throw new ReservaException(Constants.ERR_CODE_LOG_RESERVA, mensajeError);
-			}
-
 			// Obtener los logs paginados
 			Page<LogReservas> listaLogs = this.logReservasRepository.findAllByOrderByFechaReservaDesc(pageable);
 
@@ -438,10 +435,12 @@ public class ReservasAdminRest
 
 			return ResponseEntity.ok().body(listaLogs);
 
-		} catch (ReservaException reservaException)
+		} 
+		catch (ReservaException reservaException)
 		{
 			return ResponseEntity.status(404).body(reservaException.getBodyMesagge());
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			String mensajeError = "Error inesperado al obtener los logs";
 			log.error(mensajeError, exception);
