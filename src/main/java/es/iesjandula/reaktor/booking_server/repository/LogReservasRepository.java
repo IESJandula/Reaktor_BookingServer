@@ -33,14 +33,4 @@ public interface LogReservasRepository extends JpaRepository<LogReservas, Long>
 			+ "  COUNT(*) " + ") " + "FROM LogReservas l " + "WHERE l.recurso IS NOT NULL AND l.recurso <> '' "
 			+ "GROUP BY l.recurso " + "ORDER BY COUNT(*) DESC")
 	List<EstadisticaRecursoMasReservadoDto> obtenerRecursoMasReservado();
-
-	/**
-	 * Obtiene el día y tramo horario más reservado desde los logs.
-	 */
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaTramoMasReservadoDto(" + "  l.diaSemana, "
-			+ "  l.tramoHorario, " + "  COUNT(*) " + ") " + "FROM LogReservas l "
-			+ "WHERE l.diaSemana IS NOT NULL AND l.diaSemana <> '' "
-			+ "AND l.tramoHorario IS NOT NULL AND l.tramoHorario <> '' " + "GROUP BY l.diaSemana, l.tramoHorario "
-			+ "ORDER BY COUNT(*) DESC")
-	List<EstadisticaDiaTramoMasReservadoDto> obtenerDiaTramoMasReservado();
 }
