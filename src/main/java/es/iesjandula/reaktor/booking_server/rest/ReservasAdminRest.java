@@ -412,14 +412,12 @@ public class ReservasAdminRest
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/logs")
-	public ResponseEntity<?> getPaginatedLogs(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-			@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "size", defaultValue = "20") int size)
+	public ResponseEntity<?> getPaginatedLogs(@AuthenticationPrincipal DtoUsuarioExtended usuario, Pageable pageable)
 	{
 		try
 		{
 			// Obtener los logs paginados
-			Page<LogReservas> listaLogs = this.logReservasRepository.findAllByOrderByFechaReservaDesc(pageable);
+			Page<LogReservas> listaLogs = this.logReservasRepository.getPaginacionLogs(pageable);
 
 			// Si la página está vacía pero no es la primera página, devolver 404
 			if (listaLogs.isEmpty() && pageable.getPageNumber() > 0)
