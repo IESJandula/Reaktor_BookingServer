@@ -31,11 +31,11 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * Busca una reserva temporal según profesor, recurso, día, tramo horario y
 	 * número de semana.
 	 * 
-	 * @param email        email del profesor
-	 * @param recursoId    id del recurso
+	 * @param email          email del profesor
+	 * @param recursoId      id del recurso
 	 * @param diaSemanaId    id del día de la semana
 	 * @param tramoHorarioId id del tramo horario
-	 * @param numSemana    número de la semana
+	 * @param numSemana      número de la semana
 	 * @return Optional con la reserva temporal si existe
 	 */
 	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
@@ -50,16 +50,17 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * Busca reservas temporales por recurso, día, tramo horario y número de semana,
 	 * sin filtrar por profesor.
 	 * 
-	 * @param recursoId    id del recurso
+	 * @param recursoId      id del recurso
 	 * @param diaSemanaId    id del día de la semana
 	 * @param tramoHorarioId id del tramo horario
-	 * @param numSemana    número de la semana
+	 * @param numSemana      número de la semana
 	 * @return Optional con la reserva temporal si existe
 	 */
 	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
 			+ "r.reservaTemporalId.diaSemana.id = :diaSemanaId AND "
-			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND " + "r.reservaTemporalId.numSemana = :numSemana")
-	Optional <List<ReservaTemporal>> encontrarReservasPorDiaTramo(@Param("recursoId") String recursoId,
+			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND "
+			+ "r.reservaTemporalId.numSemana = :numSemana")
+	Optional<List<ReservaTemporal>> encontrarReservasPorDiaTramo(@Param("recursoId") String recursoId,
 			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId,
 			@Param("numSemana") Integer numSemana);
 
@@ -67,15 +68,16 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * Busca reservas temporales no compartibles según recurso, día, tramo horario y
 	 * número de semana.
 	 * 
-	 * @param recursoId    id del recurso
+	 * @param recursoId      id del recurso
 	 * @param diaSemanaId    id del día de la semana
 	 * @param tramoHorarioId id del tramo horario
-	 * @param numSemana    número de la semana
+	 * @param numSemana      número de la semana
 	 * @return Optional con la reserva temporal si existe
 	 */
 	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
 			+ "r.reservaTemporalId.diaSemana.id = :diaSemanaId AND "
-			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND " + "r.reservaTemporalId.numSemana = :numSemana")
+			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND "
+			+ "r.reservaTemporalId.numSemana = :numSemana")
 	Optional<ReservaTemporal> encontrarReservaNoCompartible(@Param("recursoId") String recursoId,
 			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId,
 			@Param("numSemana") Integer numSemana);
@@ -142,5 +144,24 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	@Transactional
 	@Query(value = "Delete from ReservaTemporal rt where rt.reservaTemporalId.recurso.id = :recursoId")
 	void deleteReservas(@Param("recursoId") String recursoId);
+
+	/**
+	 * Cuenta reservas temporales por recurso. Cada reserva cuenta como 1 semana.
+	 */
+	@Query("SELECT rt.reservaTemporalId.recurso.id, COUNT(*) FROM ReservaTemporal rt GROUP BY rt.reservaTemporalId.recurso.id")
+	List<Object[]> contarPorRecurso();
+
+	/**
+	 * Cuenta reservas temporales por tramo horario (ejemplo: "8:00-9:00")
+	 */
+	@Query("SELECT th.tramoHorario, COUNT(*) FROM ReservaTemporal rt " + "JOIN rt.reservaTemporalId.tramoHorario th "
+			+ "GROUP BY th.tramoHorario")
+	List<Object[]> contarPorTramoConNombre();
+
+	/**
+	 * Cuenta reservas temporales por día de la semana.
+	 */
+	@Query("SELECT rt.reservaTemporalId.diaSemana.id, COUNT(*) FROM ReservaTemporal rt GROUP BY rt.reservaTemporalId.diaSemana.id")
+	List<Object[]> contarPorDia();
 
 }

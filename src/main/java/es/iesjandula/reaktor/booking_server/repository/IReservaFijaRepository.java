@@ -19,17 +19,17 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	 * Busca la reserva que coincide con el email, recurso, día de la semana y tramo
 	 * horario.
 	 * 
-	 * @param email        correo del profesor
-	 * @param recursoId    id del recurso
+	 * @param email          correo del profesor
+	 * @param recursoId      id del recurso
 	 * @param diaSemanaId    id del día de la semana
 	 * @param tramoHorarioId id del tramo horario
 	 * @return Optional con la reserva encontrada o vacío si no existe
 	 */
 	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recursoId AND "
-			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorarioId AND "
-			+ "r.reservaFijaId.profesor.email = :email")
+			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND "
+			+ "r.reservaFijaId.tramoHorario.id = :tramoHorarioId AND " + "r.reservaFijaId.profesor.email = :email")
 	Optional<ReservaFija> encontrarReserva(@Param("email") String email, @Param("recursoId") String recursoId,
-			                               @Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
+			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
 
 	/**
 	 * Obtiene una lista con la información de reservas de un recurso específico,
@@ -57,16 +57,14 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 			+ "FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_fija GROUP BY recurso_id, dia_semana_id, tramo_horario_id) AS Fija "
 			+ "GROUP BY recurso_id", nativeQuery = true)
 	List<Object[]> reservaFijaMax();
-	
-	
+
 	/*
 	 * Se obtiene la suma del número de alumnos para calcular la reserva máxima
 	 */
 	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recursoId AND "
-			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND "
-			+ "r.reservaFijaId.tramoHorario.id = :tramoHorarioId")
-	Optional <List<ReservaFija>> encontrarReservasFijasPorDiaTramo(@Param("recursoId") String recursoId,
-			                                                       @Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
+			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorarioId")
+	Optional<List<ReservaFija>> encontrarReservasFijasPorDiaTramo(@Param("recursoId") String recursoId,
+			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
 
 	/**
 	 * Borra todas las reservas asociadas a un recurso dado.
@@ -77,4 +75,23 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	@Transactional
 	@Query(value = "DELETE FROM ReservaFija rt WHERE rt.reservaFijaId.recurso.id = :recursoId")
 	void deleteReservas(@Param("recursoId") String recursoId);
+
+	/**
+	 * Cuenta reservas fijas por recurso con fecha de creación. 
+	 * Para calcular las semanas ponderadas.
+	 */
+	@Query("SELECT rf.reservaFijaId.recurso.id, rf.fechaCreacion FROM ReservaFija rf")
+	List<Object[]> contarPorRecursoConFecha();
+
+	/**
+	 * Cuenta reservas fijas por tramo horario (ejemplo: "8:00-9:00")
+	 */
+	@Query("SELECT th.tramoHorario, rf.fechaCreacion FROM ReservaFija rf " + "JOIN rf.reservaFijaId.tramoHorario th")
+	List<Object[]> contarPorTramoConNombre();
+
+	/**
+	 * Cuenta reservas fijas por día de la semana con fecha de creación.
+	 */
+	@Query("SELECT rf.reservaFijaId.diaSemana.id, rf.fechaCreacion FROM ReservaFija rf")
+	List<Object[]> contarPorDiaConFecha();
 }
