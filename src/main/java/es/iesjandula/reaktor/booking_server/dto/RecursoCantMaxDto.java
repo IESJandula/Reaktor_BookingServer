@@ -19,17 +19,12 @@ import lombok.NoArgsConstructor;
  * El valor de cantidad máxima se representa con un {@link BigDecimal} para
  * permitir mayor precisión.
  * </p>
- * 
- * @author Luis David Castillo
- * @author Miguel Ríos
- * @author Enrique Contreras
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecursoCantMaxDto
 {
-
 	/** Nombre o identificador del recurso */
 	private String recurso;
 

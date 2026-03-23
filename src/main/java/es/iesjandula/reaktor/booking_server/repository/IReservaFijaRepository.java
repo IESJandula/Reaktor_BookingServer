@@ -9,9 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaMasReservadoDto;
-import es.iesjandula.reaktor.booking_server.dto.EstadisticaTramoMasReservadoDto;
-import es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFija;
 import es.iesjandula.reaktor.booking_server.models.reservas_fijas.ReservaFijaId;
 
@@ -28,11 +25,16 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	 * @param tramoHorarioId id del tramo horario
 	 * @return Optional con la reserva encontrada o vacío si no existe
 	 */
-	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recursoId AND "
-			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND "
-			+ "r.reservaFijaId.tramoHorario.id = :tramoHorarioId AND " + "r.reservaFijaId.profesor.email = :email")
-	Optional<ReservaFija> encontrarReserva(@Param("email") String email, @Param("recursoId") String recursoId,
-			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
+	@Query(value = """
+			SELECT r 
+			FROM ReservaFija r 
+			WHERE r.reservaFijaId.recurso.id = :recursoId AND 
+				r.reservaFijaId.diaSemana.id = :diaSemanaId AND
+				r.reservaFijaId.tramoHorario.id = :tramoHorarioId AND
+				r.reservaFijaId.profesor.email = :email
+			""")
+	Optional<ReservaFija> encontrarReserva(@Param("email") String email, 		   @Param("recursoId") String recursoId,
+										   @Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
 
 	/**
 	 * Obtiene una lista con la información de reservas de un recurso específico,
@@ -63,19 +65,31 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	 * 
 	 * @return lista con recurso y máximo de alumnos reservado
 	 */
-	@Query(value = "SELECT recurso_id, MAX(total_alumnos) AS max_alumnos "
-			+ "FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_fija GROUP BY recurso_id, dia_semana_id, tramo_horario_id) AS Fija "
-			+ "GROUP BY recurso_id", nativeQuery = true)
+	@Query(value = """
+			SELECT recurso_id, MAX(total_alumnos) AS max_alumnos 
+			FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_fija GROUP BY recurso_id, dia_semana_id, tramo_horario_id) AS Fija 
+			GROUP BY recurso_id
+		""", nativeQuery = true)
 	List<Object[]> reservaFijaMax();
 
 	/*
 	 * Se obtiene la suma del número de alumnos para calcular la reserva máxima
+	 * 
+	 * @param recursoId id del recurso
+	 * @param diaSemanaId id del día de la semana
+	 * @param tramoHorarioId id del tramo horario
+	 * @return lista de reservas fijas
 	 */
-	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recursoId AND "
-			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorarioId")
+	@Query(value = """
+		SELECT r 
+		FROM ReservaFija r 
+		WHERE r.reservaFijaId.recurso.id = :recursoId AND 
+		      r.reservaFijaId.diaSemana.id = :diaSemanaId AND 
+			  r.reservaFijaId.tramoHorario.id = :tramoHorarioId
+		""")
 	Optional<List<ReservaFija>> encontrarReservasFijasPorDiaTramo(@Param("recursoId") String recursoId,
-			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
-
+																  @Param("diaSemanaId") Long diaSemanaId,
+																  @Param("tramoHorarioId") Long tramoHorarioId);
 	/**
 	 * Borra todas las reservas asociadas a un recurso dado.
 	 * 
@@ -87,29 +101,37 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	void deleteReservas(@Param("recursoId") String recursoId);
 
 	/**
-	 * Obtiene el recurso más reservado en reservas FIJAS activas.
+	 * Cuenta reservas fijas por recurso con fecha de creación. 
+	 * Para calcular las semanas ponderadas.
+	 * 
+	 * @return lista de objetos con id del recurso y fecha de creación
 	 */
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto("
-			+ "   rf.reservaFijaId.recurso.id, " + "   COUNT(rf)" + ") " + "FROM ReservaFija rf "
-			+ "WHERE rf.reservaFijaId.recurso.id IS NOT NULL " + "GROUP BY rf.reservaFijaId.recurso.id "
-			+ "ORDER BY COUNT(rf) DESC")
-	List<EstadisticaRecursoMasReservadoDto> obtenerRecursoMasReservadoFija();
+	@Query(value = """
+			SELECT rf.reservaFijaId.recurso.id, rf.fechaCreacion 
+			FROM ReservaFija rf
+		""")
+	List<Object[]> contarPorRecursoConFecha();
 
 	/**
-	 * Obtiene el día de la semana más reservado en reservas FIJAS activas.	 
+	 * Cuenta reservas fijas por tramo horario (ejemplo: "8:00-9:00")
+	 * 
+	 * @return lista de objetos con tramo horario y fecha de creación
 	 */
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaMasReservadoDto(" + "   ds.diaSemana, "
-			+ "   COUNT(rf)" + ") " + "FROM ReservaFija rf " + "JOIN rf.reservaFijaId.diaSemana ds "
-			+ "WHERE ds.diaSemana IS NOT NULL " + "GROUP BY ds.diaSemana " + "ORDER BY COUNT(rf) DESC")
-	List<EstadisticaDiaMasReservadoDto> obtenerDiaMasReservadoFija();
+	@Query(value = """
+			SELECT th.tramoHorario, rf.fechaCreacion 
+			FROM ReservaFija rf 
+			JOIN rf.reservaFijaId.tramoHorario th
+		""")
+	List<Object[]> contarPorTramoConNombre();
 
 	/**
-	 * Obtiene el tramo horario más reservado en reservas FIJAS activas.
+	 * Cuenta reservas fijas por día de la semana con fecha de creación.
+	 * 
+	 * @return lista de objetos con id del día de la semana y fecha de creación
 	 */
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaTramoMasReservadoDto(" + "   ds.diaSemana, "
-			+ "   th.tramoHorario, " + "   COUNT(rf)" + ") " + "FROM ReservaFija rf "
-			+ "JOIN rf.reservaFijaId.diaSemana ds " + "JOIN rf.reservaFijaId.tramoHorario th "
-			+ "WHERE th.tramoHorario IS NOT NULL " + "GROUP BY th.tramoHorario, ds.diaSemana "
-			+ "ORDER BY COUNT(rf) DESC")
-	List<EstadisticaTramoMasReservadoDto> obtenerTramoMasReservadoFija();
+	@Query(value = """
+			SELECT rf.reservaFijaId.diaSemana.id, rf.fechaCreacion 
+			FROM ReservaFija rf
+		""")
+	List<Object[]> contarPorDiaConFecha();
 }

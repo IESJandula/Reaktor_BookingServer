@@ -9,9 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaMasReservadoDto;
-import es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto;
-import es.iesjandula.reaktor.booking_server.dto.EstadisticaTramoMasReservadoDto;
 import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTemporal;
 import es.iesjandula.reaktor.booking_server.models.reservas_temporales.ReservaTemporalId;
 
@@ -59,13 +56,17 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * @param numSemana      número de la semana
 	 * @return Optional con la reserva temporal si existe
 	 */
-	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
-			+ "r.reservaTemporalId.diaSemana.id = :diaSemanaId AND "
-			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND "
-			+ "r.reservaTemporalId.numSemana = :numSemana")
+	@Query(value = """
+			SELECT r FROM ReservaTemporal r 
+			WHERE r.reservaTemporalId.recurso.id = :recursoId AND 
+				  r.reservaTemporalId.diaSemana.id = :diaSemanaId AND 
+				  r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND 
+				  r.reservaTemporalId.numSemana = :numSemana
+		""")
 	Optional<List<ReservaTemporal>> encontrarReservasPorDiaTramo(@Param("recursoId") String recursoId,
-			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId,
-			@Param("numSemana") Integer numSemana);
+																 @Param("diaSemanaId") Long diaSemanaId,
+																 @Param("tramoHorarioId") Long tramoHorarioId,
+																 @Param("numSemana") Integer numSemana);
 
 	/**
 	 * Busca reservas temporales no compartibles según recurso, día, tramo horario y
@@ -77,13 +78,17 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	 * @param numSemana      número de la semana
 	 * @return Optional con la reserva temporal si existe
 	 */
-	@Query("SELECT r FROM ReservaTemporal r WHERE " + "r.reservaTemporalId.recurso.id = :recursoId AND "
-			+ "r.reservaTemporalId.diaSemana.id = :diaSemanaId AND "
-			+ "r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND "
-			+ "r.reservaTemporalId.numSemana = :numSemana")
+	@Query(value = """
+			SELECT r FROM ReservaTemporal r 
+			WHERE r.reservaTemporalId.recurso.id = :recursoId AND 
+				  r.reservaTemporalId.diaSemana.id = :diaSemanaId AND 
+				  r.reservaTemporalId.tramoHorario.id = :tramoHorarioId AND 
+				  r.reservaTemporalId.numSemana = :numSemana
+		""")
 	Optional<ReservaTemporal> encontrarReservaNoCompartible(@Param("recursoId") String recursoId,
-			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId,
-			@Param("numSemana") Integer numSemana);
+			                                                @Param("diaSemanaId") Long diaSemanaId,
+															@Param("tramoHorarioId") Long tramoHorarioId,
+															@Param("numSemana") Integer numSemana);
 
 	/**
 	 * Obtiene reservas temporales y fijas relacionadas a un recurso y semana
@@ -169,29 +174,26 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 	void deleteReservas(@Param("recursoId") String recursoId);
 
 	/**
-	 * Obtiene el recurso más reservado en reservas TEMPORALES activas.
+	 * Cuenta reservas temporales por recurso. Cada reserva cuenta como 1 semana.
 	 */
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaRecursoMasReservadoDto("
-			+ "   rt.reservaTemporalId.recurso.id, " + "   COUNT(rt)" + ") " + "FROM ReservaTemporal rt "
-			+ "WHERE rt.reservaTemporalId.recurso.id IS NOT NULL " + "GROUP BY rt.reservaTemporalId.recurso.id "
-			+ "ORDER BY COUNT(rt) DESC")
-	List<EstadisticaRecursoMasReservadoDto> obtenerRecursoMasReservadoTemporal();
+	@Query(value = """
+			SELECT rt.reservaTemporalId.recurso.id, COUNT(*) FROM ReservaTemporal rt GROUP BY rt.reservaTemporalId.recurso.id
+		""", nativeQuery = true)
+	List<Object[]> contarPorRecurso();
 
 	/**
-	 * Obtiene el día de la semana más reservado en reservas temporales activas.
+	 * Cuenta reservas temporales por tramo horario (ejemplo: "8:00-9:00")
 	 */
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaDiaMasReservadoDto(" + "   ds.diaSemana, "
-			+ "   COUNT(rt)" + ") " + "FROM ReservaTemporal rt " + "JOIN rt.reservaTemporalId.diaSemana ds "
-			+ "WHERE ds.diaSemana IS NOT NULL " + "GROUP BY ds.diaSemana " + "ORDER BY COUNT(rt) DESC")
-	List<EstadisticaDiaMasReservadoDto> obtenerDiaMasReservadoTemporal();
+	@Query(value = """
+			SELECT th.tramoHorario, COUNT(*) FROM ReservaTemporal rt JOIN rt.reservaTemporalId.tramoHorario th GROUP BY th.tramoHorario
+		""", nativeQuery = true)
+	List<Object[]> contarPorTramoConNombre();
 
 	/**
-	 * Obtiene el tramo horario más reservado en reservas temporales activas.
+	 * Cuenta reservas temporales por día de la semana.
 	 */
-	@Query("SELECT new es.iesjandula.reaktor.booking_server.dto.EstadisticaTramoMasReservadoDto(" + "   ds.diaSemana, "
-			+ "   th.tramoHorario, " + "   COUNT(rt)" + ") " + "FROM ReservaTemporal rt "
-			+ "JOIN rt.reservaTemporalId.diaSemana ds " + "JOIN rt.reservaTemporalId.tramoHorario th "
-			+ "WHERE th.tramoHorario IS NOT NULL " + "GROUP BY th.tramoHorario, ds.diaSemana "
-			+ "ORDER BY COUNT(rt) DESC")
-	List<EstadisticaTramoMasReservadoDto> obtenerTramoMasReservadoTemporal();
+	@Query(value = """
+			SELECT rt.reservaTemporalId.diaSemana.id, COUNT(*) FROM ReservaTemporal rt GROUP BY rt.reservaTemporalId.diaSemana.id
+		""", nativeQuery = true)
+	List<Object[]> contarPorDia();
 }
