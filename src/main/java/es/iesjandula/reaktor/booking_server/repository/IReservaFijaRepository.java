@@ -106,10 +106,7 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	 * 
 	 * @return lista de objetos con id del recurso y fecha de creación
 	 */
-	@Query(value = """
-			SELECT rf.reservaFijaId.recurso.id, rf.fechaCreacion 
-			FROM ReservaFija rf
-		""")
+	@Query(value = "SELECT rf.reservaFijaId.recurso.id, rf.fechaCreacion FROM ReservaFija rf")
 	List<Object[]> contarPorRecursoConFecha();
 
 	/**
@@ -117,11 +114,7 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	 * 
 	 * @return lista de objetos con tramo horario y fecha de creación
 	 */
-	@Query(value = """
-			SELECT th.tramoHorario, rf.fechaCreacion 
-			FROM ReservaFija rf 
-			JOIN rf.reservaFijaId.tramoHorario th
-		""")
+	@Query(value = "SELECT th.tramoHorario, rf.fechaCreacion FROM ReservaFija rf  JOIN rf.reservaFijaId.tramoHorario th")
 	List<Object[]> contarPorTramoConNombre();
 
 	/**
@@ -129,9 +122,6 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	 * 
 	 * @return lista de objetos con id del día de la semana y fecha de creación
 	 */
-	@Query(value = """
-			SELECT rf.reservaFijaId.diaSemana.id, rf.fechaCreacion 
-			FROM ReservaFija rf
-		""")
+	@Query(value = "SELECT rf.reservaFijaId.diaSemana.id, rf.fechaCreacion FROM ReservaFija rf")
 	List<Object[]> contarPorDiaConFecha();
 }
