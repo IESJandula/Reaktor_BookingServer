@@ -57,15 +57,7 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 			+ "FROM (SELECT recurso_id, dia_semana_id, tramo_horario_id, SUM(n_alumnos) AS total_alumnos FROM reserva_fija GROUP BY recurso_id, dia_semana_id, tramo_horario_id) AS Fija "
 			+ "GROUP BY recurso_id", nativeQuery = true)
 	List<Object[]> reservaFijaMax();
-
-	/*
-	 * Se obtiene la suma del número de alumnos para calcular la reserva máxima
-	 */
-	@Query("SELECT r FROM ReservaFija r WHERE " + "r.reservaFijaId.recurso.id = :recursoId AND "
-			+ "r.reservaFijaId.diaSemana.id = :diaSemanaId AND " + "r.reservaFijaId.tramoHorario.id = :tramoHorarioId")
-	Optional<List<ReservaFija>> encontrarReservasFijasPorDiaTramo(@Param("recursoId") String recursoId,
-			@Param("diaSemanaId") Long diaSemanaId, @Param("tramoHorarioId") Long tramoHorarioId);
-
+	
 	/**
 	 * Borra todas las reservas asociadas a un recurso dado.
 	 * 
@@ -77,21 +69,39 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	void deleteReservas(@Param("recursoId") String recursoId);
 
 	/**
-	 * Cuenta reservas fijas por recurso con fecha de creación. 
-	 * Para calcular las semanas ponderadas.
+	 * Cuenta reservas fijas por recurso con la fecha de creación. 
+	 * Para calcular semanas ponderadas hasta fin de curso.
+	 * 
+	 * @return Lista de Object[] con [recurso.id, fechaCreacion]
 	 */
 	@Query("SELECT rf.reservaFijaId.recurso.id, rf.fechaCreacion FROM ReservaFija rf")
 	List<Object[]> contarPorRecursoConFecha();
 
 	/**
-	 * Cuenta reservas fijas por tramo horario (ejemplo: "8:00-9:00")
+	 * Cuenta reservas fijas por tramo horario con la fecha de creación. 
+	 * Hacemos JOIN con TramoHorario para obtener el nombre del tramo.
+	 * 
+	 * @return Lista de Object[] con [tramoHorario.tramoHorario, fechaCreacion]
 	 */
 	@Query("SELECT th.tramoHorario, rf.fechaCreacion FROM ReservaFija rf " + "JOIN rf.reservaFijaId.tramoHorario th")
 	List<Object[]> contarPorTramoConNombre();
 
 	/**
-	 * Cuenta reservas fijas por día de la semana con fecha de creación.
+	 * Cuenta reservas fijas por día de la semana con la fecha de creación. 
+	 * Hacemos JOIN con DiaSemana para obtener el nombre del día.
+	 * 
+	 * @return Lista de Object[] con [diaSemana.diaSemana, fechaCreacion]
 	 */
-	@Query("SELECT rf.reservaFijaId.diaSemana.id, rf.fechaCreacion FROM ReservaFija rf")
-	List<Object[]> contarPorDiaConFecha();
+	@Query("SELECT ds.diaSemana, rf.fechaCreacion FROM ReservaFija rf " + "JOIN rf.reservaFijaId.diaSemana ds")
+	List<Object[]> contarPorDiaConNombre();
+
+	/**
+	 * Encuentra todas las reservas fijas por recurso, día y tramo. 
+	 * Usado para comprobación de disponibilidad.
+	 */
+	@Query("SELECT rf FROM ReservaFija rf WHERE rf.reservaFijaId.recurso.id = :recurso "
+			+ "AND rf.reservaFijaId.diaSemana.id = :diaSemana "
+			+ "AND rf.reservaFijaId.tramoHorario.id = :tramoHorario")
+	Optional<List<ReservaFija>> encontrarReservasFijasPorDiaTramo(@Param("recurso") String recurso,
+			@Param("diaSemana") Long diaSemana, @Param("tramoHorario") Long tramoHorario);
 }

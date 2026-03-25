@@ -147,21 +147,28 @@ public interface IReservaTemporalRepository extends JpaRepository<ReservaTempora
 
 	/**
 	 * Cuenta reservas temporales por recurso. Cada reserva cuenta como 1 semana.
+	 * 
+	 * @return Lista de Object[] con [recurso.id, COUNT(*)]
 	 */
 	@Query("SELECT rt.reservaTemporalId.recurso.id, COUNT(*) FROM ReservaTemporal rt GROUP BY rt.reservaTemporalId.recurso.id")
 	List<Object[]> contarPorRecurso();
 
 	/**
-	 * Cuenta reservas temporales por tramo horario (ejemplo: "8:00-9:00")
+	 * Cuenta reservas temporales por tramo horario con el nombre del tramo.
+	 * 
+	 * @return Lista de Object[] con [tramoHorario.tramoHorario, COUNT(*)]
 	 */
 	@Query("SELECT th.tramoHorario, COUNT(*) FROM ReservaTemporal rt " + "JOIN rt.reservaTemporalId.tramoHorario th "
 			+ "GROUP BY th.tramoHorario")
 	List<Object[]> contarPorTramoConNombre();
 
 	/**
-	 * Cuenta reservas temporales por día de la semana.
+	 * Cuenta reservas temporales por día de la semana con el nombre del día.
+	 * 
+	 * @return Lista de Object[] con [diaSemana.diaSemana, COUNT(*)]
 	 */
-	@Query("SELECT rt.reservaTemporalId.diaSemana.id, COUNT(*) FROM ReservaTemporal rt GROUP BY rt.reservaTemporalId.diaSemana.id")
-	List<Object[]> contarPorDia();
+	@Query("SELECT ds.diaSemana, COUNT(*) FROM ReservaTemporal rt " + "JOIN rt.reservaTemporalId.diaSemana ds "
+			+ "GROUP BY ds.diaSemana")
+	List<Object[]> contarPorDiaConNombre();
 
 }

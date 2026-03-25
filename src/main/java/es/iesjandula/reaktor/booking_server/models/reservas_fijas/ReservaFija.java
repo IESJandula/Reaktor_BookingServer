@@ -12,43 +12,35 @@ import lombok.NoArgsConstructor;
 
 /**
  * Entidad que representa una reserva fija en el sistema.
- * <p>
- * Contiene el identificador compuesto de la reserva, número de alumnos, si la
- * reserva es fija y el motivo del curso asociado.
- * </p>
- * 
- * @author Luis David Castillo
- * @author Miguel Ríos
- * @author Enrique Contreras
  */
 @Data
 @NoArgsConstructor
 @Entity
 public class ReservaFija
 {
-
-	/** Identificador compuesto de la reserva fija */
 	@EmbeddedId
 	private ReservaFijaId reservaFijaId;
 
-	/** Número de alumnos para la reserva */
 	@Column(nullable = false)
 	private int nAlumnos;
 
-	/** Indica si la reserva es fija */
 	@Column(nullable = false)
 	private boolean esFija;
 
-	/** Motivo del curso asociado a la reserva */
 	@Column(nullable = false)
 	private String motivoCurso;
 
-	/** Fecha de creación de la reserva fija para calcular la semana del curso */
+	/**
+	 * Fecha de creación automática. 
+	 * Se usa para calcular las semanas restantes hasta fin de curso
+	 */
 	@Column(name = "fecha_creacion", nullable = false, updatable = false)
 	@CreationTimestamp
 	private LocalDateTime fechaCreacion;
 
-	/** Método para calcular la semana del curso escolar */
+	/**
+	 * Calcula la semana del curso escolar Curso: 1 Septiembre - 30 Junio
+	 */
 	public Integer getSemanaCurso()
 	{
 		if (this.fechaCreacion == null)
@@ -65,7 +57,7 @@ public class ReservaFija
 			inicioCurso = java.time.LocalDate.of(fecha.getYear() - 1, 9, 1);
 		}
 
-		// Calcular las semanas desde el inicio de curso
+		// Calcular semanas desde inicio de curso
 		long semanas = java.time.temporal.ChronoUnit.WEEKS.between(inicioCurso, fecha);
 		return (int) semanas + 1; // Semana 1 = primera semana de curso
 	}

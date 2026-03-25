@@ -3,7 +3,6 @@ package es.iesjandula.reaktor.booking_server.rest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +30,6 @@ import es.iesjandula.reaktor.booking_server.utils.Constants;
  * Controlador REST para proporcionar estadísticas del sistema de reservas.
  * Accesible solo para roles de administrador o dirección.
  * 
- * ESTADÍSTICAS PONDERADAS: - Reservas FIJAS: Se ponderan por semanas restantes
- * hasta fin de curso - Reservas TEMPORALES: Cuentan como 1 semana cada una
  */
 @RequestMapping("/bookings/estadisticas")
 @RestController
@@ -47,13 +44,11 @@ public class EstadisticasController
 	private IReservaTemporalRepository reservaTemporalRepository;
 
 	/**
-	 * SEMANA FIN DE CURSO (aproximada - 40 semanas desde septiembre)
-	 */
-	private static final int SEMANA_FIN_CURSO = 40;
-
-	/**
 	 * Obtiene el recurso más reservado combinando reservas fijas (ponderadas) y
 	 * temporales (directas).
+	 * 
+	 * Lógica: 1. Fijas: (Semana Fin Curso - Semana Creación + 1) por cada reserva.
+	 * 2. Temporales: COUNT(*) directo.
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/recurso-mas-reservado")
@@ -62,27 +57,59 @@ public class EstadisticasController
 		try
 		{
 			Map<String, Long> contador = new HashMap<>();
+			int semanaFinCurso = obtenerSemanaFinCurso();
+
+			//log.info("=== DEBUG ESTADÍSTICAS ===");
+			//log.info("Semana fin curso calculada: {}", semanaFinCurso);
 
 			// 1. RESERVAS FIJAS (ponderadas por semanas restantes)
 			List<Object[]> fijas = reservaFijaRepository.contarPorRecursoConFecha();
+			//log.info("Reservas fijas encontradas en BBDD: {}", fijas.size());
+
 			for (Object[] row : fijas)
 			{
 				String recurso = (String) row[0];
 				LocalDateTime fechaCreacion = (LocalDateTime) row[1];
-				int semanaCreacion = calcularSemanaDesdeFecha(fechaCreacion);
 
-				// Ponderar: semanas restantes desde creación hasta fin de curso
-				long semanasRestantes = SEMANA_FIN_CURSO - semanaCreacion + 1;
-				contador.merge(recurso, semanasRestantes, Long::sum);
+				//log.info("  Recurso: {}, Fecha: {}", recurso, fechaCreacion);
+
+				if (fechaCreacion == null)
+				{
+					//log.warn("    FECHA NULL! Contando como 1");
+					contador.merge(recurso, 1L, Long::sum);
+					continue;
+				}
+
+				int semanaCreacion = calcularSemanaDesdeFecha(fechaCreacion);
+				long semanasRestantes = semanaFinCurso - semanaCreacion + 1;
+
+				//log.info("    Semana creación: {}, Semanas restantes: {}", semanaCreacion, semanasRestantes);
+
+				if (semanasRestantes > 0)
+				{
+					contador.merge(recurso, semanasRestantes, Long::sum);
+					//log.info("    Sumando {} semanas al recurso {}", semanasRestantes, recurso);
+				} else
+				{
+					contador.merge(recurso, 1L, Long::sum);
+					//log.info("    Semanas negativas, sumando 1");
+				}
 			}
 
 			// 2. RESERVAS TEMPORALES (1 reserva = 1 semana)
 			List<Object[]> temporales = reservaTemporalRepository.contarPorRecurso();
+			//log.info("Reservas temporales encontradas: {}", temporales.size());
+
 			for (Object[] row : temporales)
 			{
 				String recurso = (String) row[0];
-				contador.merge(recurso, 1L, Long::sum);
+				Long count = (Long) row[1];
+				//log.info("  Recurso: {}, Count: {}", recurso, count);
+				contador.merge(recurso, count, Long::sum);
 			}
+
+			//log.info("=== FIN DEBUG ESTADÍSTICAS ===");
+			//log.info("Resultado final: {}", contador);
 
 			// 3. Convertir a DTO y ordenar
 			List<EstadisticaRecursoMasReservadoDto> resultado = contador.entrySet().stream()
@@ -102,7 +129,7 @@ public class EstadisticasController
 
 	/**
 	 * Obtiene el tramo horario más reservado combinando reservas fijas y
-	 * temporales. (ejemplo: "8:00-9:00") 
+	 * temporales.
 	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/tramo-horario-mas-reservado")
@@ -111,19 +138,34 @@ public class EstadisticasController
 		try
 		{
 			Map<String, Long> contador = new HashMap<>();
+			int semanaFinCurso = obtenerSemanaFinCurso();
 
-			// 1. RESERVAS FIJAS (ponderadas por semanas restantes)			
+			// 1. RESERVAS FIJAS (ponderadas)			
 			List<Object[]> fijas = reservaFijaRepository.contarPorTramoConNombre();
 			for (Object[] row : fijas)
 			{
-				String tramoHorario = (String) row[0]; // ← AHORA es el nombre "8:00-9:00"
+				String tramoHorario = (String) row[0];
 				LocalDateTime fechaCreacion = (LocalDateTime) row[1];
+
+				if (fechaCreacion == null)
+				{
+					contador.merge(tramoHorario, 1L, Long::sum);
+					continue;
+				}
+
 				int semanaCreacion = calcularSemanaDesdeFecha(fechaCreacion);
-				long semanasRestantes = SEMANA_FIN_CURSO - semanaCreacion + 1;
-				contador.merge(tramoHorario, semanasRestantes, Long::sum);
+				long semanasRestantes = semanaFinCurso - semanaCreacion + 1;
+
+				if (semanasRestantes > 0)
+				{
+					contador.merge(tramoHorario, semanasRestantes, Long::sum);
+				} else
+				{
+					contador.merge(tramoHorario, 1L, Long::sum);
+				}
 			}
 
-			// 2. RESERVAS TEMPORALES (1 reserva = 1 semana)			
+			// 2. RESERVAS TEMPORALES (directas)			
 			List<Object[]> temporales = reservaTemporalRepository.contarPorTramoConNombre();
 			for (Object[] row : temporales)
 			{
@@ -158,35 +200,48 @@ public class EstadisticasController
 	{
 		try
 		{
-			Map<Long, Long> contador = new HashMap<>();
+			Map<String, Long> contador = new HashMap<>();
+			int semanaFinCurso = obtenerSemanaFinCurso();
 
-			// 1. RESERVAS FIJAS (ponderadas)
-			List<Object[]> fijas = reservaFijaRepository.contarPorDiaConFecha();
+			// 1. RESERVAS FIJAS (ponderadas)			
+			List<Object[]> fijas = reservaFijaRepository.contarPorDiaConNombre();
 			for (Object[] row : fijas)
 			{
-				Long diaId = (Long) row[0];
+				String diaSemana = (String) row[0];
 				LocalDateTime fechaCreacion = (LocalDateTime) row[1];
+
+				if (fechaCreacion == null)
+				{
+					contador.merge(diaSemana, 1L, Long::sum);
+					continue;
+				}
+
 				int semanaCreacion = calcularSemanaDesdeFecha(fechaCreacion);
-				long semanasRestantes = SEMANA_FIN_CURSO - semanaCreacion + 1;
-				contador.merge(diaId, semanasRestantes, Long::sum);
+				long semanasRestantes = semanaFinCurso - semanaCreacion + 1;
+
+				if (semanasRestantes > 0)
+				{
+					contador.merge(diaSemana, semanasRestantes, Long::sum);
+				} else
+				{
+					contador.merge(diaSemana, 1L, Long::sum);
+				}
 			}
 
-			// 2. RESERVAS TEMPORALES (directas)
-			List<Object[]> temporales = reservaTemporalRepository.contarPorDia();
+			// 2. RESERVAS TEMPORALES (directas)			
+			List<Object[]> temporales = reservaTemporalRepository.contarPorDiaConNombre();
 			for (Object[] row : temporales)
 			{
-				Long diaId = (Long) row[0];
-				contador.merge(diaId, 1L, Long::sum);
+				String diaSemana = (String) row[0];
+				Long count = (Long) row[1];
+				contador.merge(diaSemana, count, Long::sum);
 			}
 
-			// 3. Convertir a DTO
-			List<EstadisticaDiaTramoMasReservadoDto> resultado = new ArrayList<>();
-			contador.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).forEach(e ->
-			{
-				// Mapeo de ID de día a nombre (1=Lunes, 2=Martes, etc.)
-				String nombreDia = obtenerNombreDia(e.getKey());
-				resultado.add(new EstadisticaDiaTramoMasReservadoDto(nombreDia, "", e.getValue()));
-			});
+			// 3. Convertir a DTO y ordenar
+			List<EstadisticaDiaTramoMasReservadoDto> resultado = contador.entrySet().stream()
+					.map(e -> new EstadisticaDiaTramoMasReservadoDto(e.getKey(), "", e.getValue()))
+					.sorted(Comparator.comparingLong(EstadisticaDiaTramoMasReservadoDto::getTotalReservas).reversed())
+					.collect(Collectors.toList());
 
 			return ResponseEntity.ok(resultado);
 		} catch (Exception exception)
@@ -199,50 +254,73 @@ public class EstadisticasController
 	}
 
 	/**
-	 * Calcula la semana del curso escolar desde una fecha. Curso: 1 Septiembre - 30
-	 * Junio
+	 * Calcula dinámicamente la semana de fin de curso basada en la fecha actual.	  
+	 * 
+	 */
+	private int obtenerSemanaFinCurso()
+	{
+		LocalDate hoy = LocalDate.now();
+		int year = hoy.getYear();
+
+		// Determinar el año de inicio del curso actual.
+		// Si estamos entre Enero y Junio (meses 1-6), el curso empezó en Septiembre del
+		// año anterior.
+		// Si estamos entre Septiembre y Diciembre (meses 9-12), el curso empezó en
+		// Septiembre de este año
+		int yearInicioCurso;
+		if (hoy.getMonthValue() <= 6)
+		{
+			yearInicioCurso = year - 1;
+		} else
+		{
+			yearInicioCurso = year;
+		}
+
+		// Fecha de inicio del curso (1 de Septiembre)
+		LocalDate inicioCurso = LocalDate.of(yearInicioCurso, 9, 1);
+
+		// Fecha de fin del curso (30 de Junio)
+		LocalDate finCurso = LocalDate.of(yearInicioCurso + 1, 6, 30);
+
+		// Calcular semanas desde inicio de curso hasta fin de curso
+		long semanasTotales = ChronoUnit.WEEKS.between(inicioCurso, finCurso);
+
+		/**log.info("=== DEBUG SEMANA FIN CURSO ===");
+		log.info("Inicio curso: {}", inicioCurso);
+		log.info("Fin curso: {}", finCurso);
+		log.info("Semanas totales del curso: {}", semanasTotales); **/
+
+		return (int) semanasTotales; // ≈ 43 semanas
+	}
+
+	/**
+	 * Calcula la semana del curso escolar desde una fecha de creación. Curso: 1
+	 * Septiembre - 30 Junio.
+	 * 
+	 * @param fecha Fecha de creación de la reserva fija.
+	 * @return Número de semana dentro del curso escolar (1 = primera semana de
+	 *         septiembre).
 	 */
 	private int calcularSemanaDesdeFecha(LocalDateTime fecha)
 	{
 		LocalDate date = fecha.toLocalDate();
 		LocalDate inicioCurso = LocalDate.of(date.getYear(), 9, 1);
 
-		// Si es antes de septiembre, el curso empezó el año anterior
+		// Si es antes de septiembre, el curso empezó el 1 de septiembre del año
+		// anterior
 		if (date.getMonthValue() < 9)
 		{
 			inicioCurso = LocalDate.of(date.getYear() - 1, 9, 1);
 		}
 
 		long semanas = ChronoUnit.WEEKS.between(inicioCurso, date);
-		return (int) semanas + 1;
-	}
+		int semanaNumero = (int) semanas + 1; // Semana 1 = primera semana de curso
 
-	/**
-	 * Obtiene el nombre del día de la semana desde su ID.
-	 */
-	private String obtenerNombreDia(Long diaId)
-	{
-		if (diaId == null)
-			return "Desconocido";
+		/**log.info("  Calculando semana desde fecha: {}", fecha);
+		log.info("  Inicio curso: {}", inicioCurso);
+		log.info("  Semanas desde inicio: {}", semanas);
+		log.info("  Semana número: {}", semanaNumero); **/
 
-		switch (diaId.intValue())
-		{
-		case 1:
-			return "Lunes";
-		case 2:
-			return "Martes";
-		case 3:
-			return "Miércoles";
-		case 4:
-			return "Jueves";
-		case 5:
-			return "Viernes";
-		case 6:
-			return "Sábado";
-		case 7:
-			return "Domingo";
-		default:
-			return "Día " + diaId;
-		}
+		return semanaNumero;
 	}
 }
