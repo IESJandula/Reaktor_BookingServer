@@ -101,27 +101,29 @@ public interface IReservaFijaRepository extends JpaRepository<ReservaFija, Reser
 	void deleteReservas(@Param("recursoId") String recursoId);
 
 	/**
-	 * Cuenta reservas fijas por recurso con fecha de creación. 
-	 * Para calcular las semanas ponderadas.
+	 * Cuenta reservas fijas por recurso con la fecha de creación. 
+	 * Para calcular semanas ponderadas hasta fin de curso.
 	 * 
-	 * @return lista de objetos con id del recurso y fecha de creación
+	 * @return Lista de Object[] con [recurso.id, fechaCreacion]
 	 */
-	@Query(value = "SELECT rf.reservaFijaId.recurso.id, rf.fechaCreacion FROM ReservaFija rf")
+	@Query("SELECT rf.reservaFijaId.recurso.id, rf.fechaCreacion FROM ReservaFija rf")
 	List<Object[]> contarPorRecursoConFecha();
 
 	/**
-	 * Cuenta reservas fijas por tramo horario (ejemplo: "8:00-9:00")
+	 * Cuenta reservas fijas por tramo horario con la fecha de creación. 
+	 * Hacemos JOIN con TramoHorario para obtener el nombre del tramo.
 	 * 
-	 * @return lista de objetos con tramo horario y fecha de creación
+	 * @return Lista de Object[] con [tramoHorario.tramoHorario, fechaCreacion]
 	 */
-	@Query(value = "SELECT th.tramoHorario, rf.fechaCreacion FROM ReservaFija rf  JOIN rf.reservaFijaId.tramoHorario th")
+	@Query("SELECT th.tramoHorario, rf.fechaCreacion FROM ReservaFija rf " + "JOIN rf.reservaFijaId.tramoHorario th")
 	List<Object[]> contarPorTramoConNombre();
 
 	/**
-	 * Cuenta reservas fijas por día de la semana con fecha de creación.
+	 * Cuenta reservas fijas por día de la semana con la fecha de creación. 
+	 * Hacemos JOIN con DiaSemana para obtener el nombre del día.
 	 * 
-	 * @return lista de objetos con id del día de la semana y fecha de creación
+	 * @return Lista de Object[] con [diaSemana.diaSemana, fechaCreacion]
 	 */
-	@Query(value = "SELECT rf.reservaFijaId.diaSemana.id, rf.fechaCreacion FROM ReservaFija rf")
-	List<Object[]> contarPorDiaConFecha();
+	@Query("SELECT ds.diaSemana, rf.fechaCreacion FROM ReservaFija rf " + "JOIN rf.reservaFijaId.diaSemana ds")
+	List<Object[]> contarPorDiaConNombre();
 }
