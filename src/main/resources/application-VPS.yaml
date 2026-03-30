@@ -1,5 +1,14 @@
 spring:
-  jpa.hibernate.ddl-auto: update
+  application:
+    name: reaktor-bookingserver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
   datasource:
     url: jdbc:mysql://localhost:3306/reaktor_bookingserver?createDatabaseIfNotExist=true
     username: root
@@ -36,3 +45,6 @@ reaktor:
     reservasTemporales: ""
   http_connection_timeout: 30000
   reiniciarParametros: false
+  audit:
+    exchange: audit.exchange
+    routing-key: audit.key
