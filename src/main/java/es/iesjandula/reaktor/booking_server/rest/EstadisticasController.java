@@ -4,11 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +25,6 @@ import es.iesjandula.reaktor.booking_server.repository.IReservaFijaRepository;
 import es.iesjandula.reaktor.booking_server.repository.IReservaTemporalRepository;
 import es.iesjandula.reaktor.booking_server.utils.Constants;
 
-/**
- * Controlador REST para proporcionar estadísticas del sistema de reservas.
- * Accesible solo para roles de administrador o dirección.
- * 
- * ESTADÍSTICAS PONDERADAS: - Reservas FIJAS: Se ponderan por semanas restantes
- * hasta fin de curso - Reservas TEMPORALES: Cuentan como 1 semana cada una
- */
 @RequestMapping("/bookings/estadisticas")
 @RestController
 public class EstadisticasController
@@ -46,272 +37,302 @@ public class EstadisticasController
 	@Autowired
 	private IReservaTemporalRepository reservaTemporalRepository;
 
-	/**
-	 * Obtiene el recurso más reservado combinando reservas fijas (ponderadas) y
-	 * temporales (directas).
-	 * 
-	 * Lógica: 1. Fijas: (Semana Fin Curso - Semana Creación + 1) por cada reserva.
-	 * 2. Temporales: COUNT(*) directo.
-	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/recurso-mas-reservado")
 	public ResponseEntity<?> obtenerRecursoMasReservado()
 	{
 		try
 		{
-			Map<String, Long> contador = new HashMap<>();
-			int semanaFinCurso = obtenerSemanaFinCurso();
+			// Mapa para acumular totales (clave = nombre del recurso y valor = total de semanas reservadas) 
+			Map<String, Long> mapaTotales = new HashMap<>();			
+			int semanaActual = this.obtenerSemanaActualCurso();
 
-			// 1. RESERVAS FIJAS (ponderadas por semanas restantes)
-			List<Object[]> fijas = reservaFijaRepository.contarPorRecursoConFecha();
-
-			for (Object[] row : fijas)
+			// Reservas fijas (calculamos cuántas semanas han pasado desde su creación hasta hoy)
+			List<Object[]> reservasFijas = this.reservaFijaRepository.contarPorRecursoConFecha();
+			for (Object[] fila : reservasFijas)
 			{
-				String recurso = (String) row[0];
-				LocalDateTime fechaCreacion = (LocalDateTime) row[1];
+				String recurso = (String) fila[0];
+				LocalDateTime fechaCreacion = (LocalDateTime) fila[1];
 
-				if (fechaCreacion == null)
+				// Por defecto al menos hay una semana.
+				long semanas = 1;
+				if (fechaCreacion != null)
 				{
-					contador.merge(recurso, 1L, Long::sum);
-					continue;
+					// Semana del curso en que se creó la reserva.
+					int semanaCreacion = this.calcularSemanaDesdeFecha(fechaCreacion);
+					// Si la reserva se creó antes o en la semana actual, la diferencia más uno nos da las semanas transcurridas.
+					if (semanaActual >= semanaCreacion)
+					{
+						semanas = semanaActual - semanaCreacion + 1;
+					}
 				}
-
-				int semanaCreacion = calcularSemanaDesdeFecha(fechaCreacion);
-				long semanasRestantes = semanaFinCurso - semanaCreacion + 1;
-
-				if (semanasRestantes > 0)
+				
+				// Acumulamos los datos en el mapa.
+				Long totalActual = mapaTotales.get(recurso);
+				if (totalActual == null)
 				{
-					contador.merge(recurso, semanasRestantes, Long::sum);
-				} else
+					mapaTotales.put(recurso, semanas);
+				}
+				else
 				{
-					contador.merge(recurso, 1L, Long::sum);
+					mapaTotales.put(recurso, totalActual + semanas);
 				}
 			}
 
-			// 2. RESERVAS TEMPORALES (1 reserva = 1 semana)
-			List<Object[]> temporales = reservaTemporalRepository.contarPorRecurso();
-
-			for (Object[] row : temporales)
+			// Reservas temporales (Cada reserva cuenta como una semana)
+			List<Object[]> reservasTemporales = this.reservaTemporalRepository.contarPorRecurso();
+			for (Object[] fila : reservasTemporales)
 			{
-				String recurso = (String) row[0];
-				Long count = (Long) row[1];
-				//log.info("  Recurso: {}, Count: {}", recurso, count);
-				contador.merge(recurso, count, Long::sum);
+				String recurso = (String) fila[0];
+				Long conteo = (Long) fila[1];
+
+				// Acumulamos los datos en el mapa.
+				Long totalActual = mapaTotales.get(recurso);
+				if (totalActual == null)
+				{
+					mapaTotales.put(recurso, conteo);
+				}
+				else
+				{
+					mapaTotales.put(recurso, totalActual + conteo);
+				}
 			}
 
-			//log.info("=== FIN DEBUG ESTADÍSTICAS ===");
-			//log.info("Resultado final: {}", contador);
+			// Convertimos el mapa a una lista de DTOs
+			List<EstadisticaRecursoMasReservadoDto> listaResultados = new ArrayList<>();
+			for (String recurso : mapaTotales.keySet())
+			{
+				Long total = mapaTotales.get(recurso);
+				listaResultados.add(new EstadisticaRecursoMasReservadoDto(recurso, total));
+			}
 
-			// 3. Convertir a DTO y ordenar
-			List<EstadisticaRecursoMasReservadoDto> resultado = contador.entrySet().stream()
-					.map(e -> new EstadisticaRecursoMasReservadoDto(e.getKey(), e.getValue()))
-					.sorted(Comparator.comparingLong(EstadisticaRecursoMasReservadoDto::getTotalReservas).reversed())
-					.collect(Collectors.toList());
+			// Ordenamos la lista de mayor a menor usando el algoritmo burbuja
+			this.ordenarResultadosRecurso(listaResultados);
 
-			return ResponseEntity.ok(resultado);
-		} catch (Exception exception)
+			return ResponseEntity.ok(listaResultados);
+		}
+		// Si ocurre un error lo capturamos, lo registramos en el log y devolvemos un error con un mensaje JSON.
+		catch (Exception exception)
 		{
-			log.error("Error al obtener recurso más reservado", exception);
-			ReservaException reservaException = new ReservaException(Constants.ERROR_ESTADISTICAS,
-					"Error al obtener el recurso más reservado", exception);
+			String mensajeError = "Error inesperado al obtener el recurso más reservado";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_ESTADISTICAS, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
 
-	/**
-	 * Obtiene el tramo horario más reservado combinando reservas fijas y
-	 * temporales. (ejemplo: "8:00-9:00") 
-	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/tramo-horario-mas-reservado")
+	// Método para saber qué tramo horario tiene más reservas combinando reservas fijas y temporales. 
 	public ResponseEntity<?> obtenerTramoHorarioMasReservado()
 	{
 		try
 		{
-			Map<String, Long> contador = new HashMap<>();
-			int semanaFinCurso = obtenerSemanaFinCurso();
+			Map<String, Long> mapaTotales = new HashMap<>();
+			int semanaActual = this.obtenerSemanaActualCurso();
 
-			// 1. RESERVAS FIJAS (ponderadas)			
-			List<Object[]> fijas = reservaFijaRepository.contarPorTramoConNombre();
-			for (Object[] row : fijas)
+			// Reservas fijas
+			List<Object[]> reservasFijas = this.reservaFijaRepository.contarPorTramoConNombre();
+			for (Object[] fila : reservasFijas)
 			{
-				String tramoHorario = (String) row[0];
-				LocalDateTime fechaCreacion = (LocalDateTime) row[1];
+				String tramo = (String) fila[0];
+				LocalDateTime fechaCreacion = (LocalDateTime) fila[1];
 
-				if (fechaCreacion == null)
+				long semanas = 1;
+				if (fechaCreacion != null)
 				{
-					contador.merge(tramoHorario, 1L, Long::sum);
-					continue;
+					int semanaCreacion = this.calcularSemanaDesdeFecha(fechaCreacion);
+					if (semanaActual >= semanaCreacion)
+					{
+						semanas = semanaActual - semanaCreacion + 1;
+					}
 				}
 
-				int semanaCreacion = calcularSemanaDesdeFecha(fechaCreacion);
-				long semanasRestantes = semanaFinCurso - semanaCreacion + 1;
-
-				if (semanasRestantes > 0)
-				{
-					contador.merge(tramoHorario, semanasRestantes, Long::sum);
-				} else
-				{
-					contador.merge(tramoHorario, 1L, Long::sum);
-				}
+				Long totalActual = mapaTotales.get(tramo);
+				if (totalActual == null)
+					mapaTotales.put(tramo, semanas);
+				else
+					mapaTotales.put(tramo, totalActual + semanas);
 			}
 
-			// 2. RESERVAS TEMPORALES (directas)			
-			List<Object[]> temporales = reservaTemporalRepository.contarPorTramoConNombre();
-			for (Object[] row : temporales)
+			// Reservas temporales
+			List<Object[]> reservasTemporales = this.reservaTemporalRepository.contarPorTramoConNombre();
+			for (Object[] fila : reservasTemporales)
 			{
-				String tramoHorario = (String) row[0];
-				Long count = (Long) row[1];
-				contador.merge(tramoHorario, count, Long::sum);
+				String tramo = (String) fila[0];
+				Long conteo = (Long) fila[1];
+
+				Long totalActual = mapaTotales.get(tramo);
+				if (totalActual == null)
+					mapaTotales.put(tramo, conteo);
+				else
+					mapaTotales.put(tramo, totalActual + conteo);
 			}
 
-			// 3. Convertir a DTO y ordenar
-			List<EstadisticaDiaTramoMasReservadoDto> resultado = contador.entrySet().stream()
-					.map(e -> new EstadisticaDiaTramoMasReservadoDto("", e.getKey(), e.getValue()))
-					.sorted(Comparator.comparingLong(EstadisticaDiaTramoMasReservadoDto::getTotalReservas).reversed())
-					.collect(Collectors.toList());
+			// Convertimos el mapa a una lista de DTOs
+			List<EstadisticaDiaTramoMasReservadoDto> listaResultados = new ArrayList<>();
+			for (String tramo : mapaTotales.keySet())
+			{
+				Long total = mapaTotales.get(tramo);
+				// Como este DTO necesita día y tramo pasamos el día vacío ("") y el nombre del tramo.
+				listaResultados.add(new EstadisticaDiaTramoMasReservadoDto("", tramo, total));
+			}
 
-			return ResponseEntity.ok(resultado);
-		} catch (Exception exception)
+			this.ordenarResultadosTramo(listaResultados);
+
+			return ResponseEntity.ok(listaResultados);
+		}
+		catch (Exception exception)
 		{
-			log.error("Error al obtener tramo horario más reservado", exception);
-			ReservaException reservaException = new ReservaException(Constants.ERROR_ESTADISTICAS,
-					"Error al obtener el tramo horario más reservado", exception);
+			String mensajeError = "Error inesperado al obtener el tramo horario más reservado";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_ESTADISTICAS, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
 
-	/**
-	 * Obtiene el día de la semana más reservado combinando reservas fijas y
-	 * temporales.
-	 */
 	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/dia-semana-mas-reservado")
 	public ResponseEntity<?> obtenerDiaSemanaMasReservado()
 	{
 		try
 		{
-			Map<String, Long> contador = new HashMap<>();
-			int semanaFinCurso = obtenerSemanaFinCurso();
+			Map<String, Long> mapaTotales = new HashMap<>();
+			int semanaActual = this.obtenerSemanaActualCurso();
 
-			// 1. RESERVAS FIJAS (ponderadas)			
-			List<Object[]> fijas = reservaFijaRepository.contarPorDiaConNombre();
-			for (Object[] row : fijas)
+			// Reservas fijas
+			List<Object[]> reservasFijas = this.reservaFijaRepository.contarPorDiaConNombre();
+			for (Object[] fila : reservasFijas)
 			{
-				String diaSemana = (String) row[0];
-				LocalDateTime fechaCreacion = (LocalDateTime) row[1];
+				String dia = (String) fila[0];
+				LocalDateTime fechaCreacion = (LocalDateTime) fila[1];
 
-				if (fechaCreacion == null)
+				long semanas = 1;
+				if (fechaCreacion != null)
 				{
-					contador.merge(diaSemana, 1L, Long::sum);
-					continue;
+					int semanaCreacion = this.calcularSemanaDesdeFecha(fechaCreacion);
+					if (semanaActual >= semanaCreacion)
+					{
+						semanas = semanaActual - semanaCreacion + 1;
+					}
 				}
 
-				int semanaCreacion = calcularSemanaDesdeFecha(fechaCreacion);
-				long semanasRestantes = semanaFinCurso - semanaCreacion + 1;
-
-				if (semanasRestantes > 0)
-				{
-					contador.merge(diaSemana, semanasRestantes, Long::sum);
-				} else
-				{
-					contador.merge(diaSemana, 1L, Long::sum);
-				}
+				Long totalActual = mapaTotales.get(dia);
+				if (totalActual == null)
+					mapaTotales.put(dia, semanas);
+				else
+					mapaTotales.put(dia, totalActual + semanas);
 			}
 
-			// 2. RESERVAS TEMPORALES (directas)			
-			List<Object[]> temporales = reservaTemporalRepository.contarPorDiaConNombre();
-			for (Object[] row : temporales)
+			// Reservas temporales
+			List<Object[]> reservasTemporales = this.reservaTemporalRepository.contarPorDiaConNombre();
+			for (Object[] fila : reservasTemporales)
 			{
-				String diaSemana = (String) row[0];
-				Long count = (Long) row[1];
-				contador.merge(diaSemana, count, Long::sum);
+				String dia = (String) fila[0];
+				Long conteo = (Long) fila[1];
+
+				Long totalActual = mapaTotales.get(dia);
+				if (totalActual == null)
+					mapaTotales.put(dia, conteo);
+				else
+					mapaTotales.put(dia, totalActual + conteo);
 			}
 
-			// 3. Convertir a DTO y ordenar
-			List<EstadisticaDiaTramoMasReservadoDto> resultado = contador.entrySet().stream()
-					.map(e -> new EstadisticaDiaTramoMasReservadoDto(e.getKey(), "", e.getValue()))
-					.sorted(Comparator.comparingLong(EstadisticaDiaTramoMasReservadoDto::getTotalReservas).reversed())
-					.collect(Collectors.toList());
+			// Convertir a DTOs
+			List<EstadisticaDiaTramoMasReservadoDto> listaResultados = new ArrayList<>();
+			for (String dia : mapaTotales.keySet())
+			{
+				Long total = mapaTotales.get(dia);
+				listaResultados.add(new EstadisticaDiaTramoMasReservadoDto(dia, "", total));
+			}
 
-			return ResponseEntity.ok(resultado);
-		} catch (Exception exception)
+			this.ordenarResultadosDia(listaResultados);
+
+			return ResponseEntity.ok(listaResultados);
+		}
+		catch (Exception exception)
 		{
-			log.error("Error al obtener día de la semana más reservado", exception);
-			ReservaException reservaException = new ReservaException(Constants.ERROR_ESTADISTICAS,
-					"Error al obtener el día de la semana más reservado", exception);
+			String mensajeError = "Error inesperado al obtener el día de la semana más reservado";
+			log.error(mensajeError, exception);
+			ReservaException reservaException = new ReservaException(Constants.ERROR_ESTADISTICAS, mensajeError, exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
 
-	/**
-	 * Calcula dinámicamente la semana de fin de curso basada en la fecha actual.	  
-	 * 
-	 */
-	private int obtenerSemanaFinCurso()
+	// Métodos para ordenar la cantidad de recursos, de tramos y de días.
+
+	private void ordenarResultadosRecurso(List<EstadisticaRecursoMasReservadoDto> lista)
 	{
-		LocalDate hoy = LocalDate.now();
-		int year = hoy.getYear();
-
-		// Determinar el año de inicio del curso actual.
-		// Si estamos entre Enero y Junio (meses 1-6), el curso empezó en Septiembre del
-		// año anterior.
-		// Si estamos entre Septiembre y Diciembre (meses 9-12), el curso empezó en
-		// Septiembre de este año
-		int yearInicioCurso;
-		if (hoy.getMonthValue() <= 6)
+		int tamano = lista.size();
+		for (int i = 0; i < tamano - 1; i++)
 		{
-			yearInicioCurso = year - 1;
-		} else
-		{
-			yearInicioCurso = year;
+			for (int j = 0; j < tamano - i - 1; j++)
+			{
+				EstadisticaRecursoMasReservadoDto actual = lista.get(j);
+				EstadisticaRecursoMasReservadoDto siguiente = lista.get(j + 1);
+				if (actual.getTotalReservas() < siguiente.getTotalReservas())
+				{
+					lista.set(j, siguiente);
+					lista.set(j + 1, actual);
+				}
+			}
 		}
-
-		// Fecha de inicio del curso (1 de Septiembre)
-		LocalDate inicioCurso = LocalDate.of(yearInicioCurso, 9, 1);
-
-		// Fecha de fin del curso (30 de Junio)
-		LocalDate finCurso = LocalDate.of(yearInicioCurso + 1, 6, 30);
-
-		// Calcular semanas desde inicio de curso hasta fin de curso
-		long semanasTotales = ChronoUnit.WEEKS.between(inicioCurso, finCurso);
-
-		/**log.info("=== DEBUG SEMANA FIN CURSO ===");
-		log.info("Inicio curso: {}", inicioCurso);
-		log.info("Fin curso: {}", finCurso);
-		log.info("Semanas totales del curso: {}", semanasTotales); **/
-
-		return (int) semanasTotales; // ≈ 43 semanas
 	}
 
-	/**
-	 * Calcula la semana del curso escolar desde una fecha de creación. Curso: 1
-	 * Septiembre - 30 Junio.
-	 * 
-	 * @param fecha Fecha de creación de la reserva fija.
-	 * @return Número de semana dentro del curso escolar (1 = primera semana de
-	 *         septiembre).
-	 */
+	private void ordenarResultadosTramo(List<EstadisticaDiaTramoMasReservadoDto> lista)
+	{
+		int tamano = lista.size();
+		for (int i = 0; i < tamano - 1; i++)
+		{
+			for (int j = 0; j < tamano - i - 1; j++)
+			{
+				EstadisticaDiaTramoMasReservadoDto actual = lista.get(j);
+				EstadisticaDiaTramoMasReservadoDto siguiente = lista.get(j + 1);
+				if (actual.getTotalReservas() < siguiente.getTotalReservas())
+				{
+					lista.set(j, siguiente);
+					lista.set(j + 1, actual);
+				}
+			}
+		}
+	}
+
+	private void ordenarResultadosDia(List<EstadisticaDiaTramoMasReservadoDto> lista)
+	{
+		int tamano = lista.size();
+		for (int i = 0; i < tamano - 1; i++)
+		{
+			for (int j = 0; j < tamano - i - 1; j++)
+			{
+				EstadisticaDiaTramoMasReservadoDto actual = lista.get(j);
+				EstadisticaDiaTramoMasReservadoDto siguiente = lista.get(j + 1);
+				if (actual.getTotalReservas() < siguiente.getTotalReservas())
+				{
+					lista.set(j, siguiente);
+					lista.set(j + 1, actual);
+				}
+			}
+		}
+	}
+
+	private int obtenerSemanaActualCurso()
+	{
+		return this.calcularSemanaDesdeFecha(LocalDateTime.now());
+	}
+
+	// Método para calcular el número de semanas desde el inicio del curso escolar hasta la fecha de la reserva.
 	private int calcularSemanaDesdeFecha(LocalDateTime fecha)
 	{
-		LocalDate date = fecha.toLocalDate();
-		LocalDate inicioCurso = LocalDate.of(date.getYear(), 9, 1);
-
-		// Si es antes de septiembre, el curso empezó el 1 de septiembre del año
-		// anterior
-		if (date.getMonthValue() < 9)
+		LocalDate fechaLocal = fecha.toLocalDate();
+		int anio = fechaLocal.getYear();
+		// El curso escolar empieza el 1 de septiembre.
+		LocalDate inicioCurso = LocalDate.of(anio, 9, 1);
+		if (fechaLocal.getMonthValue() < 9)
 		{
-			inicioCurso = LocalDate.of(date.getYear() - 1, 9, 1);
+			inicioCurso = LocalDate.of(anio - 1, 9, 1);
 		}
-
-		long semanas = ChronoUnit.WEEKS.between(inicioCurso, date);
-		int semanaNumero = (int) semanas + 1; // Semana 1 = primera semana de curso
-
-		/**log.info("  Calculando semana desde fecha: {}", fecha);
-		log.info("  Inicio curso: {}", inicioCurso);
-		log.info("  Semanas desde inicio: {}", semanas);
-		log.info("  Semana número: {}", semanaNumero); **/
-
-		return semanaNumero;
+		// Contamos las semanas desde el inicio del curso hasta la fecha de la reserva.
+		long semanas = ChronoUnit.WEEKS.between(inicioCurso, fechaLocal);
+		return (int) semanas + 1;
 	}
 }
