@@ -45,7 +45,7 @@ public class EstadisticasController
 		{
 			// Mapa para acumular totales (clave = nombre del recurso y valor = total de semanas reservadas) 
 			Map<String, Long> mapaTotales = new HashMap<>();			
-			int semanaActual = this.obtenerSemanaActualCurso();
+			int semanaActual = this.calcularSemanaDesdeFecha(LocalDateTime.now());
 
 			// Reservas fijas (calculamos cuántas semanas han pasado desde su creación hasta hoy)
 			List<Object[]> reservasFijas = this.reservaFijaRepository.contarPorRecursoConFecha();
@@ -129,7 +129,7 @@ public class EstadisticasController
 		try
 		{
 			Map<String, Long> mapaTotales = new HashMap<>();
-			int semanaActual = this.obtenerSemanaActualCurso();
+			int semanaActual = this.calcularSemanaDesdeFecha(LocalDateTime.now());
 
 			// Reservas fijas
 			List<Object[]> reservasFijas = this.reservaFijaRepository.contarPorTramoConNombre();
@@ -198,7 +198,7 @@ public class EstadisticasController
 		try
 		{
 			Map<String, Long> mapaTotales = new HashMap<>();
-			int semanaActual = this.obtenerSemanaActualCurso();
+			int semanaActual = this.calcularSemanaDesdeFecha(LocalDateTime.now());
 
 			// Reservas fijas
 			List<Object[]> reservasFijas = this.reservaFijaRepository.contarPorDiaConNombre();
@@ -313,11 +313,6 @@ public class EstadisticasController
 				}
 			}
 		}
-	}
-
-	private int obtenerSemanaActualCurso()
-	{
-		return this.calcularSemanaDesdeFecha(LocalDateTime.now());
 	}
 
 	// Método para calcular el número de semanas desde el inicio del curso escolar hasta la fecha de la reserva.
