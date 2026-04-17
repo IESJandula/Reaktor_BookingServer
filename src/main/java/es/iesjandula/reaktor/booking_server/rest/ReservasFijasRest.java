@@ -116,7 +116,7 @@ public class ReservasFijasRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -160,7 +160,7 @@ public class ReservasFijasRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -202,7 +202,7 @@ public class ReservasFijasRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
@@ -243,7 +243,7 @@ public class ReservasFijasRest
 			ReservaException reservaException = new ReservaException(Constants.ERROR_INESPERADO,
 					"Error al acceder a la base de datos", exception);
 
-			log.error("Error al acceder a la bade de datos: ", exception);
+			log.error("Error al acceder a la base de datos: ", exception);
 			return ResponseEntity.status(500).body(reservaException.getBodyMesagge());
 		}
 	}
