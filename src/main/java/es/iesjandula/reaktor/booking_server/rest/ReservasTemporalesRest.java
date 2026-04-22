@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -154,7 +155,7 @@ public class ReservasTemporalesRest
 			for (Object[] row : resultados)
 			{
 
-				if (diaSemana == (Long) row[0] && tramoHorario == (Long) row[1])
+				if (Objects.equals(diaSemana, (Long) row[0]) && Objects.equals(tramoHorario, (Long) row[1]))
 				{
 
 					ReservasPuntualesDto reservaAntigua = reserva;
@@ -781,6 +782,7 @@ public class ReservasTemporalesRest
 						|| (usuario.getRoles().contains("ADMINISTRADOR") || usuario.getRoles().contains("DIRECCION")))
 				{
 					this.reservaTemporalRepository.deleteAll(listaReservasBorrado);
+					log.info("Se han borrado {} reservas semanales", listaReservasBorrado.size());
 				}
 				else
 				{
@@ -789,8 +791,6 @@ public class ReservasTemporalesRest
 					throw new ReservaException(Constants.ERROR_CANCELANDO_RESERVA, mensajeError);
 				}
 
-				// Borramos las reservas
-				this.reservaTemporalRepository.deleteAll(listaReservasBorrado);
 			}
 			else
 			{

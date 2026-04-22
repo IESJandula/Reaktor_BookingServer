@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -294,7 +295,7 @@ public class ReservasFijasRest
 			for (Object[] row : resultados)
 			{
 
-				if (diaSemana == (Long) row[0] && tramoHorario == (Long) row[1])
+				if (Objects.equals(diaSemana, (Long) row[0]) && Objects.equals(tramoHorario, (Long) row[1]))
 				{
 
 					ReservasFijasDto reservaAntigua = reserva;
