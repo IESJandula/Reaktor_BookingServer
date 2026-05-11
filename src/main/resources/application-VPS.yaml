@@ -1,6 +1,6 @@
 spring:
   application:
-    name: reaktor-bookingserver
+    name: bookings
   jpa:
     hibernate:
       ddl-auto: validate
