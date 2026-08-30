@@ -37,7 +37,7 @@ public class EstadisticasController
 	@Autowired
 	private IReservaTemporalRepository reservaTemporalRepository;
 
-	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/recurso-mas-reservado")
 	public ResponseEntity<?> obtenerRecursoMasReservado()
 	{
@@ -121,7 +121,7 @@ public class EstadisticasController
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/tramo-horario-mas-reservado")
 	// Método para saber qué tramo horario tiene más reservas combinando reservas fijas y temporales. 
 	public ResponseEntity<?> obtenerTramoHorarioMasReservado()
@@ -191,7 +191,7 @@ public class EstadisticasController
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/dia-semana-mas-reservado")
 	public ResponseEntity<?> obtenerDiaSemanaMasReservado()
 	{
